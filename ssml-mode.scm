@@ -447,7 +447,9 @@
   (set! ssml-xxml-elements.orig xxml_elements)
   (set! xxml_elements ssml-elements)
   (set! ssml-voices (list current-voice))
-  (reset-voice))
+  ;; reset-voice used to be called here, but it's not much useful and it resets
+  ;; current speechd settings, which is not what we want.
+  )
 
 (define (ssml_exit_func)
   (voice.select (car (last ssml-voices)))
