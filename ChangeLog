@@ -1,3 +1,7 @@
+2004-06-27  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-utt-text): Merge all unprocessed tokens.
+
 2004-06-25  Milan Zamazal  <pdm@brailcom.org>
 
 	* speech-dispatcher.scm (speechd-send-to-client): If WAVE is a

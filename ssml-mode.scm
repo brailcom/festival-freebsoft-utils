@@ -171,8 +171,15 @@
   (format t "Mark reached: %s\n" mark))
 
 (define (ssml-utt-text utt)
-  (let ((last-token (and utt (utt.relation.last utt 'Token))))
-    (and last-token (recode-utf8->current (item.name last-token)))))
+  (let* ((last-token (and utt (utt.relation.last utt 'Token)))
+         (token last-token)
+         (token-list nil))
+    (when last-token
+      (while (and token (not (eq? (item.feat token 'ssml-tag) 'noticed)))
+        (push (recode-utf8->current (item.name token)) token-list)
+        (set! token (item.prev token)))
+      (item.set_feat last-token 'ssml-tag 'noticed))
+    (apply string-append token-list)))
 
 
 ;;; Markup handlers
