@@ -169,7 +169,7 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
          utt 'Segment (list (caar (cdar (PhoneSet.description '(silences))))))
         (list (utt.relation.first utt 'Segment) placement))))
 
-(define (event-synth-text text)
+(define (event-synth-text text wave-eater)
   (let ((utt (SynthText text)))
     (utt.relation.create utt 'Event)
     (do-relation-items (w utt Word)
@@ -184,70 +184,69 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
             (item.set_feat seg 'event (item.feat w 'event))
             (item.set_feat seg 'event-placement placement)
             (utt.relation.append utt 'Event seg))))
-    (if (utt.relation.items utt 'Event)
-        (let ((w (utt.wave utt))
-              (waves '())
-              (last-break 0.0))
-          (do-relation-items (seg utt Event)
-            (let ((break (cond
-                          ((string-equal (item.feat seg 'event-placement)
-                                         'after)
-                           (item.feat seg 'end))
-                          ((item.prev (item.relation seg 'Segment))
-                           (item.feat seg "R:Segment.p.end"))
-                          (t
-                           0.0)))
-                  (event (item.feat seg 'event)))
-              (push (wave-subwave w last-break break) waves)
-              (push (utt.wave (event-synth-plain (first event) (second event)))
-                    waves)
-              (set! last-break break)))
-          (push (wave-subwave
-                 w last-break
-                 (item.feat (utt.relation.last utt 'Segment) 'end))
-                waves)
-          (wave-utt (wave-concat (reverse waves))))
-        utt)))
+    (let ((w (utt.wave utt)))
+      (if (utt.relation.items utt 'Event)
+          (let ((last-break 0.0))
+            (do-relation-items (seg utt Event)
+              (let ((break (cond
+                            ((string-equal (item.feat seg 'event-placement)
+                                           'after)
+                             (item.feat seg 'end))
+                            ((item.prev (item.relation seg 'Segment))
+                             (item.feat seg "R:Segment.p.end"))
+                            (t
+                             0.0)))
+                    (event (item.feat seg 'event)))
+                (wave-eater (wave-subwave w last-break break))
+                (event-synth-plain (first event) (second event) wave-eater)
+                (set! last-break break)))
+            (wave-eater (wave-subwave
+                         w last-break
+                         (item.feat (utt.relation.last utt 'Segment) 'end))))
+          (wave-eater w)))
+    utt))
 
-(define (event-synth-key value)
+(define (event-synth-key value wave-eater)
   (let ((text (string-append value)))
     (while (string-matches text ".*_.*")
       (aset text (length (string-before text "_")) 32))
-    (event-synth-text text)))
+    (event-synth-text text wave-eater)))
 
-(define (event-synth-character value)
-  (event-synth-text value))
+(define (event-synth-character value wave-eater)
+  (event-synth-text value wave-eater))
 
-(define (event-synth-sound value)
-  (wave-import-utt (if (string-matches value "^/.*")
-                       value
-                       (string-append sound-icon-directory "/" value))))
+(define (event-synth-sound value wave-eater)
+  (let ((utt (wave-import-utt
+              (if (string-matches value "^/.*")
+                  value
+                  (string-append sound-icon-directory "/" value)))))
+    (wave-eater (utt.wave utt))
+    utt))
 
-(define (event-synth-plain type value)
+(define (event-synth-plain type value wave-eater)
   (cond
    ((eq? type 'text)
-    (event-synth-text value))
+    (event-synth-text value wave-eater))
    ((eq? type 'sound)
-    (event-synth-sound value))
+    (event-synth-sound value wave-eater))
    (t
     (let ((transformed
            (cdr (assoc value (cadr (assq type (langvar 'event-mappings)))))))
       (cond
        (transformed
-        (apply event-synth transformed))
+        (apply event-synth-1 transformed wave-eater))
        ((or (eq? type 'key) (eq? type 'character))
         (event-with-mode (punctuation 'all)
           (event-with-mode (cap-signalization t)
             ((if (eq? type 'key) event-synth-key event-synth-character)
-             value))))
+             value wave-eater))))
        ((eq? type 'logical)
-        (event-synth-text (if (string-matches value "^_.*") "" value)))
+        (event-synth-text (if (string-matches value "^_.*") "" value
+                              wave-eater)))
        (t
         (error "Event description not found" (cons type value))))))))
 
-;;; External functions
-
-(define (event-synth type value)
+(define (event-synth-1 type value wave-eater)
   (event-print (list 'event event-debug type value))
   (if (and (eq? type 'logical)
            (string-matches value "^_.*"))
@@ -260,7 +259,17 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
         (set! event-debug nil)
         (set_backtrace nil)
         (event-print value))))
-  (event-synth-plain type value))
+  (event-synth-plain type value wave-eater))
+
+;;; External functions
+
+(define (event-synth type value)
+  (let* ((waves '())
+         (utt (event-synth-1 type value
+                             (lambda (w) (set! waves (cons w waves))))))
+    (if (<= (length waves) 1)
+        utt
+        (wave-utt (wave-concat (reverse waves))))))
 
 (define (event-play type value)
   (utt.play (event-synth type value)))

@@ -22,6 +22,11 @@ See the variable inhibit-initial-pauses.
 It is now possible to perform utterance chunking not only in tts_file, but in
 any extension function.
 
+** Synthesized events can be returned in multiple wave forms.
+
+See the manual entry of the multiple.scm module for description why this can be
+useful.
+
 ** New utility functions added.
 
 See documentation of the util.scm and wave.scm files for the complete list of

@@ -1,3 +1,14 @@
+2004-04-08  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (event-synth): Renamed to event-synth-1.
+	(event-synth): New function.
+	(event-synth-1, event-synth-plain, event-synth-sound) 
+	(event-synth-character, event-synth-key, event-synth-text): New
+	argument wave-eater.
+	(event-synth-text): Always return utt.
+
+	* multiwave.scm: New file.
+
 2004-04-06  Milan Zamazal  <pdm@brailcom.org>
 
 	* tokenize.scm: New file.

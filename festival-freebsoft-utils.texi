@@ -374,6 +374,7 @@ following sections.
 * cap-signalization.scm::       Capital letter signalization.
 * punctuation.scm::             Punctuation reading modes.
 * tokenize.scm::                Alternative tokenization written in SIOD.
+* multiwave.scm::               Returning multiple wave forms for an event.
 * speech-dispatcher.scm::       Speech Dispatcher interface.
 @end menu
 
@@ -670,7 +671,7 @@ corresponding to the current language and voice.
 @xref{Punctuation Characters}, for information about punctuation mode
 configuration.
 
-@node tokenize.scm, speech-dispatcher.scm, punctuation.scm, Reference Manual
+@node tokenize.scm, multiwave.scm, punctuation.scm, Reference Manual
 @section tokenize.scm
 
 Festival's tokenization is implemented mostly in C++, so it is
@@ -700,7 +701,53 @@ implemented as follows:
           (SayText* text)))))
 @end lisp
 
-@node speech-dispatcher.scm,  , tokenize.scm, Reference Manual
+@node multiwave.scm, speech-dispatcher.scm, tokenize.scm, Reference Manual
+@section multiwave.scm
+@cindex multiple wave forms
+
+Sometimes it is convenient to return multiple synthesized wave forms
+instead of a single wave form.  There are two typical situations when
+this can happen:
+
+@itemize @bullet
+@item
+@cindex long texts
+You want to synthesize a long text and you don't want to wait until it
+is all synthesized, you want to play the resulting audio as soon as
+possible.  The text can be cut into smaller pieces, returning the
+corresponding wave forms in a sequence.
+
+@item
+@cindex resampling
+The resulting wave form is a mixture of a synthesized texts and sound
+icons, of different rates or other sound sample parameters.
+Concatenating them together may reduce the resulting sound quality.
+So the different sound parts may be better returned separately.
+@end itemize
+
+The @file{multiwave.scm} module provides the following interface for
+those purposes:
+
+@ftable @code
+@item multi-synth @var{type} @var{value}
+This function is similar to the @code{event-synth} function
+(@pxref{events.scm}), except that it doesn't return an utterance
+containing the resulting wave form.  Instead, it setups the synthesis
+for the following @code{multi-next} calls.
+
+@item multi-next
+Return the next wave form of the last event synthesized via the
+@code{multi-synth} function.  If there is no next wave form, return
+@code{nil}.
+
+@item multi-clear
+Throw away the synthesized data.  You usually don't need to call this
+function as the data is cleared on the next @code{multi-synth} call
+automatically, but the function may be useful under special
+circumstances.
+@end ftable
+
+@node speech-dispatcher.scm,  , multiwave.scm, Reference Manual
 @section speech-dispatcher.scm
 
 This module provides Speech Dispatcher interface.  You need it if you
