@@ -1,5 +1,11 @@
 2004-05-03  Milan Zamazal  <pdm@brailcom.org>
 
+	* events.scm (event-synth-plain): event-synth-1 call arguments
+	fixed.
+	(event-synth-plain): Parentheses typo fixed.
+
+2004-05-03  Milan Zamazal  <pdm@brailcom.org>
+	
 	* speech-dispatcher.scm (speechd-set-voice): Don't give language
 	as the speechd-set-lang-voice argument.
 	(speechd-set-lang-voice): Don't call reset-voice, set some

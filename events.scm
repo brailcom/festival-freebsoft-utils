@@ -244,15 +244,15 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
            (cdr (assoc value (cadr (assq type (langvar 'event-mappings)))))))
       (cond
        (transformed
-        (apply event-synth-1 transformed wave-eater))
+        (event-synth-1 (first transformed) (second transformed) wave-eater))
        ((or (eq? type 'key) (eq? type 'character))
         (event-with-mode (punctuation 'all)
           (event-with-mode (cap-signalization t)
             ((if (eq? type 'key) event-synth-key event-synth-character)
              value wave-eater))))
        ((eq? type 'logical)
-        (event-synth-text (if (string-matches value "^_.*") "" value
-                              wave-eater)))
+        (event-synth-text (if (string-matches value "^_.*") "" value)
+                          wave-eater))
        (t
         (error "Event description not found" (cons type value))))))))
 
