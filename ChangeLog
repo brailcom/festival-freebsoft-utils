@@ -1,5 +1,12 @@
 2004-01-23  Milan Zamazal  <pdm@brailcom.org>
 
+	* oo.scm (oo-wrapped-var): New function.
+	(oo-ensure-function-wrapped): Make necessary precautions for case
+	of function variable change.
+	(oo-set-wrapper-func): Renamed to oo-set-wrapper-func!.
+
+2004-01-23  Milan Zamazal  <pdm@brailcom.org>
+
 	* Makefile (VERSION, DISTDIR, TARBALL): New variables.
 	(dist): Implemented.
 	(clean): Remove distdir.
