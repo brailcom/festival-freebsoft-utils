@@ -1,3 +1,7 @@
+2004-02-02  Milan Zamazal  <pdm@brailcom.org>
+
+	* Version 0.1 released.
+
 2004-01-30  Milan Zamazal  <pdm@brailcom.org>
 
 	* speech-dispatcher.scm (speechd-set-pitch): Support
