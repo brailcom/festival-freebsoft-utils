@@ -1,3 +1,17 @@
+2004-12-05  Milan Zamazal  <pdm@zamazal.org>
+
+	* tokenize.scm: Require spell-mode.
+	(get-token): Renamed to get-regular-token.
+	(get-single-char-token, get-token): New functions.
+
+	* spell-mode.scm (spell-mode): New variable.
+	(spell_init_func, spell_exit_func): Set it.
+
+	* ssml-mode.scm : Require spell-mode.
+	(ssml-say-as-settings): New variable.
+	(ssml.say-as.start): Set it.
+	(ssml.say-as.end): Restore previous spelling mode.
+
 2004-10-19  Milan Zamazal  <pdm@brailcom.org>
 
 	* Version 0.4 released.

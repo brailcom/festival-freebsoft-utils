@@ -1,5 +1,10 @@
 User-visible changes to festival-freebsoft-utils:
 
+* Changes in festival-freebsoft-utils 0.5
+
+** Spelling support in SSML mode.
+
+
 * Changes in festival-freebsoft-utils 0.4
 
 No user visible changes, just bug fixes.

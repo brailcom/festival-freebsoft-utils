@@ -28,6 +28,8 @@
 
 (defvar spell-orig-pos-method nil)
 
+(defvar spell-mode nil)
+
 (define (spell-pos utt)
   (do-relation-items (w utt Word)
     (item.set_feat w 'pos 'sym))
@@ -37,11 +39,13 @@
   (set! spell-orig-token.singlecharsymbols token.singlecharsymbols)
   (set! token.singlecharsymbols "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüış")
   (set! spell-orig-pos-method (Param.get 'POS_Method))
-  (Param.set 'POS_Method spell-pos))
+  (Param.set 'POS_Method spell-pos)
+  (set! spell-mode t))
 
 (define (spell_exit_func)
   (set! token.singlecharsymbols spell-orig-token.singlecharsymbols)
-  (Param.set 'POS_Method spell-orig-pos-method))
+  (Param.set 'POS_Method spell-orig-pos-method)
+  (set! spell-mode nil))
 
 (set! tts_text_modes
       (cons

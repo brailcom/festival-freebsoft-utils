@@ -23,6 +23,7 @@
 
 (require 'tts)
 
+(require 'spell-mode)
 (require 'util)
 
 
@@ -35,7 +36,7 @@
   (let ((utt (Utterance Tokens)))
     (utt.relation.create utt 'Token)))
 
-(define (get-token utt text)
+(define (get-regular-token utt text)
   (let* ((l-whitespace (symbolexplode token.whitespace))
          (l-punc (symbolexplode token.punctuation))
          (l-prepunctuation (symbolexplode token.prepunctuation))
@@ -96,6 +97,18 @@
                              ((name ,name) (whitespace ,whitespace)
                               (punc ,punc) (prepunctuation ,prepunctuation)))))
     text))
+
+(define (get-single-char-token utt text)
+  (let ((name (substring text 0 1)))
+    (set! text (substring text 1 (length text)))
+    (unless (string-equal name "")
+      (utt.relation.append utt 'Token
+                           `(,name ((name ,name) (whitespace "")
+                                    (punc "") (prepunctuation ""))))))
+  text)
+
+(define (get-token utt text)
+  ((if spell-mode get-single-char-token get-regular-token) utt text))
 
 (define (next-chunk text)
   (let ((utt (token-utterance))

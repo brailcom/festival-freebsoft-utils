@@ -26,7 +26,8 @@
 ;; metadata: ignored (no reasonable use here known)
 ;; p: supported
 ;; s: supported
-;; say-as: trivially rendered (attribute values undefined in the standard)
+;; say-as: trivially rendered (attribute values undefined in the standard);
+;;   special value detail="spell"
 ;; phoneme: unsupported
 ;; sub: supported
 ;; voice: supported, but prosody not yet retained (TODO)
@@ -42,6 +43,7 @@
 
 (require 'prosody-param)
 (require 'recode)
+(require 'spell-mode)
 (require 'tokenize)
 (require 'util)
 (require 'voice-select)
@@ -247,11 +249,20 @@
   (ssml-unchange-language)
   nil)
 
+(define ssml-say-as-settings '())
 (define (ssml.say-as.start attlist utt)
   (ssml-process-utt utt)
+  (push spell-mode ssml-say-as-settings)
+  (when (and (string-equal (ssml-attval attlist 'detail) "spell")
+             (not spell-mode))
+    (spell_init_func))
   nil)
+
 (define (ssml.say-as.end attlist utt)
   (ssml-process-utt utt)
+  (when (and (not (pop ssml-say-as-settings))
+             spell-mode)
+    (spell_exit_func))
   nil)
 
 (define (ssml.phoneme.start attlist utt)
