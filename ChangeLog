@@ -1,3 +1,7 @@
+2004-10-19  Milan Zamazal  <pdm@brailcom.org>
+
+	* Version 0.4 released.
+
 2004-07-29  Milan Zamazal  <pdm@brailcom.org>
 
 	* Makefile (dist): Install all files names of which start with a
