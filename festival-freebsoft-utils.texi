@@ -951,6 +951,25 @@ Example setting doubling the current voice speed:
 (set-rate (prosody-relative-value 2))
 @end lisp
 
+When you switch to a different voice, prosody parameters get lost.
+festival-freebsoft-utils offers a way to restore them, using the
+following functions:
+
+@ftable @code
+@item change-prosody @var{function} @var{value}
+Similar to the @code{set-*} functions described above, except it
+additionally saves the set prosodic value.  @var{function} is one of
+the @code{set-*} functions and @var{value} is its parameter value.
+
+@item restore-prosody
+Set prosodic parameters according to their current saved values.
+
+@item reset-prosody
+Reset the list of the saved prosodic values.  Note, it just deletes
+the saved settings and doesn't actually change the current prosodic
+parameters.
+@end ftable
+
 @node ssml-mode.scm
 @section ssml-mode.scm
 

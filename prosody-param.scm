@@ -95,6 +95,8 @@
 ;;; Internal utilities
 
 
+(defvar prosody-parameters '())
+
 (define (prosody-change-parameter value get-func set-func min max)
   (let* ((old-value (get-func))
          (new-value (if (eq? (typeof value) 'closure)
@@ -137,6 +139,19 @@
 (define (set-rate rate)
   ;; 0+..1..inf- or a function
   (prosody-change-parameter rate prosody-get-rate prosody-set-rate 0.1 10))
+
+(define (change-prosody function param)
+  (prog1 (function param)
+    (set! prosody-parameters (assoc-set prosody-parameters function param))))
+
+(define (restore-prosody)
+  (let ((parameters prosody-parameters))
+    (while parameters
+      ((caar parameters) (cdar parameters))
+      (set! parameters (cdr parameters)))))
+
+(define (reset-prosody)
+  (set! prosody-parameters '()))
 
 
 (provide 'prosody-param)

@@ -1,3 +1,23 @@
+2004-06-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-set-prosody): Use change-prosody.
+	(ssml-change-voice, ssml-unchange-voice): Call restore-prosody.
+
+2004-06-29  Milan Zamazal  <pdm@brailcom.org>
+	
+	* prosody-param.scm (change-prosody): Return the old value.
+
+2004-06-29  Milan Zamazal  <pdm@brailcom.org>
+	
+	* speech-dispatcher.scm (speechd-set-lang-voice): Call
+	restore-prosody.
+	(speechd-set-rate, speechd-set-pitch): Use change-prosody.
+
+2004-06-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* prosody-param.scm (prosody-parameters): New variable.
+	(change-prosody, restore-prosody, reset-prosody): New parameters.
+
 2004-06-27  Milan Zamazal  <pdm@brailcom.org>
 
 	* ssml-mode.scm (ssml-utt-text): Merge all unprocessed tokens.

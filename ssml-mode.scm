@@ -139,10 +139,12 @@
 (define (ssml-change-voice lang-code gender age variant name)
   (push current-voice ssml-voices)
   (push voice-select-current-defaults ssml-voice-parameters)
-  (select-voice* lang-code gender age variant name))
+  (select-voice* lang-code gender age variant name)
+  (restore-prosody))
 
 (define (ssml-unchange-voice)
   (voice.select (pop ssml-voices))
+  (restore-prosody)
   (set! voice-select-current-defaults (pop ssml-voice-parameters)))
 
 (define (ssml-change-language attlist)
@@ -160,7 +162,8 @@
     (while prosody
       (let ((id (first (car prosody)))
             (value (second (car prosody))))
-        (push (list id ((avalue-get id ssml-prosody-setters) value))
+        (push (list id (change-prosody (avalue-get id ssml-prosody-setters)
+                                       value))
               old-prosody))
       (set! prosody (cdr prosody)))
     old-prosody))

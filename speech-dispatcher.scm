@@ -45,6 +45,7 @@
                       t)))
     (select-voice* lang gender age variant name)
     (set! speechd-base-pitch (prosody-get-pitch))
+    (restore-prosody)
     (current-voice-coding)))
 
 (define (speechd-send-to-client wave)
@@ -158,7 +159,7 @@ Set voice, which is one of the Speech Dispatcher voice strings."
 Set speech RATE, which must be a number in the range -100..100."
   ;; Stretch the rate to the interval 0.5..2 in such a way, that:
   ;; f(-100) = 0.5 ; f(0) = 1 ; f(100) = 2
-  (set-rate (pow 2 (/ rate 100.0))))
+  (change-prosody set-rate (pow 2 (/ rate 100.0))))
 
 (define (speechd-set-pitch pitch)
   "(speechd-set-pitch PITCH)
@@ -169,7 +170,7 @@ Set speech PITCH, which must be a number in the range -100..100."
   (unless speechd-base-pitch
     (set! speechd-base-pitch (prosody-get-pitch)))
   (let ((relative-pitch (pow 2 (/ pitch 100.0))))
-    (set-pitch (* relative-pitch speechd-base-pitch))))
+    (change-prosody set-pitch (* relative-pitch speechd-base-pitch))))
 
 (define (speechd-set-capital-character-recognition-mode mode)
   "(speechd-set-capital-character-recognition-mode MODE)
