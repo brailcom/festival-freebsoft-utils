@@ -58,8 +58,7 @@ pdf: festival-freebsoft-utils.pdf
 dist: clean info
 	mkdir $(DISTDIR)
 	chmod 755 $(DISTDIR)
-	install -m 644 ANNOUNCE COPYING ChangeLog README *.scm *.texi *.info* \
-		$(DISTDIR)
+	install -m 644 [A-Z]* *.scm *.texi *.info* $(DISTDIR)
 	tar cvf $(TARBALL) $(DISTDIR)
 	gzip -9 $(TARBALL)
 

@@ -1,3 +1,8 @@
+2004-07-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* Makefile (dist): Install all files names of which start with a
+	capital letter.
+
 2004-07-25  Milan Zamazal  <pdm@brailcom.org>
 
 	* events.scm (event-synth-ssml): Apply synthesis on the utterance
