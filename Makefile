@@ -20,6 +20,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
+VERSION := 0.1
+DISTDIR := festival-freebsoft-utils-$(VERSION)
+TARBALL := $(DISTDIR).tar
 
 .PHONY: all install install-strip uninstall clean distclean mostlyclean \
 	maintainer-clean TAGS info dvi dist check
@@ -36,6 +39,7 @@ uninstall:
 mostlyclean:
 
 clean: mostlyclean
+	rm -rf $(DISTDIR) $(TARBALL)*
 
 distclean: clean
 
@@ -51,7 +55,12 @@ pdf: festival-freebsoft-utils.pdf
 %.pdf: %.texi
 	texi2pdf festival-freebsoft-utils.texi
 
-dist: info
+dist: clean info
+	mkdir $(DISTDIR)
+	install -m 644 ANNOUNCE COPYING ChangeLog README *.scm *.texi *.info* \
+		$(DISTDIR)
+	tar cvf $(TARBALL) $(DISTDIR)
+	gzip -9 $(TARBALL)
 
 check:
 
