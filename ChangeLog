@@ -1,3 +1,11 @@
+2004-04-06  Milan Zamazal  <pdm@brailcom.org>
+
+	* tokenize.scm: New file.
+
+2004-04-06  Milan Zamazal  <pdm@brailcom.org>
+
+	* util.scm (complement): New function.
+
 2004-04-04  Milan Zamazal  <pdm@brailcom.org>
 
 	* wave.scm (wave-load, wave-import-utt): New functions.

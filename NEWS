@@ -17,6 +17,11 @@ more robust.
 
 See the variable inhibit-initial-pauses.
 
+** Utterance chunking implemented in SIOD.
+
+It is now possible to perform utterance chunking not only in tts_file, but in
+any extension function.
+
 ** New utility functions added.
 
 See documentation of the util.scm and wave.scm files for the complete list of

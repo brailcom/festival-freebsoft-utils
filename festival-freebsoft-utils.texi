@@ -68,7 +68,7 @@ Festival is a powerful and extensible speech synthesis system, able to
 handle the whole text-to-speech process.  The aim of
 festival-freebsoft-utils is to further extend Festival facilities, to
 the level providing complete set of features required by
-@ref{Top,Speech Dispatcher,,speechd,Speech Dispatcher Manual}.  As a side
+@ref{Top,Speech Dispatcher,,speech-dispatcher,Speech Dispatcher Manual}.  As a side
 effect, festival-freebsoft-utils introduces interesting functionality,
 generalizing the text-to-speech system to a text-to-sound system.
 
@@ -90,7 +90,7 @@ logical event mapping.
 Spell mode.
 
 @item
-Capital letter signalization.
+Capital letter signalling.
 
 @item
 Punctuation modes, for reading or not reading punctuation characters.
@@ -101,7 +101,7 @@ Function wrapping support.
 @item
 Speech Dispatcher Festival output interface.  For more information
 about Speech Dispatcher, see @url{http://www.freebsoft.org/speechd} or
-@ref{Top,Speech Dispatcher,,speechd,Speech Dispatcher manual}.
+@ref{Top,Speech Dispatcher,,speech-dispatcher,Speech Dispatcher manual}.
 @end itemize
 
 @cindex home page
@@ -151,12 +151,12 @@ functions such as @code{SayText}, which are too limited in their use.
 You must use either the Speech Dispatcher functions,
 @ref{speech-dispatcher.scm}, or the event speaking functions,
 @ref{events.scm}, to utilize the features like word substitution,
-capital signalization or punctuation modes.
+capital signalling or punctuation modes.
 
 @menu
 * Events::                      Basic event handling.
 * Word Substitution::           Substituting events for certain words.
-* Capital Letters::             Capital letter signalization.
+* Capital Letters::             Capital letter signalling.
 * Punctuation Characters::      Pronouncing punctuation characters.
 * Initial Pauses::              Avoiding initial pauses.
 * Speech Dispatcher::           Speech Dispatcher interface.
@@ -182,7 +182,7 @@ Text.  The event value is a string containing the given text.
 @item sound
 @cindex sound
 @vindex sound-icon-directory
-Sound icon.  The value is a string containing a file name of a wav
+Sound icon.  The value is a string containing a file name of a sound
 file, either absolute, or relative to the @code{sound-icon-directory}
 variable value.
 
@@ -266,14 +266,14 @@ given event.
 @node Capital Letters, Punctuation Characters, Word Substitution, User Customization
 @section Signalling Capital Characters
 
-When capital character signalization is enabled,
+When capital character signalling is enabled,
 @ref{cap-signalization.scm}, capital characters are signalled via the
 @code{capital} logical event.  By default the event is mapped on the
 sound event @code{capital}.  If you want to change it, change the
 logical mapping, as is described in @ref{Events}.
 
 For example, the following code in your @file{~/.festivalrc} changes
-the sound signalization to saying the word @emph{capital}:
+the sound signalling to saying the word @emph{capital}:
 
 @lisp
 (require 'events)
@@ -293,7 +293,7 @@ characters, it is provided through the following variable:
 Alist of punctuation characters and their word forms.  Each entry in
 the list is of the form @code{("@var{character}" "@var{word}" ...},
 where @var{character} is the pronounced character and @var{word}s are
-the words of its pronounciation.  Please note you must put each word
+the words of its pronunciation.  Please note you must put each word
 inside separate double quotes.  Example entry:
 
 @lisp
@@ -373,6 +373,7 @@ following sections.
 * spell-mode.scm::              Spelling mode.
 * cap-signalization.scm::       Capital letter signalization.
 * punctuation.scm::             Punctuation reading modes.
+* tokenize.scm::                Alternative tokenization written in SIOD.
 * speech-dispatcher.scm::       Speech Dispatcher interface.
 @end menu
 
@@ -399,7 +400,7 @@ The same as @code{let} except that variable bindings are applied
 sequentially rather than in parallel.
 
 @item unwind-protect* @var{protected-form} @var{cleanup-form} @var{...}
-Eval @var{protected-form}, and after it is finished, whether
+Evaluate @var{protected-form}, and after it is finished, whether
 successfully or with errors, evaluate all @var{cleanup-form}s.  If
 @var{protected-form} was evaluated successfully, return its return
 value.
@@ -415,6 +416,10 @@ Return first, second, or third element of @var{list}, respectively.
 
 @item identity @var{object}
 Return @var{object}.
+
+@item complement @var{function}
+Return a function that is .equivalent to function except that it
+returns the opposite truth value to the return value of function.
 
 @item apply* @var{function} @var{arglist}
 The same as @code{apply}, except that it also works if @var{function}
@@ -466,7 +471,7 @@ Return true if and only if @var{item} has @var{feature} set.
 @item langvar @var{symbol}
 Return language dependent value stored under @var{symbol}.  First, the
 variable named @var{symbol.language}, where @var{language} is the
-language name as stored in the @code{Language} parmeter is checked and
+language name as stored in the @code{Language} parameter is checked and
 if it is unbound, @var{symbol}'s value is returned.
 
 @item do-relation-items (@var{var} @var{utterance} @var{relation}) @var{body-form} @var{...}
@@ -495,7 +500,7 @@ finishes at @var{to-time}.  Both times are in seconds.
 @item wave-load @var{filename}
 @cindex Ogg Vorbis
 @cindex Vorbis
-Load and return a waveform from @var{filename}.  This function is
+Load and return a wave form from @var{filename}.  This function is
 similar to @code{wave.load}, but more sound file formats (most
 significantly Ogg Vorbis, if your SoX installation supports it) can be
 loaded.
@@ -568,7 +573,7 @@ returning the parameter value.  @var{wrapper-name} is the same as in
 
 @cindex @code{next-value}
 Macro @code{next-value} is automatically defined within @var{body}.
-It returnes the parameter value, either plain or modified by another
+It returns the parameter value, either plain or modified by another
 wrapper.
 @end table
 
@@ -635,16 +640,16 @@ immediately, e.g.
 @node cap-signalization.scm, punctuation.scm, spell-mode.scm, Reference Manual
 @section cap-signalization.scm
 
-Defines mode that allows signalization of capital letters through the
+Defines mode that allows signalling of capital letters through the
 logical event @code{capital}.  @xref{Capital Letters}, for more details.
 
 @ftable @code
 @item set-cap-signalization-mode @var{mode}
-If @var{mode} is true, enable capital letter signalization, otherwise
+If @var{mode} is true, enable capital letter signalling, otherwise
 disable it.
 @end ftable
 
-@node punctuation.scm, speech-dispatcher.scm, cap-signalization.scm, Reference Manual
+@node punctuation.scm, tokenize.scm, cap-signalization.scm, Reference Manual
 @section punctuation.scm
 
 Sometimes it is useful to get read all the punctuation characters
@@ -655,17 +660,47 @@ whether it should read punctuation characters or not.
 
 @ftable @code
 @item set-punctuation-mode @var{mode}
-Set punctuaton mode to @var{mode}.  @var{mode} may be one of the
+Set punctuation mode to @var{mode}.  @var{mode} may be one of the
 following symbols: @code{all} meaning all the punctuation characters
 are read, @code{none} meaning no punctuation characters are read, and
 @code{default} that switches to the default Festival behavior
 corresponding to the current language and voice.
 @end ftable
 
-@xref{Punctuation Characters}, for information about punctuatios mode
+@xref{Punctuation Characters}, for information about punctuation mode
 configuration.
 
-@node speech-dispatcher.scm,  , punctuation.scm, Reference Manual
+@node tokenize.scm, speech-dispatcher.scm, punctuation.scm, Reference Manual
+@section tokenize.scm
+
+Festival's tokenization is implemented mostly in C++, so it is
+impossible to use it when extending Festival.  The @code{tokenize}
+module provides an alternative tokenization implemented in SIOD, that
+can be used wherever needed.
+
+@ftable @code
+@item next-chunk @var{text}
+Get the next part of @var{text} and create an utterance containing the
+corresponding tokens.  A list of two elements, the utterance and the
+remaining unprocessed part of @var{text}, is returned.
+@end ftable
+
+@cindex @code{SayText}
+An alternative @code{SayText} function, splitting the text into
+smaller pieces (and thus speeding up the start of speech) might be
+implemented as follows:
+
+@lisp
+(define (SayText* text)
+  (if (not (equal? text ""))
+      (let ((utt-text (next-chunk text)))
+        (let ((utt (car utt-text))
+              (text (cadr utt-text)))
+          (utt.play (utt.synth utt))
+          (SayText* text)))))
+@end lisp
+
+@node speech-dispatcher.scm,  , tokenize.scm, Reference Manual
 @section speech-dispatcher.scm
 
 This module provides Speech Dispatcher interface.  You need it if you
@@ -676,9 +711,9 @@ see @ref{Speech Dispatcher}.
 
 @cindex @code{speechd-speak}
 To ease debugging, for each Speech Dispatcher function which returns
-an wave form, there is defined a corresponding function of the same
+a wave form, there is defined a corresponding function of the same
 name with star appended, that returns an utterance instead of wave
-form.  For instance, the function @code{speechd-speak} returns an wave
+form.  For instance, the function @code{speechd-speak} returns a wave
 form (and can be used only in server mode), while the function
 @code{speechd-speak*} returns an utterance.
 
@@ -722,3 +757,10 @@ people.  The home page of the project is
 @printindex cp
 
 @bye
+
+@c  LocalWords:  texinfo setfilename freebsoft utils settitle syncodeindex fn
+@c  LocalWords:  cp ky vr dircategory direntry titlepage vskip pt filll dir url
+@c  LocalWords:  insertcopying ifnottex cindex scm SayText emph vindex xref var
+@c  LocalWords:  vtable alist ftable nopauses speechd util prog dolist assoc oo
+@c  LocalWords:  avg args dirname basename tmp langvar concat subwave utt arg
+@c  LocalWords:  func foo Param synth FDL fdl texi printindex

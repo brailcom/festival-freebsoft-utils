@@ -70,6 +70,9 @@
 (define (identity x)
   x)
 
+(define (complement func)
+  (lambda args (not (apply func args))))
+
 (define (apply* function list)
   (apply (if (eq? (typeof function) 'string) (intern function) function) list))
 
