@@ -1,8 +1,8 @@
-festival-freebsoft-utils 0.3 released
+festival-freebsoft-utils 0.4 released
 =====================================
 
 The Free(b)soft project is pleased to announce
-festival-freebsoft-utils 0.3.
+festival-freebsoft-utils 0.4.
 
 * What is festival-freebsoft-utils?
 
@@ -42,24 +42,20 @@ festival-freebsoft-utils 0.3.
   - Everything is written in the extension language, no patching of the
     Festival C++ sources is needed.
 
-* What is new in the 0.3 version?
+* What is new in the 0.4 version?
 
-  - New modules fileio.scm and recode.scm.
-
-  - The Speech Dispatcher interface was changed to be compatible with
-    Speech Dispatcher 0.5 and is not compatible with older Speech
-    Dispatcher versions.
+  - No user visible changes, this is a bug fix release.
 
 NOTE: If you use festival-freebsoft-utils with Speech Dispatcher, you
-must install Speech Dispatcher 0.5 release candidate or higher.  There
-was an incompatible change in the Speech Dispatcher Festival interface
-that prevents the new festival-freebsoft-utils version to fully
-cooperate with older Speech Dispatcher versions.
+must install Speech Dispatcher 0.5 or higher.  There was an incompatible
+change in the Speech Dispatcher Festival interface that prevents the new
+festival-freebsoft-utils version to fully cooperate with older Speech
+Dispatcher versions.
 
 * Where to get it?
   
   You can get the distribution tarball of the released version from
-  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.3.tar.gz .
+  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.4.tar.gz .
 
   The home page of the project is
   http://www.freebsoft.org/festival-freebsoft-utils .
