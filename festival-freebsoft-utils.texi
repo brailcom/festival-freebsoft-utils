@@ -996,6 +996,9 @@ available:
 @item ssml-say @var{text}
 Speak the given SSML @var{text}.
 
+@item ssml-say* @var{text}
+Speak the given SSML @var{text} honoring the event m
+
 @item ssml-parse @var{text}
 Parse the given SSML @var{text} for later processing by the
 @code{ssml-next-chunk} function.
@@ -1007,6 +1010,9 @@ mark, return @code{nil}.  The returned utterance contains only the
 @code{Token} relation and is intended to be further processed with the
 @code{utt.synth} function.  The returned mark name is a non-@code{nil}
 symbol.
+
+@item ssml-speak-chunks
+Speak the SSML text processed by @code{ssml-parse}.
 @end ftable
 
 The @code{ssml-parse} and @code{ssml-next-chunk} functions are

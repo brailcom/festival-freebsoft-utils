@@ -477,6 +477,10 @@
       (fclose fd))
     (tts_file ssml-file 'ssml)))
 
+(define (ssml-say* ssml-text)
+  (ssml-parse ssml-text)
+  (ssml-speak-chunks))
+
 (define (ssml-parse ssml-text)
   (set! ssml-parsed '())
   (set! ssml-utterances '())
@@ -560,5 +564,17 @@
             (set! ssml-current-utt ((symbol-value func-name) attlist utt))))
       (ssml-next-chunk)))))
 
+(define (ssml-speak-chunks)
+  (let ((utt (ssml-next-chunk)))
+    (cond
+     ((not utt)
+      nil)
+     ((symbol? utt)
+      (print utt)
+      (ssml-speak-chunks))
+     (t
+      (utt.synth utt)
+      (event-eat-utt utt wave.play)
+      (ssml-speak-chunks)))))
 
 (provide 'ssml-mode)

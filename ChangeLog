@@ -1,3 +1,14 @@
+2004-07-19  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-speak-chunks, ssml-say*): New functions.
+
+2004-07-18  Milan Zamazal  <pdm@brailcom.org>
+
+	* multiwave.scm (multi-next): Use event-eat-utt.
+
+	* events.scm (event-eat-utt): New function.
+	(event-synth-text, event-synth-ssml): Use it.
+
 2004-07-02  Milan Zamazal  <pdm@brailcom.org>
 
 	* Version 0.3 released.

@@ -22,6 +22,7 @@
 
 
 (require 'events)
+(require 'ssml-mode)
 (require 'tokenize)
 (require 'util)
 
@@ -74,7 +75,9 @@
        ((symbol? utt)
         utt)
        (utt
-        (utt.wave (utt.synth utt)))
+        (utt.synth utt)
+        (event-eat-utt utt multi-add-wave)
+        (multi-next))
        (t
         (set! multi-ssml-processing nil)))))
    ((not (equal? multi-waiting-text ""))
