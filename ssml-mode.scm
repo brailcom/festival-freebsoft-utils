@@ -20,6 +20,23 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
+;; speak: supported
+;; lexicon: ignored (no reasonable specification of the element)
+;; meta: ignored (no reasonable use here known)
+;; metadata: ignored (no reasonable use here known)
+;; p: supported
+;; s: supported
+;; say-as: trivially rendered (attribute values undefined in the standard)
+;; phoneme: unsupported
+;; sub: supported
+;; voice: supported, but prosody not yet retained (TODO)
+;; emphasis: not properly supported (TODO)
+;; break: partially supported (TODO)
+;; prosody: partially supported (TODO)
+;; audio: supported (TODO more complicated alternative text may fail to render)
+;; mark: supported
+;; desc: ignored (no reasonable use here known)
+
 
 (require_module 'rxp)
 
@@ -337,8 +354,6 @@
 
 (define ssml-audio-uri nil)
 (define (ssml.audio.start attlist utt)
-  ;; TODO: Ensure the alternative text is not spoken because of
-  ;; ssml-process-utt call inside it.
   (ssml-process-utt utt)
   (set! ssml-audio-uri (ssml-attval attlist 'src))
   nil)
