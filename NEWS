@@ -1,0 +1,14 @@
+User-visible changes to festival-freebsoft-utils:
+
+
+* Changes in festival-freebsoft-utils 0.2
+
+** Speech Dispatcher rate and pitch setting changed.
+
+Now the Speech Dispatcher to Festival pitch/rate value mapping is smooth and
+pitch is set relatively to the default pitch of current voice.
+
+
+Local variables:
+mode: outline
+end:

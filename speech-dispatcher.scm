@@ -63,6 +63,8 @@ number within the range 1-16.")
 (Param.set 'Wavefiletype 'nist)
 
 
+(defvar speechd-base-pitch nil)
+
 (define (speechd-set-lang-voice lang voice)
   (let ((spec (assoc_string
                voice
@@ -70,6 +72,7 @@ number within the range 1-16.")
     (if spec
         (begin
           (apply (second spec) nil)
+          (set! speechd-base-pitch nil)
           (or (cadr (assoc 'coding (cadr (voice.description current-voice))))
               'ISO-8859-1))
         (error "Undefined voice"))))
@@ -152,25 +155,43 @@ alist for the current language."
 (define (speechd-set-rate rate)
   "(speechd-set-rate RATE)
 Set speech RATE, which must be a number in the range -100..100."
-  (Param.set 'Duration_Stretch
-             (if (< rate 0)
-                 (- 1 (/ rate 50))
-                 (- 1 (/ rate 200)))))
+  ;; Stretch the rate to the interval 0.5..2 in such a way, that:
+  ;; f(-100) = 0.5 ; f(0) = 1 ; f(100) = 2
+  (Param.set 'Duration_Stretch (pow 2 (/ (- 0 rate) 100.0))))
+
+(defvar speechd-set-pitch-vars '((int_lr_params target_f0_mean)
+                                 (int_simple_params f0_mean)
+                                 (int_general_params f0_mean)))
 
 (define (speechd-set-pitch pitch)
   "(speechd-set-pitch PITCH)
 Set speech PITCH, which must be a number in the range -100..100."
-  (let ((mean (if (< pitch 0) (+ 100 (/ pitch 2)) (+ 100 pitch))))
-    (if (boundp 'int_lr_params)
-        (set! int_lr_params (assoc-set int_lr_params
-                                       'target_f0_mean (list mean))))
-    (if (boundp 'int_simple_params)
-        (set! int_simple_params (assoc-set int_simple_params
-                                           'f0_mean (list mean))))
-    (if (boundp 'int_general_params)
-        (set! int_general_params (assoc-set int_general_params
-                                            'f0_mean (list mean))))))
-
+  ;; Stretch the rate to the interval 0.5*P..2*P, where P is the default pitch
+  ;; of the voice, in such a way, that:
+  ;; f(-100) = 0.5*P ; f(0) = P ; f(100) = 2*P
+  (if (not speechd-base-pitch)
+      (let ((vars speechd-set-pitch-vars))
+        (while vars
+          (let ((var (caar vars))
+                (id (car (cdar vars))))
+            (if (boundp var)
+                (set! speechd-base-pitch
+                      (cons (cons var (cadr (assoc id (symbol-value var))))
+                            speechd-base-pitch))))
+          (set! vars (cdr vars)))))
+  (let ((mean-coef (pow 2 (/ pitch 100.0)))
+        (vars speechd-set-pitch-vars))
+    (while vars
+      (let ((var (caar vars))
+            (id (car (cdar vars))))
+        (if (boundp var)
+            (set-symbol-value!
+             var
+             (assoc-set (symbol-value var) id
+                        (list (* mean-coef
+                                 (cdr (assoc var speechd-base-pitch))))))))
+      (set! vars (cdr vars)))))
+  
 (define (speechd-set-capital-character-recognition-mode mode)
   "(speechd-set-capital-character-recognition-mode MODE)
 Enable (if MODE is non-nil) or disable (if MODE is nil) capital character

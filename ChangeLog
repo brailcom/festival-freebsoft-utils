@@ -1,3 +1,14 @@
+2004-03-09  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-base-pitch): New variable.
+	(speechd-set-lang-voice): Reset its value.
+	(speechd-set-pitch): Completely rewritten.
+
+2004-03-09  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-set-rate): Use uniform interval
+	transformation formula.
+
 2004-02-18  Milan Zamazal  <pdm@brailcom.org>
 
 	* cap-signalization.scm (token_to_words): Dangling reference to
