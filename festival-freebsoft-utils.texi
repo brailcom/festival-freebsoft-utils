@@ -159,6 +159,7 @@ capital signalling or punctuation modes.
 * Capital Letters::             Capital letter signalling.
 * Punctuation Characters::      Pronouncing punctuation characters.
 * Initial Pauses::              Avoiding initial pauses.
+* Tokenization::                Utterance chunking.
 * Speech Dispatcher::           Speech Dispatcher interface.
 @end menu
 
@@ -301,7 +302,7 @@ inside separate double quotes.  Example entry:
 @end lisp
 @end vtable
 
-@node Initial Pauses, Speech Dispatcher, Punctuation Characters, User Customization
+@node Initial Pauses, Tokenization, Punctuation Characters, User Customization
 @section Avoiding Initial Pauses
 @cindex pauses
 
@@ -330,7 +331,27 @@ pause insertion:
 When set to a non-@code{nil} value, initial pauses are inhibited.
 @end vtable
 
-@node Speech Dispatcher,  , Initial Pauses, User Customization
+@node Tokenization, Speech Dispatcher, Initial Pauses, User Customization
+@section Tokenization
+
+@cindex eou_tree
+If you use the festival-freebsoft-utils tokenizer instead of the
+Festival built-in tokenizer, you can put additional limits on the
+tokenization process besides the @code{eou_tree}.
+
+@vtable @code
+@item max-number-of-tokens
+Maximum number of tokens in a single utterance.  Utterance chunking is
+performed in such a way that each produced utterance contains at most
+this number of tokens.
+
+@item max-number-of-token-chars
+Maximum number of characters within a single token.  If a token
+contains more characters than is stated by this limit, it is split
+into smaller tokens.
+@end vtable
+
+@node Speech Dispatcher,  , Tokenization, User Customization
 @section Speech Dispatcher Interface Configuration
 
 You can configure languages and voices used by Speech Dispatcher

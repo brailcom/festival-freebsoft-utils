@@ -26,6 +26,11 @@
 (require 'util)
 
 
+(defvar max-number-of-tokens 100)
+
+(defvar max-number-of-token-chars 100)
+
+
 (define (token-utterance)
   (let ((utt (Utterance Tokens)))
     (utt.relation.create utt 'Token)))
@@ -43,28 +48,39 @@
          (name "")
          (whitespace "")
          (punc "")
-         (prepunctuation ""))
+         (prepunctuation "")
+         (oversized nil))
     (let ((read-part (lambda (matcher)
                        (let ((result-chars '())
+                             (nchars 0)
                              (char (substring text 0 1)))
                          (while (and (not (string-equal char ""))
+                                     (not oversized)
                                      (matcher char))
                            (set! result-chars (cons char result-chars))
                            (set! text (substring text 1 (- (length text) 1)))
+                           (set! nchars (+ nchars 1))
+                           (when (>= nchars max-number-of-token-chars)
+                             (set! oversized t))
                            (set! char (substring text 0 1)))
                          (apply string-append (reverse result-chars))))))
       (set! whitespace (read-part r-whitespace))
       (set! prepunctuation (read-part r-prepunctuation))
       (set! name (read-part r-name))
       (set! punc (read-part r-punc))
-      (while (and (not (string-equal text ""))
+      (while (and (not oversized)
+                  (not (string-equal text ""))
                   (not (r-whitespace (substring text 0 1))))
         (set! name (string-append name punc (read-part r-name)))
-        (set! punc (read-part r-punc)))
+        (set! punc (read-part r-punc))
+        (when (>= (length name) max-number-of-token-chars)
+          (set! oversized t)))
       ;; Presence of empty words is questionable and the built-in tokenization
       ;; process doesn't generate them
       (when (string-equal name "")
         (cond
+         (oversized
+          nil)
          ((not (string-equal punc ""))
           (set! name (substring punc 0 1))
           (set! punc (substring punc 1 (- (length punc) 1))))
@@ -83,19 +99,27 @@
 
 (define (next-chunk text)
   (let ((utt (token-utterance))
-        (finished nil))
+        (finished nil)
+        (ntokens 1))
     (while (not finished)
       (let* ((new-text (get-token utt text))
-             (token (item.prev (utt.relation.last utt 'Token))))
+             (token (utt.relation.last utt 'Token))
+             (ptoken (item.prev token)))
         (cond
          ((string-equal new-text "")
           (set! text "")
           (set! finished t))
-         ((and token (string-equal (wagon_predict token eou_tree) 1))
-          (item.delete (item.next token))
+         ((and ptoken (string-equal (wagon_predict ptoken eou_tree) 1))
+          (item.delete token)
+          (set! finished t))
+         ((>= ntokens max-number-of-tokens)
+          ;; This could be handled (probably less efficiently) by eou_tree, but
+          ;; we don't want to touch the tree just because of this
+          (set! text new-text)
           (set! finished t))
          (t
-          (set! text new-text)))))
+          (set! text new-text)
+          (set! ntokens (+ ntokens 1))))))
     (list utt text)))
 
 

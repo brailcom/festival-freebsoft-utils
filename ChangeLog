@@ -1,5 +1,11 @@
 2004-04-13  Milan Zamazal  <pdm@brailcom.org>
 
+	* tokenize.scm (max-number-of-tokens, max-number-of-token-chars):
+	New variables.
+	(get-token, next-chunk): Honor them.
+
+2004-04-13  Milan Zamazal  <pdm@brailcom.org>
+
 	* speech-dispatcher.scm: Require multiwave.
 	(speechd-next, speechd-next*, speechd-enable-multi-mode): New
 	functions.
