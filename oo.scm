@@ -42,7 +42,7 @@
    (t
     (oo-next-wrapper-func (cdr wrappers) name))))
   
-(define (oo-set-wrapper-func wrappers-var name function)
+(define (oo-set-wrapper-func! wrappers-var name function)
   (let* ((wrappers (symbol-value wrappers-var))
          (spec (assoc name wrappers)))
     (if spec
@@ -52,6 +52,9 @@
          (cons (cons name function) (symbol-value wrappers-var))))
     nil))
 
+(define (oo-wrapped-var funcname)
+  (intern (string-append funcname "!shadow")))
+
 (define (oo-wrappers-var funcname)
   (intern (string-append funcname "!wrappers")))
 
@@ -60,7 +63,15 @@
     (apply (oo-first-wrapper-func (symbol-value wrappers-var)) args)))
 
 (define (oo-ensure-function-wrapped funcname)
-  (set-symbol-value! funcname (oo-gen-wrapper (oo-wrappers-var funcname))))
+  (let ((shadow (oo-wrapped-var funcname)))
+    (when (or (not (boundp shadow))
+              (not (eq (symbol-value funcname)
+                       (symbol-value shadow))))
+      (let ((wrapper (oo-gen-wrapper (oo-wrappers-var funcname)))
+            (wrappers-var (oo-wrappers-var funcname)))
+        (oo-set-wrapper-func! wrappers-var nil (symbol-value funcname))
+        (set-symbol-value! funcname wrapper)
+        (set-symbol-value! shadow wrapper)))))
 
 (defmac (define-wrapper form)
   ;; (define-wrapper (FUNCTION ARG ...) WRAPPER-NAME . BODY)
@@ -72,7 +83,7 @@
       (unless (boundp wrappers-var)
         (set-symbol-value! wrappers-var (list (cons nil (symbol-value func))))
         (oo-ensure-function-wrapped func))
-      `(oo-set-wrapper-func (quote ,wrappers-var) (quote ,name)
+      `(oo-set-wrapper-func! (quote ,wrappers-var) (quote ,name)
          (lambda ,args
            (let ((next-func (lambda ()
                               (oo-next-wrapper-func ,wrappers-var
@@ -110,7 +121,7 @@
                          (unwind-protect*
                              (Param.get param-name)
                            (set! oo-Param.get-wrapper-enabled t)))))))
-    `(oo-set-wrapper-func (quote ,wrappers-var) (quote ,wrapper-name)
+    `(oo-set-wrapper-func! (quote ,wrappers-var) (quote ,wrapper-name)
        (lambda ()
          (let ((next-value
                 (lambda ()
