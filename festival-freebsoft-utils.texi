@@ -381,6 +381,10 @@ Return first, second, or third element of @var{list}, respectively.
 @item identity @var{object}
 Return @var{object}.
 
+@item apply* @var{function} @var{arglist}
+The same as @code{apply}, except that it also works if @var{function}
+is given as a string.
+
 @item add-hook @var{hook-variable} @var{hook-function} @var{to-end?}
 Add @var{hook-function} to @var{hook-variable} if it is not already
 present there.  @var{hook-variable} must be a variable containing a
