@@ -100,6 +100,12 @@
                 (set! trans (cdr trans))))))))
    ;; Delete punctuation when punctuation-mode is none
    ((eq punctuation-mode 'none)
+    (do-relation-items (token utt Token)
+      (if (punctuation-character (item.name token))
+          (dolist (w (mapcar (lambda (i) (item.relation i 'Word))
+                             (item.daughters token)))
+            (if w
+                (item.delete w)))))
     (do-relation-items (w utt Word)
       (if (punctuation-character (item.name w))
           (item.delete w)))))

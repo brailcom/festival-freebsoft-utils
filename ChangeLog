@@ -1,5 +1,10 @@
 2004-06-30  Milan Zamazal  <pdm@brailcom.org>
 
+	* punctuation.scm (punctuation-process-words): When removing
+	punctuation, check tokens too.
+
+2004-06-30  Milan Zamazal  <pdm@brailcom.org>
+
 	* ssml-mode.scm (ssml_init_func): Don't call reset-voice.
 
 2004-06-29  Milan Zamazal  <pdm@brailcom.org>
