@@ -196,7 +196,7 @@
          (token-list nil))
     (when last-token
       (while (and token (not (eq? (item.feat token 'ssml-tag) 'noticed)))
-        (push (recode-utf8->current (item.name token)) token-list)
+        (push (item.name token) token-list)
         (set! token (item.prev token)))
       (item.set_feat last-token 'ssml-tag 'noticed))
     (apply string-append token-list)))
@@ -537,22 +537,28 @@
               (ssml-process-mark
                (lambda (mark)
                  (set! ssml-utterances (append ssml-utterances (list mark))))))
+        ;; Texts of some marks should be processed in a single step
+        (cond
+         ((member func-name '(sub.start prosody.start audio.start))
+          (push t ssml-in-volatile))
+         ((member func-name '(sub.end prosody.end audio.end))
+          (pop ssml-in-volatile)))
+        ;; If there's a text, recode it and add it to the utterance
         (if text
             (begin
-              (if (or ssml-in-volatile
-                      (eq? func-name 'ssml.break))
+              (if (ssml-attval attlist 'xml:lang)
+                  (begin
+                    (ssml-change-language attlist)
+                    (set! text (recode-utf8->current text))
+                    (ssml-unchange-language)))
+              (if (or ssml-in-volatile (eq? func-name 'ssml.break))
                   (while (not (equal? text ""))
                     (set! text (get-token utt text)))
                   (set! ssml-current-text text))
               (push (list func-name attlist nil) ssml-parsed))
-            (begin
-              (cond
-               ((member func-name '(sub.start prosody.start audio.start))
-                (push t ssml-in-volatile))
-               ((member func-name '(sub.end prosody.end audio.end))
-                (pop ssml-in-volatile)))
-              (set! ssml-current-utt ((symbol-value func-name) attlist utt))))
-        (ssml-next-chunk))))))
+            ;; If there's no text, just call the mark function
+            (set! ssml-current-utt ((symbol-value func-name) attlist utt))))
+      (ssml-next-chunk)))))
 
 
 (provide 'ssml-mode)

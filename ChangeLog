@@ -1,3 +1,13 @@
+2004-07-01  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-utt-text): Don't recode at all.
+	(ssml-next-chunk): Many mark text processing fixes.
+
+2004-07-01  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-utt-text): Call recoding only once, not
+	inside the loop.
+
 2004-06-30  Milan Zamazal  <pdm@brailcom.org>
 
 	* punctuation.scm (punctuation-process-words): Loop only through
