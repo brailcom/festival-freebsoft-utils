@@ -1,3 +1,9 @@
+2004-03-30  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (Pause_Method): Be more careful about the event
+	segment at the beginning of the utterance; put event on the last
+	silence segment before the event word.
+
 2004-03-29  Milan Zamazal  <pdm@brailcom.org>
 
 	* punctuation.scm (punctuation-process-words): Argument of
