@@ -1,5 +1,20 @@
 2004-04-01  Milan Zamazal  <pdm@brailcom.org>
 
+	* cap-signalization.scm (token_to_words): Add event-stick-to
+	feature.
+	* word-mapping.scm (Word_Method): Likewise.
+
+	* wave.scm (wave-subwave): Ensure the trimmed part has non-zero
+	length.
+
+	* events.scm (Pause_Method): Removed.
+	(event-synth-text): Perform the Event relation creation previously
+	done by Pause_Method; don't put pauses around events; honor the
+	event-stick-to feature.
+	(event-find-seg, event-find-seg-1): New functions.
+
+2004-04-01  Milan Zamazal  <pdm@brailcom.org>
+
 	* nopauses.scm: New file.
 
 	* oo.scm (oo-unwrapped): New function.

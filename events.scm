@@ -21,8 +21,6 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
 
-(require 'pauses)
-
 (require 'cap-signalization)
 (require 'punctuation)
 (require 'util)
@@ -148,39 +146,57 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
          (unwind-protect* (begin ,@body)
            (,mode-func ,mode-name))))))
 
-(Param.wrap Pause_Method event
-  (lambda (utt)
-    ((next-value) utt)
-    (utt.relation.create utt 'Event)
-    (let ((silence (caar (cdar (PhoneSet.description '(silences))))))
-      (do-relation-items (w utt Word)
-        (if (item.has_feat w 'event)
-            (let ((lastseg (and (item.prev w) (find_last_seg w)))
-                  (seg))
-              (if lastseg
-                  (begin
-                    (insert_pause utt w)
-                    (set! seg (item.next (item.relation lastseg 'Segment))))
-                  (let ((1st-seg (utt.relation.first utt 'Segment)))
-                    (cond
-                     ((not 1st-seg)
-                      (utt.relation.append utt 'Segment (list silence)))
-                     ((not (string-equal (item.name 1st-seg) silence))
-                      (item.relation.insert 1st-seg 'Segment (list silence)
-                                            'before)))
-                    (set! seg (utt.relation.first utt 'Segment))))
-              (item.set_feat seg 'event (item.feat w 'event))
-              (utt.relation.append utt 'Event seg)))))))
+(define (event-find-seg-1 utt word placement)
+  (let ((neighbor ((if (eq? placement 'after) item.prev item.next) word)))
+    (cond
+     ((not neighbor)
+      (if (eq? placement 'after)
+          (list (utt.relation.first utt 'Segment) 'before)
+          (list (utt.relation.last utt 'Segment) 'after)))
+     ((not (string-equal
+            (item.feat neighbor "R:SylStructure.daughter1.daughter1.name")
+            0))
+      (let ((d (if (eq placement 'after) item.daughtern item.daughter1)))
+        (list (d (d (item.relation neighbor 'SylStructure))) placement)))
+     (t
+      (event-find-seg-1 utt neighbor placement)))))
+
+(define (event-find-seg utt word placement)
+  (if (utt.relation.items utt 'Segment)
+      (event-find-seg-1 utt word placement)
+      (begin
+        (utt.relation.append
+         utt 'Segment (list (caar (cdar (PhoneSet.description '(silences))))))
+        (list (utt.relation.first utt 'Segment) placement))))
 
 (define (event-synth-text text)
   (let ((utt (SynthText text)))
+    (utt.relation.create utt 'Event)
+    (do-relation-items (w utt Word)
+      (if (item.has_feat w 'event)
+          (let* ((placement* (if (string-equal (item.feat w 'event-stick-to)
+                                               'next)
+                                 'before
+                                 'after))
+                 (seg-placement (event-find-seg utt w placement*))
+                 (seg (first seg-placement))
+                 (placement (second seg-placement)))
+            (item.set_feat seg 'event (item.feat w 'event))
+            (item.set_feat seg 'event-placement placement)
+            (utt.relation.append utt 'Event seg))))
     (if (utt.relation.items utt 'Event)
         (let ((w (utt.wave utt))
               (waves '())
               (last-break 0.0))
           (do-relation-items (seg utt Event)
-            (let ((break (avg (item.feat seg 'end)
-                              (item.feat seg "R:Segment.p.end")))
+            (let ((break (cond
+                          ((string-equal (item.feat seg 'event-placement)
+                                         'after)
+                           (item.feat seg 'end))
+                          ((item.prev (item.relation seg 'Segment))
+                           (item.feat seg "R:Segment.p.end"))
+                          (t
+                           0.0)))
                   (event (item.feat seg 'event)))
               (push (wave-subwave w last-break break) waves)
               (push (utt.wave (event-synth-plain (first event) (second event)))

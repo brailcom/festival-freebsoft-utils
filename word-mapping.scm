@@ -44,7 +44,13 @@ and EVENT-VALUE are the same as in `logical-event-mapping'.")
                  (not (item.has_feat w 'event)))
             (begin
               (item.set_name w "")
-              (item.set_feat w 'event event)))))
+              (item.set_feat w 'event event)
+              (item.set_feat w 'event-stick-to
+                             (let ((tw (item.relation w 'Token)))
+                               (if (and (not (item.prev tw))
+                                        (item.next tw))
+                                   'next
+                                   'prev)))))))
     (apply* (next-value) (list utt))))
 
 

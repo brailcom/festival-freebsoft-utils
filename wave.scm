@@ -34,10 +34,12 @@
   (let ((ifile (make_tmp_filename))
         (ofile (string-append (make_tmp_filename) ".sph")))
     (unwind-protect*
-        (begin
+        (let ((length (- to from)))
+          (if (<= length 0)
+              ;; sox doesn't trim if the length argument is 0
+              (set! length 0.001))
           (wave.save wave ifile 'nist nil)
-          (system (format nil "sox %s %s trim %s %s"
-                          ifile ofile from (- to from)))
+          (system (format nil "sox %s %s trim %s %s" ifile ofile from length))
           (wave.load ofile nil nil nil))
       (delete-file ifile)
       (delete-file ofile))))

@@ -34,7 +34,8 @@
                                 ;; token_to_words allows only strings and
                                 ;; symbols as feature values, so we have to use
                                 ;; capital-event, to be transformed later
-                                (list '((name "") (capital-event ""))))
+                                (list '((name "") (capital-event "")
+                                        (event-stick-to next))))
                             ((next-func) token name)))))
         (if (string-matches name "^..*[A-Z¡»œ…ÃÕ“”ÿ©´⁄Ÿ›Æ].*")
             (let ((i 1))
