@@ -168,5 +168,15 @@
     `(dolist (,var (utt.relation.items ,utt (quote ,relation)))
        ,@body)))
 
+(defmac (do-relation-top-items form)
+  (let ((var (first (nth 1 form)))
+        (utt (second (nth 1 form)))
+        (relation (third (nth 1 form)))
+        (body (nth_cdr 2 form)))
+    `(let ((,var (utt.relation.first ,utt (quote ,relation))))
+       (while ,var
+         ,@body
+         (set! ,var (item.next ,var))))))
+
                                      
 (provide 'util)

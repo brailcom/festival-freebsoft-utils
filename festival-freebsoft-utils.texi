@@ -567,6 +567,10 @@ Loop over @var{relation} items of @var{utterance}, performing
 @var{body-form}s for each of them, binding it to the variable
 @var{var}.  The macro arguments @var{var} and @var{relation} are not
 evaluated.
+
+@item do-relation-top-items (@var{var} @var{utterance} @var{relation}) @var{body-form} @var{...}
+Similar to @code{do-relation-items}, but loops only over the
+relation's top items.
 @end ftable
 
 @node wave.scm

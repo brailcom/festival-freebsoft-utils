@@ -1,5 +1,12 @@
 2004-06-30  Milan Zamazal  <pdm@brailcom.org>
 
+	* punctuation.scm (punctuation-process-words): Loop only through
+	top relation items when deleting words.
+
+	* util.scm (do-relation-top-items): New macro.
+
+2004-06-30  Milan Zamazal  <pdm@brailcom.org>
+	
 	* punctuation.scm (punctuation-process-words): When removing
 	punctuation, check tokens too.
 
