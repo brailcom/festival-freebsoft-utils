@@ -1,7 +1,7 @@
 \input texinfo    @c -*-texinfo-*-
 @comment %**start of header
 @setfilename festival-freebsoft-utils.info
-@set VERSION 0.2
+@set VERSION 0.3
 @settitle festival-freebsoft-utils @value{VERSION}
 @syncodeindex fn cp
 @syncodeindex ky cp
@@ -409,6 +409,9 @@ Just configure it as is described in the previous sections.  It is
 particularly recommended to configure available languages if you want
 to use Festival for other languages than English, @xref{Voice
 Selection}.
+
+This version of festival-freebsoft-utils requires Speech Dispatcher
+0.5 or higher.
 
 @c ****************************************************************************
 

@@ -1,3 +1,7 @@
+2004-07-02  Milan Zamazal  <pdm@brailcom.org>
+
+	* Version 0.3 released.
+
 2004-07-01  Milan Zamazal  <pdm@brailcom.org>
 
 	* speech-dispatcher.scm (speechd-character*, speechd-key*)

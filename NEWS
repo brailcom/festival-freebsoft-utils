@@ -6,6 +6,11 @@ User-visible changes to festival-freebsoft-utils:
 
 ** New module recode.scm.
 
+** Changes of the Speech Dispatcher interface.
+
+The Speech Dispatcher interface was changed to be compatible with Speech
+Dispatcher 0.5 and is not compatible with older Speech Dispatcher versions.
+
 
 * Changes in festival-freebsoft-utils 0.2
 

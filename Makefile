@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
-VERSION := 0.2
+VERSION := 0.3
 DISTDIR := festival-freebsoft-utils-$(VERSION)
 TARBALL := $(DISTDIR).tar
 
