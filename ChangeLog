@@ -1,3 +1,8 @@
+2004-02-18  Milan Zamazal  <pdm@brailcom.org>
+
+	* cap-signalization.scm (token_to_words): Dangling reference to
+	cap-token-to-words fixed.
+
 2004-02-02  Milan Zamazal  <pdm@brailcom.org>
 
 	* Version 0.1 released.

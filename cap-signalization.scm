@@ -39,7 +39,7 @@
                                           "^[A-Zахоилмрсь╘╚зыщ╝].*"))
                      (set! i (+ i 1)))
               (append (ttw* token (substring name 0 i))
-                      (cap-token-to-words
+                      (token_to_words
                        token
                        (substring name i (- (length name) i))
                        (next-func))))
