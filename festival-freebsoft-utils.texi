@@ -160,7 +160,8 @@ capital signalling or punctuation modes.
 * Punctuation Characters::      Pronouncing punctuation characters.
 * Initial Pauses::              Avoiding initial pauses.
 * Tokenization::                Utterance chunking.
-* Speech Dispatcher::           Speech Dispatcher interface.
+* Voice Selection::             Configuring voices and languages.
+* Speech Dispatcher::           Using with Speech Dispatcher.
 @end menu
 
 @node Events, Word Substitution, User Customization, User Customization
@@ -179,6 +180,15 @@ Currently the following kinds of events are supported:
 @item text
 @cindex text
 Text.  The event value is a string containing the given text.
+
+@item ssml
+@cindex SSML
+Text represented in the SSML 1.0 markup.  The event value is a string
+containing the given text.  Please note that festival-freebsoft-utils
+does not provide conforming SSML implementation and implements only a
+limited subset of the standard.  Moreover, due to the limitations of
+the built-in Festival XML parser, SSML markup texts must be provided
+in the target encoding of the document languages.
 
 @item sound
 @cindex sound
@@ -331,7 +341,7 @@ pause insertion:
 When set to a non-@code{nil} value, initial pauses are inhibited.
 @end vtable
 
-@node Tokenization, Speech Dispatcher, Initial Pauses, User Customization
+@node Tokenization, Voice Selection, Initial Pauses, User Customization
 @section Tokenization
 
 @cindex eou_tree
@@ -351,32 +361,50 @@ contains more characters than is stated by this limit, it is split
 into smaller tokens.
 @end vtable
 
-@node Speech Dispatcher,  , Tokenization, User Customization
-@section Speech Dispatcher Interface Configuration
+@node Voice Selection, Speech Dispatcher, Tokenization, User Customization
+@section Voice Selection
 
-You can configure languages and voices used by Speech Dispatcher
-through the following variables:
+@cindex voices
+@cindex languages
+You can configure languages and voices used by the SSML, Speech
+Dispatcher and other interfaces supporting the mechanism with the
+following variables:
 
 @vtable @code
-@item speechd-languages
-Alist mapping Speech Dispatcher language codes to Festival language
-names.  Each language available to Speech Dispatcher must be present
-here.  Each list entry is of the form @code{("@var{language-code}"
+@item language-codes
+Alist mapping ISO language codes to Festival language names.  Each
+alist entry is of the form @code{("@var{language-code}"
 @var{language-name})}, where @var{language-code} is an ISO language
 code as used by Speech Dispatcher and @code{language-name} is the
-corresponding Festival language name, as a string.
+corresponding Festival language name.  Optionally, the alist elements
+can have the extended form @code{(@var{language-code}
+@var{language-name} . @var{dialects})}, where @var{dialects} is a list
+of pairs @code{(@var{dialect-code} @var{dialect-name})}.
+@var{dialect-code} is the part of the language code after a hyphen or
+underscore and @var{dialect-name} is the dialect name used by
+Festival voices.
 
-@item speechd-language-voices
-Defines voices available for each of the supported languages.  It is
-an alist with the elements of the form @code{(@var{language-name}
-. @var{voices})}, where @var{language-name} is a language name as
-defined in @code{speechd-languages}.  @var{voices} is an alist with
-elements of the form @code{(@var{voice-name} @var{voice-function})},
-where @var{voice-name} is a case-insensitive Speech Dispatcher voice
-name (symbol or string) and @var{voice-function} is a Festival
-function setting the voice.  See the default variable value for a
-complete example.
+@item voice-select-defaults
+Alist of default voice parameters.  Each alist entry is of the form
+@code{(@var{name} @var{value})}, where @var{value} can be either the
+actual parameter value or @code{nil}, meaning the value is
+unspecified.
 @end vtable
+
+@node Speech Dispatcher,  , Voice Selection, User Customization
+@section Using with Speech Dispatcher
+
+One of the primary goals of festival-freebsoft-utils is to serve as a
+Speech Dispatcher interface to Festival.  festival-freebsoft-utils is
+required by Speech Dispatcher for the use of Festival as the speech
+synthesis backend.  
+
+In order to use festival-freebsoft-utils with Speech Dispatcher, you
+need not to make any special festival-freebsoft-utils arrangements.
+Just configure it as is described in the previous sections.  It is
+particularly recommended to configure available languages if you want
+to use Festival for other languages than English, @xref{Voice
+Selection}.
 
 @c ****************************************************************************
 
@@ -396,6 +424,9 @@ following sections.
 * punctuation.scm::             Punctuation reading modes.
 * tokenize.scm::                Alternative tokenization written in SIOD.
 * multiwave.scm::               Returning multiple wave forms for an event.
+* voice-select.scm::            Selecting voices and languages.
+* prosody-param.scm::           Changing prosodic parameters.
+* ssml-mode.scm::               Partial SSML support.
 * speech-dispatcher.scm::       Speech Dispatcher interface.
 @end menu
 
@@ -436,11 +467,16 @@ accepts multiple @var{cleanup-form}s and evaluates them even when
 @item third @var{list}
 Return first, second, or third element of @var{list}, respectively.
 
+@item remove-if @var{test} @var{list}
+Return @var{list} with elements, for which the @var{test} call returns
+non-@code{nil}, removed.  The order of list elements is preserved.
+@var{test} must be a function of a single argument.
+
 @item identity @var{object}
 Return @var{object}.
 
 @item complement @var{function}
-Return a function that is .equivalent to function except that it
+Return a function that is equivalent to function except that it
 returns the opposite truth value to the return value of function.
 
 @item apply* @var{function} @var{arglist}
@@ -464,6 +500,16 @@ Add the @var{key}-@var{value} pair to the association @code{list} and
 return the resulting list.  Contingent previously @var{list} entries
 stored under @var{key} are removed from the resulting list.
 
+@item avalue-get @var{key} @var{alist}
+Find the first @var{alist} element of the form
+@code{(@var{key*} @code{value})}, where @var{key*} is
+@code{string-equal} to @var{key}, and return @var{value}.
+
+@item avalue-set! @var{key} @var{alist} @var{value}
+Destructively set the @var{value*} of the first @var{alist} element of
+the form @code{(@var{key*} @code{value*})} to @var{value}.  Return
+@var{alist}.
+
 @item avg . @var{args}
 @cindex math functions
 Return average value of @var{args}.
@@ -482,6 +528,12 @@ system interface.  So it is not safe, the file may be created before
 it is actually used or the function may fail with an error.  But for
 simple purposes the function should work fine and it shouldn't be
 worse than the standard @code{make_tmp_filename} function.
+
+@item with-temp-file @var{filename} @var{body}
+Macro that binds newly generated temporary file name to a local
+variable @var{filename} and then performs @var{body}.  The macro
+ensures the temporary file is deleted after finishing @var{body} in
+any way.
 @end ftable
 
 Festival specific utilities:
@@ -586,7 +638,7 @@ festival> (foo 1)
 @cindex @code{Param.set}
 You can also wrap parameters, set by @code{Param.set}:
 
-@table @code
+@ftable @code
 @item Param.wrap @var{name} @var{wrapper-name} . @var{body}
 Wrap access to parameter @var{name} by code @var{body}.  If the given
 parameter is accessed, its wrapper is invoked instead of just
@@ -597,7 +649,7 @@ returning the parameter value.  @var{wrapper-name} is the same as in
 Macro @code{next-value} is automatically defined within @var{body}.
 It returns the parameter value, either plain or modified by another
 wrapper.
-@end table
+@end ftable
 
 Example use of parameter wrapping:
 
@@ -609,6 +661,16 @@ nil
 festival> (Param.get 'foo)
 43
 @end lisp
+
+And finally, the @code{glet*} macro allows you to dynamically bind a
+global variable value:
+
+@ftable @code
+@item glet* @var{bindings} . @var{body}
+Similar to @code{let*} (@pxref{util.scm}) except that the variables in
+@var{bindings} are bound dynamically instead of lexically.  All
+variables in @var{bindings} must be global variables.
+@end ftable
 
 @node events.scm, spell-mode.scm, oo.scm, Reference Manual
 @section events.scm
@@ -722,7 +784,7 @@ implemented as follows:
           (SayText* text)))))
 @end lisp
 
-@node multiwave.scm, speech-dispatcher.scm, tokenize.scm, Reference Manual
+@node multiwave.scm, voice-select.scm, tokenize.scm, Reference Manual
 @section multiwave.scm
 @cindex multiple wave forms
 
@@ -768,7 +830,170 @@ automatically, but the function may be useful under special
 circumstances.
 @end ftable
 
-@node speech-dispatcher.scm,  , multiwave.scm, Reference Manual
+@node voice-select.scm, prosody-param.scm, multiwave.scm, Reference Manual
+@section voice-select.scm
+
+The voice-select module provides a mechanism for voice and language
+selection.  For its configuration information, see @xref{Voice
+Selection}.
+
+The following voice selection functions are available:
+
+@ftable @code
+@item voice-list
+Return the list of names of all available voices.  Unlike the list
+returned by the standard Festival function @code{voice.list}, the list
+includes all registered voices.
+
+@item current-language-voices
+Return a list of all the voices available for the current language.
+
+@item select-voice @var{language} @var{dialect} @var{gender} @var{age} @var{variant} @var{name}
+Select voice according to the specified parameters and return its name.
+@var{language} is the language name, @var{dialect} is a @var{language}
+dialect name.  @var{gender} can be one of the symbols @code{male} or
+@code{female} (the value is currently ignored).  @code{age} is age of
+the speaker in years given as a number.  @code{variant} is a positive
+integer that selects one of several voices, if more than one voice is
+selected by all other parameters.  @var{name} can be a particular
+voice name.
+
+Each of the function arguments can have @code{nil} as its value.  In
+such a case, default value of the corresponding parameter is used.
+If there is no default value, the parameter is not considered in the
+selection process.
+
+If more than one voice matches, one of the matched voices is selected.
+If no voice satisfying all the given parameters is available, some
+voice satisfying the most important parameters is selected.
+
+@item select-voice* @var{lang-code} @var{gender} @var{age} @var{variant} @var{name}
+Like @code{select-voice}, except that language and dialect are
+specified by an ISO @var{lang-code}.
+
+@item reset-voice
+Reset currently selected voice parameters to their default values.
+@end ftable
+    
+Additionally, there is a variable holding information about voice
+properties currently in effect for the purpose of voice selection by
+the @code{voice-select} function:
+
+@vtable @code
+@item voice-select-current-defaults
+Alist containing current voice properties used by voice selection.
+@end vtable
+
+@node prosody-param.scm, ssml-mode.scm, voice-select.scm, Reference Manual
+@section prosody-param.scm
+
+Ever wished to be able to change prosodic parameters in Festival
+easily and in a uniform way for different voices?  Well, here are the
+appropriate functions.  They are no way guaranteed to work for all
+voices, since each voice can have its own unique way of prosody
+handling.  But they should work for typical cases.
+
+@ftable @code
+@item set-pitch @var{value}
+Set mean pitch of the voice to @var{value} and return the old pitch
+value.  @var{value} is given in Hertz.
+
+@item set-pitch-range @var{value}
+Set the pitch range of the voice to @var{value} and return the old
+pitch range value.  The value is in percents of the mean pitch, its
+clear meaning is not defined.
+
+@item set-volume @var{value}
+Set volume to the given @var{value} and return the old volume value.
+@var{value} must be in the range 0--1 from silence to maximum (the
+default).
+
+@item set-rate @var{value}
+Set voice rate to @var{value} and return the old rate value.
+@var{value} is in the range 0.1--10 from the slowest to the fastest.
+The value 1 corresponds to the normal voice speed, other values
+multiply the voice speed appropriately.
+@end ftable
+
+The @var{value} argument of all the functions above may also be a
+function of a single argument accepting the current parameter value
+and returning its new value.  The following convenience functions
+return functions which adjust the parameter values appropriately:
+
+@ftable @code
+@item prosody-shifted-value @var{shift}
+Return a function modifying the value by adding @var{shift} to it.
+
+@item prosody-relative-value @var{coef}
+Return a function modifying the value by multiplying it by @var{coef}.
+@end ftable
+
+Example setting doubling the current voice speed:
+
+@lisp
+(set-rate (prosody-relative-value 2))
+@end lisp
+
+@node ssml-mode.scm, speech-dispatcher.scm, prosody-param.scm, Reference Manual
+@section ssml-mode.scm
+
+@cindex SSML
+festival-freebsoft-utils provides a text processing mode partially
+supporting the SSML 1.0 markup.  You can process a SSML file in the
+following way in the Festival prompt:
+
+@lisp
+(tts_file "/the/path/to/the/file" 'ssml)
+@end lisp
+
+Moreover, there are some particular SSML processing functions
+available:
+
+@ftable @code
+@item ssml-say @var{text}
+Speak the given SSML @var{text}.
+
+@item ssml-parse @var{text}
+Parse the given SSML @var{text} for later processing by the
+@code{ssml-next-chunk} function.
+
+@item ssml-next-chunk
+Return next utterance containing tokens from the last SSML text parsed
+by @code{ssml-parse}.  If there is no next utterance, return
+@code{nil}.  The returned utterance contains only the @code{Token}
+relation and is intended to be further processed with the
+@code{utt.synth} function.
+@end ftable
+
+The @code{ssml-parse} and @code{ssml-next-chunk} functions are
+intended to be used when you want to synthesize an SSML text, but not
+to speak it immediately.  A sample use of those functions for a
+hypothetic @code{ssml-say*} function similar to @code{ssml-say} might
+be as follows:
+
+@lisp
+(define (ssml-say* text)
+  (ssml-parse text)
+  (ssml-say*-1))
+
+(define (ssml-say*-1)
+  (let ((utt (ssml-next-chunk)))
+    (if utt
+        (begin
+          (utt.play (utt.synth utt))
+          (ssml-say*-1)))))
+@end lisp
+
+festival-freebsoft-utils does not provide conforming SSML
+implementation and implements only a limited subset of the standard.
+Moreover, due to the limitations of the built-in Festival XML parser,
+SSML markup texts must be provided in the target encoding of the
+document languages.
+
+It is not easy to fully support SSML in Festival.  Contingent support
+and contributions are welcome.
+
+@node speech-dispatcher.scm,  , ssml-mode.scm, Reference Manual
 @section speech-dispatcher.scm
 
 This module provides Speech Dispatcher interface.  You need it if you
@@ -831,4 +1056,6 @@ people.  The home page of the project is
 @c  LocalWords:  insertcopying ifnottex cindex scm SayText emph vindex xref var
 @c  LocalWords:  vtable alist ftable nopauses speechd util prog dolist assoc oo
 @c  LocalWords:  avg args dirname basename tmp langvar concat subwave utt arg
-@c  LocalWords:  func foo Param synth FDL fdl texi printindex
+@c  LocalWords:  func foo Param synth FDL fdl texi printindex festivalrc pre
+@c  LocalWords:  Tokenization eou tokenizer tokenization backend signalization
+@c  LocalWords:  tokenize multiwave avalue glet pxref tts cadr

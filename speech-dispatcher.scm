@@ -27,53 +27,23 @@
 (require 'punctuation)
 (require 'cap-signalization)
 (require 'multiwave)
-
-
-(defvar speechd-languages
-  '(("en" english)
-    ("de" german)
-    ("cs" czech))
-  "Alist mapping ISO language codes to Festival language names.
-Each element of the alist is of the form (LANGUAGE-CODE LANGUAGE-NAME), where
-both the elements are strings.
-See also `speechd-language-voices'.")
-
-(defvar speechd-language-voices
-  '((english
-     (male1 voice_kal_diphone)
-     (male2 voice_ked_diphone))
-    (americanenglish
-     (male1 voice_kal_diphone)
-     (male2 voice_ked_diphone))
-    (britishenglish
-     (male1 voice_kal_diphone)
-     (male2 voice_ked_diphone))
-    (german
-     (male1 voice_german))
-    (czech
-     (male1 voice_czech_mbrola_cz2)))
-  "Alist mapping Festival language names and voice names to voice functions.
-Each element of the alist is of the form (LANGUAGE VOICE-LIST), where elements
-of VOICE-LIST are of the form (VOICE-NAME VOICE-FUNCTION CODING).  VOICE-NAME
-is a voice name symbol, VOICE-FUNCTION is the name of the function setting the
-given voice, and CODING is the text encoding required by the voice
-definition.  CODING may be one of the symbols ISO-8859-<N>, where <N> is a
-number within the range 1-16.")
+(require 'voice-select)
+(require 'prosody-param)
 
 
 (defvar speechd-base-pitch nil)
 
 (define (speechd-set-lang-voice lang voice)
-  (let ((spec (assoc_string
-               voice
-               (cdr (assoc_string lang speechd-language-voices)))))
-    (if spec
-        (begin
-          (apply (second spec) nil)
-          (set! speechd-base-pitch nil)
-          (or (cadr (assoc 'coding (cadr (voice.description current-voice))))
-              'ISO-8859-1))
-        (error "Undefined voice"))))
+  (let* ((voice* (downcase voice))
+         (name voice)
+         (gender (cond ((string-matches voice* ".*female.*") 'female)
+                       ((string-matches voice* ".*male.*") 'male)))
+         (age (if (string-matches voice* "child.*") 8 40))
+         (variant (when (string-matches voice* ".*[0-9]")
+                    (substring voice* (- (length voice*) 1) 1))))
+    (reset-voice)
+    (prog1 (select-voice* lang gender age variant name)
+      (set! speechd-base-pitch (prosody-get-pitch)))))
 
 (define (speechd-send-to-client wave)
   (let ((file-type (Param.get 'Wavefiletype)))
@@ -117,6 +87,13 @@ Return next synthesized wave form."
 Speak TEXT."
   (speechd-maybe-send-to-client (speechd-speak* text)))
 
+(define (speechd-speak-ssml* ssml-text)
+  (speechd-event-synth 'ssml ssml-text))
+(define (speechd-speak-ssml ssml-text)
+  "(speechd-speak-ssml TEXT)
+Speak SSML-TEXT."
+  (speechd-maybe-send-to-client (speechd-speak-ssml* text)))
+
 (define (speechd-spell* text)
   (spell_init_func)
   (unwind-protect
@@ -153,10 +130,7 @@ Speak KEY, represented by a string."
   "(speechd-set-language language)
 Set current language to LANGUAGE, where LANGUAGE is the language ISO code,
 given as a two-letter string."
-  (let ((lang (cadr (assoc_string language speechd-languages))))
-    (if lang
-        (speechd-set-lang-voice lang "male1")
-        (error "Undefined language"))))
+  (speechd-set-lang-voice language "male1"))
 
 (define (speechd-set-punctuation-mode mode)
   "(speechd-set-punctuation-mode MODE)
@@ -169,8 +143,7 @@ punctuation characters), `none' (don't read any punctuation characters) or
 
 (define (speechd-set-voice voice)
   "(speechd-set-voice VOICE)
-Set voice which must be one of the strings present in `speechd-language-voices'
-alist for the current language."
+Set voice, which is one of the Speech Dispatcher voice strings."
   (speechd-set-lang-voice (Param.get 'Language) voice))
 
 (define (speechd-set-rate rate)
@@ -178,41 +151,19 @@ alist for the current language."
 Set speech RATE, which must be a number in the range -100..100."
   ;; Stretch the rate to the interval 0.5..2 in such a way, that:
   ;; f(-100) = 0.5 ; f(0) = 1 ; f(100) = 2
-  (Param.set 'Duration_Stretch (pow 2 (/ (- 0 rate) 100.0))))
-
-(defvar speechd-set-pitch-vars '((int_lr_params target_f0_mean)
-                                 (int_simple_params f0_mean)
-                                 (int_general_params f0_mean)))
+  (set-rate (pow 2 (/ rate 100.0))))
 
 (define (speechd-set-pitch pitch)
   "(speechd-set-pitch PITCH)
 Set speech PITCH, which must be a number in the range -100..100."
-  ;; Stretch the rate to the interval 0.5*P..2*P, where P is the default pitch
+  ;; Stretch the pitch to the interval 0.5*P..2*P, where P is the default pitch
   ;; of the voice, in such a way, that:
   ;; f(-100) = 0.5*P ; f(0) = P ; f(100) = 2*P
-  (if (not speechd-base-pitch)
-      (let ((vars speechd-set-pitch-vars))
-        (while vars
-          (let ((var (caar vars))
-                (id (car (cdar vars))))
-            (if (boundp var)
-                (set! speechd-base-pitch
-                      (cons (cons var (cadr (assoc id (symbol-value var))))
-                            speechd-base-pitch))))
-          (set! vars (cdr vars)))))
-  (let ((mean-coef (pow 2 (/ pitch 100.0)))
-        (vars speechd-set-pitch-vars))
-    (while vars
-      (let ((var (caar vars))
-            (id (car (cdar vars))))
-        (if (boundp var)
-            (set-symbol-value!
-             var
-             (assoc-set (symbol-value var) id
-                        (list (* mean-coef
-                                 (cdr (assoc var speechd-base-pitch))))))))
-      (set! vars (cdr vars)))))
-  
+  (unless speechd-base-pitch
+    (set! speechd-base-pitch (prosody-get-pitch)))
+  (let ((relative-pitch (pow 2 (/ pitch 100.0))))
+    (set-pitch (* relative-pitch speechd-base-pitch))))
+
 (define (speechd-set-capital-character-recognition-mode mode)
   "(speechd-set-capital-character-recognition-mode MODE)
 Enable (if MODE is non-nil) or disable (if MODE is nil) capital character
@@ -223,5 +174,4 @@ recognition mode."
   "(speechd-list-voices)
 Return the list of the voice names (represented by strings) available for the
 current language."
-  (mapcar car (cdr (assoc_string (Param.get 'Language)
-                                 speechd-language-voices))))
+  (current-language-voices))

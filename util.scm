@@ -67,6 +67,15 @@
 (define (third list)
   (nth 2 list))
 
+(define (remove-if test list)
+  (let ((result '()))
+    (while list
+      (let ((elt (car list)))
+        (unless (test elt)
+          (push elt result)))
+      (set! list (cdr list)))
+    (reverse result)))
+
 (define (identity x)
   x)
 
@@ -98,6 +107,13 @@
   (cons (cons key value)
         (remove (assoc key lst) lst)))
 
+(define (avalue-get key alist)
+  (cadr (assoc_string key alist)))
+
+(define (avalue-set! key alist value)
+  (set-cdr! (assoc_string key alist) (list value))
+  alist)
+
 (define (avg . args)
   (let ((n (length args)))
     (if (<= n 0)
@@ -123,6 +139,13 @@
       (if (eqv? i max-attempts)
           (error "Temporary file not created" nil))
       name)))
+
+(defmac (with-temp-file form)
+  (let ((filename (nth 1 form))
+        (body (nth_cdr 2 form)))
+    `(let ((,filename (make-temp-filename "ffu%s")))
+       (unwind-protect* (begin ,@body)
+         (delete-file ,filename)))))
 
 ;;; Festival specific utilities
 

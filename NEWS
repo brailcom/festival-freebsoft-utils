@@ -13,6 +13,16 @@ pitch is set relatively to the default pitch of current voice.
 Event handling was redesigned to produce better results and to be cleaner and
 more robust.
 
+** Voice and language selection mechanism was generalized and simplified.
+
+There are new language-codes and voice-select-defaults variables that replace
+the old speechd-* voice and language selection variables.
+
+** New functions for unified setting of prosodic parameters.
+
+With their help, you can change basic prosodic parameters like pitch, rate or
+volume easily.
+
 ** There is new option for disabling initial pauses in synthesized samples.
 
 See the variable inhibit-initial-pauses.
@@ -26,6 +36,8 @@ any extension function.
 
 See the manual entry of the multiple.scm module for description why this can be
 useful.  The Speech Dispatcher interface was enhanced this way too.
+
+** Rudimentary SSML support added.
 
 ** New utility functions added.
 

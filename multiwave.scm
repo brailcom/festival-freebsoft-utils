@@ -28,6 +28,7 @@
 
 (defvar multi-waiting-waves nil)
 (defvar multi-waiting-text nil)
+(defvar multi-ssml-processing nil)
 
 (define (multi-add-wave wave)
   (set! multi-waiting-waves (append multi-waiting-waves (list wave))))
@@ -47,13 +48,19 @@
 
 (define (multi-clear)
   (set! multi-waiting-waves '())
-  (set! multi-waiting-text ""))
+  (set! multi-waiting-text "")
+  (set! multi-ssml-processing nil))
 
 (define (multi-synth type value)
   (multi-clear)
-  (if (eq? type 'text)
-      (set! multi-waiting-text value)
-      (multi-event-synth type value)))
+  (cond
+   ((eq? type 'text)
+    (set! multi-waiting-text value))
+   ((eq? type 'ssml)
+    (ssml-parse value)
+    (set! multi-ssml-processing t))
+   (t
+    (multi-event-synth type value))))
 
 (define (multi-next)
   (cond
@@ -61,6 +68,11 @@
     (let ((wave (car multi-waiting-waves)))
       (set! multi-waiting-waves (cdr multi-waiting-waves))
       wave))
+   (multi-ssml-processing
+    (let ((utt (ssml-next-chunk)))
+      (if utt
+          (utt.wave (utt.synth utt))
+          (set! multi-ssml-processing nil))))
    ((not (equal? multi-waiting-text ""))
     (multi-synth-current-text)
     (multi-next))

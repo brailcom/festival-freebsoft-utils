@@ -136,6 +136,40 @@
            ,@body)))))
 
 
+;;; Variables
+
+
+(defvar oo-glet-stack '())
+
+(define (oo-push-let-value var)
+  (push (cons var (symbol-value var)) oo-glet-stack))
+
+(define (oo-pop-let-value var)
+  (cond
+   ((null oo-glet-stack)
+    (error "No restore value on the variable stack"))
+   ((not (eq? (caar oo-glet-stack) var))
+    (error "Variable stack mismatch"))
+   (t
+    (cdr (pop oo-glet-stack)))))
+
+(defmac (glet* form)
+  (let ((bindings (nth 1 form))
+        (body (nth_cdr 2 form)))
+    (if bindings
+        (let* ((spec (car bindings))
+               (var (car spec))
+               (value (cadr spec)))
+          `(begin
+             (oo-push-let-value (quote ,var))
+             (unwind-protect*
+                 (begin
+                   (set! ,var ,value)
+                   (glet* ,(cdr bindings) ,@body))
+               (set! ,var (oo-pop-let-value (quote ,var))))))
+        `(begin ,@body))))
+
+           
 ;;; Announce
 
 (provide 'oo)

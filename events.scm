@@ -23,6 +23,7 @@
 
 (require 'cap-signalization)
 (require 'punctuation)
+(require 'ssml-mode)
 (require 'util)
 (require 'wave)
 (require 'word-mapping)
@@ -206,6 +207,13 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
           (wave-eater w)))
     utt))
 
+(define (event-synth-ssml value wave-eater)
+  (ssml-parse value)
+  (let ((utt (ssml-next-chunk)))
+    (while utt
+      (wave-eater (utt.wave (utt.synth utt)))
+      (set! utt (ssml-next-chunk)))))
+
 (define (event-synth-key value wave-eater)
   (let ((text (string-append value)))
     (while (string-matches text ".*_.*")
@@ -227,6 +235,8 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
   (cond
    ((eq? type 'text)
     (event-synth-text value wave-eater))
+   ((eq? type 'ssml)
+    (event-synth-ssml value wave-eater))
    ((eq? type 'sound)
     (event-synth-sound value wave-eater))
    (t

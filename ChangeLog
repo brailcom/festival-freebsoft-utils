@@ -1,3 +1,101 @@
+2004-04-30  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-voice-parameters): New variable.
+	(ssml-change-voice, ssml-unchange-voice): Store and restore
+	voice-select-current-defaults.
+
+2004-04-30  Milan Zamazal  <pdm@brailcom.org>
+
+	* multiwave.scm (multi-ssml-processing): New variable.
+	(multi-clear, multi-synth, multi-next): Support SSML.
+
+	* speech-dispatcher.scm (speechd-speak-ssml*)
+	(speechd-speak-ssml): New functions.
+
+2004-04-30  Milan Zamazal  <pdm@brailcom.org>
+	
+	* events.scm (event-synth-ssml): New function.
+	(event-synth-plain): Support `ssml' events.
+
+2004-04-30  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-synth): Renamed to ssml-say.
+	(ssml-parse): Honor the previous change.
+
+2004-04-27  Milan Zamazal  <pdm@brailcom.org>
+
+	* oo.scm (oo-glet-stack): New variable.
+	(glet): New macro.
+	(oo-push-let-value, oo-pop-let-value): New functions.
+
+	* ssml-mode.scm (ssml-synth, ssml-parse): New functions.
+	(ssml-tags, ssml-parsed, ssml-elements-parsing): New variables.
+	(ssml-elements): Renamed to ssml-elements-speaking.
+	(ssml-elements): New variable.
+	(ssml-new-utterance, ssml-next-chunk, ssml-utt-text): New
+	functions.
+	(ssml-utterances): New variable.
+
+	* util.scm (with-temp-file): New function.
+
+2004-04-22  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm: New file.
+
+	* prosody-param.scm (prosody-shifted-value): New function.
+	(prosody-change-parameter): New arguments `min' and `max'.
+	(set-pitch, set-pitch-range, set-volume, set-rate): Set the min
+	and max values.
+
+2004-04-20  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-set-lang-voice): Return the
+	selected voice name, not its pitch.
+
+2004-04-20  Milan Zamazal  <pdm@brailcom.org>
+	
+	* voice-select.scm (voice-list): Rewritten, to include voices from
+	voice.list.
+
+2004-04-20  Milan Zamazal  <pdm@brailcom.org>
+
+	* prosody-param.scm (prosody-adjust-volume): New function.
+	(prosody-set-volume): Add it to after_synth_hooks.
+
+2004-04-20  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-set-pitch-vars): Removed.
+	(speechd-set-rate, speechd-set-pitch): Rewritten to use new
+	prosody parameter functions.
+	(speechd-current-voice): New variable.
+
+	* util.scm (avalue-set!): New function.
+
+	* prosody-param.scm: New file.
+
+2004-04-20  Milan Zamazal  <pdm@brailcom.org>
+
+	* voice-select.scm (voice-list): New function.
+	(select-voice, current-language-voices): Use it instead of
+	voice.list.
+
+2004-04-20  Milan Zamazal  <pdm@brailcom.org>
+
+	* voice-select.scm (current-language-voices): New function.
+	(voice-select-code-language, select-voice*) 
+	(select-voice-internal): Bug fixes.
+
+	* speech-dispatcher.scm (speechd-languages)
+	(speechd-language-voices): Removed.
+	(speechd-set-lang-voice, speechd-set-language)
+	(speechd-list-voices): Rewritten to use voice-select functions.
+
+2004-04-19  Milan Zamazal  <pdm@brailcom.org>
+	
+	* voice-select.scm: New file.
+
+	* util.scm (remove-if, avalue-get): New functions.
+
 2004-04-13  Milan Zamazal  <pdm@brailcom.org>
 
 	* tokenize.scm (max-number-of-tokens, max-number-of-token-chars):
