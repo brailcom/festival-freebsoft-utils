@@ -1,0 +1,523 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header
+@setfilename festival-freebsoft-utils.info
+@set VERSION 0.1
+@settitle festival-freebsoft-utils @value{VERSION}
+@syncodeindex fn cp
+@syncodeindex ky cp
+@syncodeindex vr cp
+@comment %**end of header
+@copying
+This manual is for festival-freebsoft-utils, version @value{VERSION}.
+
+Copyright @copyright{} 2004 Brailcom, o.p.s.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts and no Back-Cover Texts.
+A copy of the license is included in the section entitled ``GNU Free
+Documentation License.''
+@end quotation
+@end copying
+
+@dircategory Sound
+@direntry
+* Festival Freebsoft Utilities: (festival-freebsoft-utils).  Festival utilities used by the Freebsoft project.
+@end direntry
+
+@titlepage
+@title festival-freebsoft-utils
+@subtitle for version @value{VERSION}
+@author Milan Zamazal
+@author Brailcom, o.p.s.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top, Motivation, (dir), (dir)
+@top festival-freebsoft-utils
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Motivation::                  What is festival-freebsoft-utils?
+* Installation::                How to install it.
+* User Customization::          Configuration variables.
+* Reference Manual::            Description of all available functions.
+* Contact::                     Authors, mailing lists, Web pages.
+
+* Copying This Manual::         GNU Free Documentation License.
+* Index::                       Concept, function and variable.
+@end menu
+
+@c ****************************************************************************
+
+@node Motivation, Installation, Top, Top
+@chapter Motivation
+@cindex Festival
+@cindex Speech Dispatcher
+
+Festival is a powerful and extensible speech synthesis system, able to
+handle the whole text-to-speech process.  The aim of
+festival-freebsoft-utils is to further extend Festival facilities, to
+the level providing complete set of features required by
+@ref{Top,Speech Dispatcher,,speechd,Speech Dispatcher Manual}.  As a side
+effect, festival-freebsoft-utils introduces interesting functionality,
+generalizing the text-to-speech system to a text-to-sound system.
+
+Festival is well suited to the speech synthesis process itself, but
+lacks some end-user features, especially those needed for application
+sound output.  festival-freebsoft-utils tries to fill this gap, thus
+making Festival suitable for screen readers and other speech output
+software, used especially by the blind and visually impaired people.
+
+Main features of festival-freebsoft-utils are:
+
+@itemize @bullet
+@item
+Generalized concept of input events.  festival-freebsoft-utils allows
+not only plain text synthesis, but also insertion of sounds and
+logical event mapping.
+
+@item
+Spell mode.
+
+@item
+Capital letter signalization.
+
+@item
+Punctuation modes, for reading or not reading punctuation characters.
+
+@item
+Function wrapping support.
+
+@item
+Speech Dispatcher Festival output interface.  For more information
+about Speech Dispatcher, see @url{http://www.freebsoft.org/speechd} or
+@ref{Top,Speech Dispatcher,,speechd,Speech Dispatcher manual}.
+@end itemize
+
+@cindex home page
+Up-to-date information about festival-freebsoft-utils can be found at
+its home page
+@url{http://www.freebsoft.org/festival-freebsoft-utils/}.
+
+@c ****************************************************************************
+
+@node Installation, User Customization, Motivation, Top
+@chapter Installation
+
+festival-freebsoft-utils was tested with Festival 1.4.3.  Other
+versions of Festival may or may not work.
+
+Installation itself is easy, just copy all the @file{*.scm} files to
+one of the directories present in the Festival's load-path.  This is
+typically @file{/usr/share/festival/}, you can get the exact list of
+the directories by evaluating @code{load-path} in the Festival command
+line interface.  Then you can load the whole system at Festival
+startup by adding the line
+
+@lisp
+(require 'speech-dispatcher)
+@end lisp
+
+to your @file{~/.festivalrc} file.
+
+@c ****************************************************************************
+
+@node User Customization, Reference Manual, Installation, Top
+@chapter User Customization
+
+You can customize festival-freebsoft-utils through several user
+variables described in the following sections.  This chapter is
+primarily focused on Speech Dispatcher users and other users not using
+festival-freebsoft-utils directly.  For a complete usage description
+see @ref{Reference Manual}.
+
+@menu
+* Events::                      Basic event handling.
+* Word Substitution::           Substituting events for certain words.
+* Capital Letters::             Capital letter signalization.
+* Punctuation Characters::      Pronouncing punctuation characters.
+* Speech Dispatcher::           Speech Dispatcher interface.
+@end menu
+
+@node Events, Word Substitution, User Customization, User Customization
+@section The Concept of Events
+@cindex events
+
+Default Festival interfaces expect text on their inputs, either in a
+plain form or in the form of some markup.  The event module
+generalizes the concept of input to @emph{events}.  Event is a general
+input object that can represent not only text, but also a pre-defined
+sound or an object just mapping to another input object.
+
+Currently the following kinds of events are supported:
+
+@table @code
+@item text
+@cindex text
+Text.  The event value is a string containing the given text.
+
+@item sound
+@cindex sound
+@vindex sound-icon-directory
+Sound icon.  The value is a string containing a file name of a wav
+file, either absolute, or relative to the @code{sound-icon-directory}
+variable value.
+
+@item character
+@cindex character
+Single character.  The value is a string containing the character.
+
+The difference between character events and text events is that
+characters may be spoken in a different way than ordinary
+single-letter texts.
+
+@item key
+@cindex key
+@cindex Speech Synthesis Interface Protocol
+A key (as on keyboard).  The value is a string containing key
+description in the format defined by the Speech Synthesis Interface
+Protocol, @ref{Top,SSIP,,ssip,SSIP}.
+
+@item logical
+@cindex logical
+Symbolic event name, usually mapped to another event.  The value is an
+arbitrary symbol.  Logical event values starting with the underscore
+character are considered special and shouldn't be generally used.
+@xref{events.scm}, for more details.
+@end table
+
+Any event may be mapped to another event.  Before
+festival-freebsoft-utils functions process an event, they check for
+its mapping and if the event is mapped to another event, it is
+replaced by the target event.  Event mapping is defined by the
+following variable:
+
+@vtable @code
+@item event-mappings
+Maps events of any supported kind (i.e. logical, text, sound,
+character, key) to other events (typically to text or sound events).
+All logical events used must be defined here, other kinds of events
+are processed in some default way if there are not defined in this
+variable.
+
+The variable contains an alist whose elements are of the form
+@code{(@var{event-type} @var{mappings})}.  @var{event-type} is one of
+the symbols @code{logical}, @code{text}, @code{sound},
+@code{character}, @code{key}.  @var{mappings} is an alist with the
+elements of the form @code{(@var{value} @var{new-event-type}
+@var{new-event-value})}.
+
+See the default variable value for an example.
+@end vtable
+
+For a convenience, there is a function that allows you to add or
+replace single event mappings in the @code{event-mappings} variable in
+an easier way than redefining the whole variable value:
+
+@ftable @code
+@item set-event-mapping @var{event-type} @var{event-value} @var{new-event-type} @code{new-event-value}
+Ensure the event of @var{event-type} and @var{event-value} is mapped
+to the event of @var{new-event-type} @code{new-event-value}.
+@end ftable
+
+Example:
+
+@lisp
+(set-event-mapping 'logical 'hello 'text "Hello, world!")
+@end lisp
+
+@node Word Substitution, Capital Letters, Events, User Customization
+@section Word Substitution
+
+You can map words to events.  This is useful especially when you want
+to replace some words by sounds.
+
+@vtable @code
+@item word-mapping
+Alist mapping words to events.  Each entry of the list is of the form
+@code{("@var{word}" @var{event-type} @var{event-value})}.  If
+@var{word} is encountered in the input text, it is replaced by the
+given event.
+@end vtable
+
+@node Capital Letters, Punctuation Characters, Word Substitution, User Customization
+@section Signalling Capital Characters
+
+When capital character signalization is enabled,
+@ref{cap-signalization.scm}, capital characters are signalled via the
+@code{capital} logical event.  By default the event is mapped on the
+sound event @code{capital}.  If you want to change it, change the
+logical mapping, as is described in @ref{Events}.
+
+For example, the following code in your @file{~/.festivalrc} changes
+the sound signalization to saying the word @emph{capital}:
+
+@lisp
+(require 'events)
+(set-event-mapping 'logical 'capital 'text "capital")
+@end lisp
+
+@node Punctuation Characters, Speech Dispatcher, Capital Letters, User Customization
+@section Reading Punctuation Characters
+
+Through the punctuation modes, @ref{punctuation.scm}, you can force
+Festival to speak all punctuation characters.  Since the default
+English voices don't have defined pronunciation of some punctuation
+characters, it is provided through the following variable:
+
+@vtable @code
+@item punctuation-pronunciation
+Alist of punctuation characters and their word forms.  Each entry in
+the list is of the form @code{("@var{character}" "@var{word}" ...},
+where @var{character} is the pronounced character and @var{word}s are
+the words of its pronounciation.  Please note you must put each word
+inside separate double quotes.  Example entry:
+@code{("!" "exclamation" "mark")}
+@end vtable
+
+@node Speech Dispatcher,  , Punctuation Characters, User Customization
+@section Speech Dispatcher Interface Configuration
+
+You can configure languages and voices used by Speech Dispatcher
+through the following variables:
+
+@vtable @code
+@item speechd-languages
+Alist mapping Speech Dispatcher language codes to Festival language
+names.  Each language available to Speech Dispatcher must be present
+here.  Each list entry is of the form @code{("@var{language-code}"
+@var{language-name})}, where @var{language-code} is an ISO language
+code as used by Speech Dispatcher and @code{language-name} is the
+corresponding Festival language name, as a string.
+
+@item speechd-language-voices
+Defines voices available for each of the supported languages.  It is
+an alist with the elements of the form @code{(@var{language-name}
+. @var{voices})}, where @var{language-name} is a language name as
+defined in @code{speechd-languages}.  @var{voices} is an alist with
+elements of the form @code{(@var{voice-name} @var{voice-function})},
+where @var{voice-name} is a case-insensitive Speech Dispatcher voice
+name (symbol or string) and @var{voice-function} is a Festival
+function setting the voice.  See the default variable value for a
+complete example.
+@end vtable
+
+@c ****************************************************************************
+
+@node Reference Manual, Contact, User Customization, Top
+@chapter Reference Manual
+
+festival-freebsoft-utils consists of several modules described in the
+following sections.
+
+@menu
+* util.scm::                    Miscellaneous utility functions.
+* oo.scm::                      Object oriented programming.
+* events.scm::                  Generalized input events.
+* spell-mode.scm::              Spelling mode.
+* cap-signalization.scm::       Capital letter signalization.
+* punctuation.scm::             Punctuation reading modes.
+* speech-dispatcher.scm::       Speech Dispatcher interface.
+@end menu
+
+@node util.scm, oo.scm, Reference Manual, Reference Manual
+@section util.scm
+
+This module contains miscellaneous utilities useful in general SIOD
+and Festival programming.
+
+Macros and functions mostly available in Lisp dialects:
+
+@ftable @code
+@item when @var{condition} @var{body-form} @var{...}
+If and only if @var{condition} is true, evaluate @code{body-form}s.
+
+@item unless @var{condition} @var{body-form} @var{...}
+If and only if @var{condition} is false, evaluate @code{body-form}s.
+
+@item prog1 @var{form} @var{...}
+Evaluate all forms and return the return value of the first one.
+
+@item unwind-protect* @var{protected-form} @var{cleanup-form} @var{...}
+Eval @var{protected-form}, and after it is finished, whether
+successfully or with errors, evaluate all @var{cleanup-form}s.  If
+@var{protected-form} was evaluated successfully, return its return
+value.
+
+Unlike Festival's @code{unwind-protect}, @code{unwind-protect*}
+accepts multiple @var{cleanup-form}s and evaluates them even when
+@var{protected-form} doesn't signal an error.
+
+@item first @var{list}
+@item second @var{list}
+@item third @var{list}
+Return first, second, or third element of @var{list}, respectively.
+
+@item identity @var{object}
+Return @var{object}.
+
+@item add-hook @var{hook-variable} @var{hook-function} @var{to-end?}
+Add @var{hook-function} to @var{hook-variable} if it is not already
+present there.  @var{hook-variable} must be a variable containing a
+list.  If @var{to-end?} is true, add @var{hook-function} to the end of
+the list contained in @var{hook-variable}, otherwise add it to the
+beginning.
+
+@item assoc-set @var{list} @var{key} @var{value}
+Add the @var{key}-@var{value} pair to the association @code{list} and
+return the resulting list.  Contingent previously @var{list} entries
+stored under @var{key} are removed from the resulting list.
+@end ftable
+
+Festival specific utilities:
+
+@ftable @code
+@item item.has_feat @var{item} @var{feature}
+Return true if and only if @var{item} has @var{feature} set.
+
+@item concat-waves @var{waves}
+Append wave forms and return the resulting wave form.  @var{waves}
+must be a list of wave forms to append.
+
+@item langvar @var{symbol}
+Return language dependent value stored under @var{symbol}.  First, the
+variable named @var{symbol.language}, where @var{language} is the
+language name as stored in the @code{Language} parmeter is checked and
+if it is unbound, @var{symbol}'s value is returned.
+@end ftable
+
+@node oo.scm, events.scm, util.scm, Reference Manual
+@section oo.scm
+
+@node events.scm, spell-mode.scm, oo.scm, Reference Manual
+@section events.scm
+
+For introductory and configuration information about events see
+@ref{Events}.  The event module provides the following functions to
+synthesize events:
+
+@ftable @code
+@item event-synth @var{type} @var{value}
+Synthesize event of @var{type}, which may be one of the following
+symbols: @code{logical}, @code{text}, @code{sound}, @code{character},
+@code{key}.  @var{event} is the event value that must correspond to
+the event type.
+
+@item event-play @var{type} @var{value}
+Play event.  The @var{type} and @var{value} arguments are the same as
+in @code{event-synth}.
+@end ftable
+
+@node spell-mode.scm, cap-signalization.scm, events.scm, Reference Manual
+@section spell-mode.scm
+@cindex @code{spell}
+
+Defines spelling mode, i.e. the mode in which the input text is
+spelled rather than read in the usual way.  The @code{spell} mode is a
+normal Festival mode, so you can use it after loading this module
+immediately, e.g.
+
+@example
+(tts_file "file" 'spell)
+@end example
+
+@node cap-signalization.scm, punctuation.scm, spell-mode.scm, Reference Manual
+@section cap-signalization.scm
+
+Defines mode that allows signalization of capital letters through the
+logical event @code{capital}.  @xref{Capital Letters}, for more details.
+
+@ftable @code
+@item set-cap-signalization-mode @var{mode}
+If @var{mode} is true, enable capital letter signalization, otherwise
+disable it.
+@end ftable
+
+@node punctuation.scm, speech-dispatcher.scm, cap-signalization.scm, Reference Manual
+@section punctuation.scm
+
+Sometimes it is useful to hear all the punctuation characters present
+in the synthesized text (for exact information about the text) and
+sometimes it is useful to read no punctuation character (for faster
+reading).  Punctuation modes allow you to tell Festival, whether it
+should read punctuation characters or not.
+
+@ftable @code
+@item set-punctuation-mode @var{mode}
+Set punctuaton mode to @var{mode}.  @var{mode} may be one of the
+following symbols: @code{all} meaning all the punctuation characters
+are read, @code{none} meaning no punctuation characters are read, and
+@code{default} that switches to the default Festival behavior
+corresponding to the current language and voice.
+@end ftable
+
+@xref{Punctuation Characters}, for information about punctuatios mode
+configuration.
+
+@node speech-dispatcher.scm,  , punctuation.scm, Reference Manual
+@section speech-dispatcher.scm
+
+This module provides Speech Dispatcher interface.  You need it if you
+want to use Festival as a Speech Dispatcher output text-to-speech
+system.  The module defines functions required by the Speech
+Dispatcher Festival output module and user configuration variables,
+see @ref{Speech Dispatcher}.
+
+@cindex @code{speechd-speak}
+To ease debugging, for each Speech Dispatcher function which returns
+an wave form, there is defined a corresponding function of the same
+name with star appended, that returns an utterance instead of wave
+form.  For instance, the function @code{speechd-speak} returns an wave
+form (and can be used only in server mode), while the function
+@code{speechd-speak*} returns an utterance.
+
+@c ****************************************************************************
+
+@node Contact, Copying This Manual, Reference Manual, Top
+@chapter How to contact us
+@cindex author
+@cindex contact
+
+The author of festival-freebsoft-utils is Milan Zamazal
+@email{pdm@@freebsoft.org}.  The home page of festival-freebsoft-utils
+is @url{http://www.freebsoft.org/festival-freebsoft-utils/}.
+
+@cindex mailing list
+You can contact us with your comments, questions, bug reports,
+suggestions, patches or anything at the Speech Dispatcher mailing list
+@email{speechd@@freebsoft.org}.
+
+@cindex Free(b)soft project
+festival-freebsoft-utils is part of the Free(b)soft project aimed at
+making computers accessible to blind and sorely visually impaired
+people.  The home page of the project is
+@url{http://www.freebsoft.org}.
+
+@c ****************************************************************************
+
+@node Copying This Manual, Index, Contact, Top
+@appendix GNU Free Documentation License
+
+@cindex FDL, GNU Free Documentation License
+@center Version 1.2, November 2002
+
+@include fdl.texi
+
+@c ****************************************************************************
+
+@node Index,  , Copying This Manual, Top
+@unnumbered Index
+
+@printindex cp
+
+@bye
