@@ -1,3 +1,8 @@
+2004-03-31  Milan Zamazal  <pdm@brailcom.org>
+
+	* wave.scm (wave-concat): Concat the waveforms in the opposite
+	order.
+
 2004-03-30  Milan Zamazal  <pdm@brailcom.org>
 
 	* events.scm (Pause_Method): Be more careful about the event

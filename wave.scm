@@ -25,7 +25,10 @@
   (let ((first-wave (car waves)))
     (if (<= (length waves) 1)
         first-wave
-        (wave.append first-wave (wave-concat (cdr waves))))))
+        ;; The order of concatenation matters -- the resulting sample of
+        ;; wave.append has parameters (rate etc.) of the first argument sample
+        (wave-concat (cons (wave.append first-wave (cadr waves))
+                           (cddr waves))))))
 
 (define (wave-subwave wave from to)
   (let ((ifile (make_tmp_filename))
