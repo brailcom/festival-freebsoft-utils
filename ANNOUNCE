@@ -1,0 +1,46 @@
+festival-freebsoft-utils 0.1 released
+=====================================
+
+The Free(b)soft project is pleased to announce festival-freebsoft-utils 0.1.
+
+* What is festival-freebsoft-utils?
+
+  festival-freebsoft-utils is a collection of Festival utilities that
+  enhance Festival with some useful features.  They provide all what is
+  needed for interaction with Speech Dispatcher.
+
+  Key festival-freebsoft-utils features are:
+
+  - Generalized concept of input events.  festival-freebsoft-utils
+    allows not only plain text synthesis, but also insertion of sounds
+    and logical event mapping.
+
+  - Substitution of events for given words.
+
+  - Spell mode.
+
+  - Capital letter signalization.
+
+  - Punctuation modes, for reading or not reading punctuation
+    characters.
+
+  - Speech Dispatcher support.
+
+  - Enhancing the Festival extension language with some functions
+    commonly used in Lisp.  Also, wrapping existing Festival functions
+    by your code is possible.
+
+  - Everything is written in Scheme, no patching of Festival is needed.
+  
+* Where to get it?
+  
+  You can get the distribution tarball of the released version from
+  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.1.tar.gz .
+
+  The home page of the project is
+  http://www.freebsoft.org/festival-freebsoft-utils .
+
+
+Local Variables:
+fill-column: 72
+End:

@@ -11,7 +11,11 @@ Speech Dispatcher.  It provides especially the following features:
 
 - Capital letter signalization.
 
+- Word replacement.
+
 - Speech Dispatcher interface.
+
+- Festival programming extensions.
 
 It's all in an early stage of development.  Some things could be done in better
 or more powerful way, any help is welcome.
