@@ -1,3 +1,7 @@
+2004-05-10  Milan Zamazal  <pdm@brailcom.org>
+
+	* Makefile (dist): Set permissions of DISTDIR.
+
 2004-05-04  Milan Zamazal  <pdm@brailcom.org>
 
 	* events.scm (event-synth-ssml): Ignore symbols returned by
