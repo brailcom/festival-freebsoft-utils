@@ -1,5 +1,10 @@
 2004-07-19  Milan Zamazal  <pdm@brailcom.org>
 
+	* events.scm (event-eat-utt): Don't use segments directly, create
+	completely new items for the Event relation.
+
+2004-07-19  Milan Zamazal  <pdm@brailcom.org>
+
 	* ssml-mode.scm (ssml-speak-chunks, ssml-say*): New functions.
 
 2004-07-18  Milan Zamazal  <pdm@brailcom.org>

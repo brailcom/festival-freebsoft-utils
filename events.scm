@@ -181,9 +181,15 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
                (seg-placement (event-find-seg utt w placement*))
                (seg (first seg-placement))
                (placement (second seg-placement)))
-          (item.set_feat seg 'event (item.feat w 'event))
+          (item.set_feat seg 'event )
           (item.set_feat seg 'event-placement placement)
-          (utt.relation.append utt 'Event seg))))
+          (utt.relation.append utt 'Event
+                               `(event
+                                 ((event ,(item.feat w 'event))
+                                  (event-placement ,placement)
+                                  (end ,(item.feat seg 'end))
+                                  (pend ,(item.feat seg "R:Segment.p.end"))))
+                               ))))
   (let ((w (utt.wave utt)))
     (if (utt.relation.items utt 'Event)
         (let ((last-break 0.0))
@@ -193,7 +199,7 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
                                          'after)
                            (item.feat seg 'end))
                           ((item.prev (item.relation seg 'Segment))
-                           (item.feat seg "R:Segment.p.end"))
+                           (item.feat seg 'pend))
                           (t
                            0.0)))
                   (event (item.feat seg 'event)))
