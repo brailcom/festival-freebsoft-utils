@@ -156,6 +156,10 @@
   (let ((lsymbol (intern (string-append symbol "." (Param.get 'Language)))))
     (symbol-value (if (symbol-bound? lsymbol) lsymbol symbol))))
 
+(define (current-voice-coding)
+  (or (cadr (assoc 'coding (cadr (voice.description current-voice))))
+      'ISO-8859-1))
+
 (defmac (do-relation-items form)
   (let ((var (first (nth 1 form)))
         (utt (second (nth 1 form)))

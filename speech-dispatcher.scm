@@ -45,8 +45,7 @@
                       t)))
     (select-voice* lang gender age variant name)
     (set! speechd-base-pitch (prosody-get-pitch))
-    (or (cadr (assoc 'coding (cadr (voice.description current-voice))))
-        'ISO-8859-1)))
+    (current-voice-coding)))
 
 (define (speechd-send-to-client wave)
   (if (symbol? wave)

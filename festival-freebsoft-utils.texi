@@ -548,6 +548,13 @@ variable named @var{symbol.language}, where @var{language} is the
 language name as stored in the @code{Language} parameter is checked and
 if it is unbound, @var{symbol}'s value is returned.
 
+@item current-voice-coding
+Return character coding of the currently selected voice in Festival.
+The coding is taken from the @code{coding} attribute of the voice
+description, if it is undefined or @code{nil}, ISO@ 8859-1 coding is
+assumed.  The @code{coding} voice attribute is introduced by
+festival-freebsoft-utils, it is not a standard Festival feature.
+
 @item do-relation-items (@var{var} @var{utterance} @var{relation}) @var{body-form} @var{...}
 @cindex looping
 Loop over @var{relation} items of @var{utterance}, performing

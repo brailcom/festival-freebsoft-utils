@@ -1,3 +1,8 @@
+2004-05-13  Milan Zamazal  <pdm@brailcom.org>
+
+	* util.scm (current-voice-coding): New function.
+	* speech-dispatcher.scm (speechd-set-lang-voice): Use it.
+
 2004-05-11  Milan Zamazal  <pdm@brailcom.org>
 
 	* Version 0.2 released.
