@@ -1,3 +1,26 @@
+2004-04-13  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm: Require multiwave.
+	(speechd-next, speechd-next*, speechd-enable-multi-mode): New
+	functions.
+	(speechd-multi-mode): New variable.
+	(speechd-event-synth): New function.
+	(speechd-speak*, speechd-spell*, speechd-sound-icon*)
+	(speechd-character*, speechd-key*): Use it.
+	(speechd-maybe-send-to-client): New function.
+	(speechd-speak, speechd-spell, speechd-sound-icon) 
+	(speechd-character, speechd-key): Use it.
+
+2004-04-13  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-send-to-client): Set Wavefiletype
+	here, not at the toplevel.
+
+2004-04-13  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-send-to-client): Don't support
+	list results anymore.
+
 2004-04-08  Milan Zamazal  <pdm@brailcom.org>
 
 	* events.scm (event-synth): Renamed to event-synth-1.

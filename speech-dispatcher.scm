@@ -26,6 +26,7 @@
 (require 'spell-mode)
 (require 'punctuation)
 (require 'cap-signalization)
+(require 'multiwave)
 
 
 (defvar speechd-languages
@@ -60,9 +61,6 @@ definition.  CODING may be one of the symbols ISO-8859-<N>, where <N> is a
 number within the range 1-16.")
 
 
-(Param.set 'Wavefiletype 'nist)
-
-
 (defvar speechd-base-pitch nil)
 
 (define (speechd-set-lang-voice lang voice)
@@ -77,56 +75,79 @@ number within the range 1-16.")
               'ISO-8859-1))
         (error "Undefined voice"))))
 
-(define (speechd-send-to-client result)
-  (if (consp result)
-      (begin
-        (send_sexpr_to_client (length result))
-        (mapcar utt.send.wave.client result)
-        nil)
-      (utt.send.wave.client result)))
+(define (speechd-send-to-client wave)
+  (let ((file-type (Param.get 'Wavefiletype)))
+    (Param.set 'Wavefiletype 'nist)
+    (unwind-protect* (utt.send.wave.client wave)
+      (Param.set 'Wavefiletype file-type))))
 
+(define (speechd-maybe-send-to-client wave)
+  (unless speechd-multi-mode
+    (speechd-send-to-client wave)))
+
+(define (speechd-event-synth type value)
+  ((if speechd-multi-mode multi-synth event-synth) type value))
 
 ;;; Commands
 
+(defvar speechd-multi-mode nil)
+  
+(define (speechd-enable-multi-mode mode)
+  "(speechd-set-punctuation-mode MODE)
+Enable (if MODE is non-nil) or disable (if MODE is nil) sending multiple
+synthesized wave forms."
+  (set! speechd-multi-mode mode))
+
+(define (speechd-next*)
+  (set_backtrace t)
+  (let ((wave (multi-next)))
+    (when wave
+      (wave-utt wave))))
+(define (speechd-next)
+  "(speechd-next)
+Return next synthesized wave form."
+  (let ((utt (speechd-next*)))
+    (when utt
+      (speechd-send-to-client utt))))
 
 (define (speechd-speak* text)
-  (event-synth 'text text))
+  (speechd-event-synth 'text text))
 (define (speechd-speak text)
   "(speechd-speak TEXT)
 Speak TEXT."
-  (speechd-send-to-client (speechd-speak* text)))
+  (speechd-maybe-send-to-client (speechd-speak* text)))
 
 (define (speechd-spell* text)
   (spell_init_func)
   (unwind-protect
-      (prog1 (event-synth 'text text)
+      (prog1 (speechd-event-synth 'text text)
         (spell_exit_func))
     (spell_exit_func)))
 (define (speechd-spell text)
   "(speechd-spell TEXT)
 Spell TEXT."
-  (speechd-send-to-client (speechd-spell* text)))
+  (speechd-maybe-send-to-client (speechd-spell* text)))
 
 (define (speechd-sound-icon* name)
-  (event-synth 'logical name))
+  (speechd-event-synth 'logical name))
 (define (speechd-sound-icon name)
   "(speechd-sound-icon NAME)
 Play the sound or text bound to the sound icon named by the symbol NAME."
-  (speechd-send-to-client (speechd-sound-icon* name)))
+  (speechd-maybe-send-to-client (speechd-sound-icon* name)))
 
 (define (speechd-character* character)
-  (event-synth 'character character))
+  (speechd-event-synth 'character character))
 (define (speechd-character character)
   "(speechd-character CHARACTER)
 Speak CHARACTER, represented by a string."
-  (speechd-send-to-client (speechd-character* character)))
+  (speechd-maybe-send-to-client (speechd-character* character)))
 
 (define (speechd-key* key)
-  (event-synth 'key key))
+  (speechd-event-synth 'key key))
 (define (speechd-key key)
   "(speechd-key KEY)
 Speak KEY, represented by a string."
-  (speechd-send-to-client (speechd-key* key)))
+  (speechd-maybe-send-to-client (speechd-key* key)))
 
 (define (speechd-set-language language)
   "(speechd-set-language language)

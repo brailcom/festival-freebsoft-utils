@@ -25,7 +25,7 @@ any extension function.
 ** Synthesized events can be returned in multiple wave forms.
 
 See the manual entry of the multiple.scm module for description why this can be
-useful.
+useful.  The Speech Dispatcher interface was enhanced this way too.
 
 ** New utility functions added.
 
