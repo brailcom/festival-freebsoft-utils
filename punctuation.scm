@@ -22,6 +22,7 @@
 
 
 (require 'oo)
+(require 'word-mapping)
 
 
 (defvar punctuation-mode 'default)
@@ -45,7 +46,7 @@
     ("(" "left" "parenthesis")
     (")" "right" "parenthesis")
     ("{" "left" "brace")
-    ("(" "right" "brace")))
+    ("}" "right" "brace")))
 
 (define (punctuation-character string)
   (or (string-matches string punctuation-chars)
@@ -53,28 +54,23 @@
 
 (define (punctuation-split-token token name ttw)
   (cond
+   ;; No punctuation
    ((and (not (string-matches name
                               (string-append ".*" punctuation-chars ".*")))
          (not (string-matches name
                               (string-append ".*" punctuation-chars-2 ".*"))))
     (ttw token name))
-   ((let ((char (substring name 0 1)))
-      (punctuation-character char))
+   ;; Punctuation at start
+   ((punctuation-character (substring name 0 1))
     (append (if (eq? punctuation-mode 'all)
-                (let ((char (substring name 0 1)))
-                  (if (and (member current-voice '(kal_diphone ked_diphone))
-                           (assoc char punctuation-pronunciation))
-                      (if (assoc char word-mapping)
-                          (list char)
-                          (cdr (assoc char punctuation-pronunciation)))
-                      (ttw token char))))
+                (ttw token (substring name 0 1)))
             (punctuation-split-token token
                                      (substring name 1 (- (length name) 1))
                                      ttw)))
+   ;; Punctuation inside
    (t
     (let ((i 1))
-      (while (let ((char (substring name i 1)))
-               (not (punctuation-character char)))
+      (while (not (punctuation-character (substring name i 1)))
         (set! i (+ i 1)))
       (append (ttw token (substring name 0 i))
               (punctuation-split-token
@@ -87,62 +83,40 @@
 
 (define (punctuation-process-words utt)
   (cond
+   ;; Standard English lexicon has no notion of punctuation pronounciation
    ((and (eq? punctuation-mode 'all)
          (member (Param.get 'Language)
                  '(english britishenglish americanenglish
                    "english" "britishenglish" "americanenglish")))
-    (mapcar
-     (lambda (w)
-       (let ((trans (assoc (item.name w) punctuation-pronunciation)))
-         (if (and trans
-                  (not (assoc (item.name w) word-mapping)))
-             (begin
-               (item.set_name w (car (cdr trans)))
-               (set! trans (cdr (cdr trans)))
-               (while trans
-                 (item.insert w (list (car trans)))
-                 (set! trans (cdr trans)))))))
-     (utt.relation.items utt 'Word)))
+    (do-relation-items (w utt Word)
+      (let ((trans (assoc (item.name w) punctuation-pronunciation)))
+        (if (and trans
+                 (not (word-mapping-of w)))
+            (begin
+              (item.set_name w (car (cdr trans)))
+              (set! trans (cdr (cdr trans)))
+              (while trans
+                (item.insert w (list (car trans)))
+                (set! trans (cdr trans))))))))
+   ;; Delete punctuation when punctuation-mode is none
    ((eq punctuation-mode 'none)
-    (mapcar
-     (lambda (w)
-       (if (punctuation-character (item.name w))
-           (item.delete w)))
-     (utt.relation.items utt 'Word))))
-  utt)
-
-(define (punctuation-process-final-punctuation utt)
-  (if (eq? punctuation-mode 'all)
-      (mapcar
-       (lambda (w)
-         (let ((token (item.root (item.relation w 'Token))))
-           (if (and (equal? (item.feat token 'punc) "0")
-                    (or (not (item.next w))
-                        (not (equal? token
-                                     (item.root
-                                      (item.relation (item.next w) 'Token))))))
-               (begin
-                 (item.insert w '(what-should-be-here? ((name "."))))
-                 (item.append_daughter token (item.next w))))))
-       (utt.relation.items utt 'Word)))
+    (do-relation-items (w utt Word)
+      (if (punctuation-character (item.name w))
+          (item.delete w)))))
   utt)
 
 (Param.wrap Token_Method punctuation
   (lambda (utt)
     (apply* (next-value) (list utt))
-    (punctuation-process-final-punctuation utt)
     (punctuation-process-words utt)))
 
 (Param.wrap Word_Method punctuation
+  ;; This is here to avoid deletion of punctuation in standard functions
   (lambda (utt)
     (if (eq? punctuation-mode 'all)
-        (mapcar
-         (lambda (w)
-           (let ((pos (item.feat w "pos")))
-             (if (or (string-equal "punc" pos)
-                     (string-equal "fpunc" pos))
-                 (item.set_feat w "pos" "allpunc"))))
-         (utt.relation.items utt 'Word)))
+        (do-relation-items (w utt Word)
+          (if (string-matches (item.feat w 'pos) "f?punc")
+              (item.set_feat w 'pos 'allpunc))))
     (apply* (next-value) (list utt))))
 
 (define (set-punctuation-mode mode)

@@ -31,6 +31,9 @@
   (if cap-signalization-mode
       (let ((ttw* (lambda (token name)
                     (append (if (string-matches name "^[A-Z¡»œ…ÃÕ“”ÿ©´⁄Ÿ›Æ].*")
+                                ;; token_to_words allows only strings and
+                                ;; symbols as feature values, so we have to use
+                                ;; capital-event, to be transformed later
                                 (list '((name "") (capital-event ""))))
                             ((next-func) token name)))))
         (if (string-matches name "^..*[A-Z¡»œ…ÃÕ“”ÿ©´⁄Ÿ›Æ].*")
@@ -49,13 +52,10 @@
 (Param.wrap Token_Method cap-signalization
   (lambda (utt)
     (apply* (next-value) (list utt))
-    (mapcar
-     (lambda (w)
-       (if (item.has_feat w 'capital-event)
-           (item.set_feat w 'event '(logical capital))))
-     (utt.relation.items utt 'Word))
+    (do-relation-items (w utt Word)
+      (if (item.has_feat w 'capital-event)
+          (item.set_feat w 'event '(logical capital))))
     utt))
-
 
 (define (set-cap-signalization-mode mode)
   "(set-cap-signalization-mode MODE)

@@ -73,6 +73,12 @@
 (define (apply* function list)
   (apply (if (eq? (typeof function) 'string) (intern function) function) list))
 
+(defmac (dolist form)
+  (let ((var (first (nth 1 form)))
+        (items (second (nth 1 form)))
+        (body (nth_cdr 2 form)))
+    `(mapcar (lambda (,var) ,@body) ,items)))
+
 ;;; General utilities
 
 (defmac (add-hook form)
@@ -89,20 +95,28 @@
   (cons (cons key value)
         (remove (assoc key lst) lst)))
 
+(define (avg . args)
+  (let ((n (length args)))
+    (if (<= n 0)
+        0
+        (/ (apply + args) n))))
+
 ;;; Festival specific utilities
 
 (define (item.has_feat item feat)
   (assoc feat (item.features item)))
 
-(define (concat-waves waves)
-  (let ((first-wave (car waves)))
-    (if (<= (length waves) 1)
-        first-wave
-        (wave.append first-wave (concat-waves (cdr waves))))))
-
 (define (langvar symbol)
   (let ((lsymbol (intern (string-append symbol "." (Param.get 'Language)))))
     (symbol-value (if (symbol-bound? lsymbol) lsymbol symbol))))
 
+(defmac (do-relation-items form)
+  (let ((var (first (nth 1 form)))
+        (utt (second (nth 1 form)))
+        (relation (third (nth 1 form)))
+        (body (nth_cdr 2 form)))
+    `(dolist (,var (utt.relation.items ,utt (quote ,relation)))
+       ,@body)))
 
+                                     
 (provide 'util)

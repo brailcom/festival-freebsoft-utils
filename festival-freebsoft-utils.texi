@@ -333,6 +333,7 @@ following sections.
 
 @menu
 * util.scm::                    Miscellaneous utility functions.
+* wave.scm::                    Wave form handling.
 * oo.scm::                      Object oriented programming.
 * events.scm::                  Generalized input events.
 * spell-mode.scm::              Spelling mode.
@@ -341,7 +342,7 @@ following sections.
 * speech-dispatcher.scm::       Speech Dispatcher interface.
 @end menu
 
-@node util.scm, oo.scm, Reference Manual, Reference Manual
+@node util.scm, wave.scm, Reference Manual, Reference Manual
 @section util.scm
 
 This module contains miscellaneous utilities useful in general SIOD
@@ -385,6 +386,11 @@ Return @var{object}.
 The same as @code{apply}, except that it also works if @var{function}
 is given as a string.
 
+@item dolist (@var{var} @var{items}) @var{body-form} @var{...}
+@cindex looping
+Loop over @var{items} and perform @var{body-form}s over each of them,
+binding it to the variable @var{var} (unevaluated).
+
 @item add-hook @var{hook-variable} @var{hook-function} @var{to-end?}
 Add @var{hook-function} to @var{hook-variable} if it is not already
 present there.  @var{hook-variable} must be a variable containing a
@@ -396,6 +402,10 @@ beginning.
 Add the @var{key}-@var{value} pair to the association @code{list} and
 return the resulting list.  Contingent previously @var{list} entries
 stored under @var{key} are removed from the resulting list.
+
+@item avg . @var{args}
+@cindex math functions
+Return average value of @var{args}.
 @end ftable
 
 Festival specific utilities:
@@ -404,18 +414,41 @@ Festival specific utilities:
 @item item.has_feat @var{item} @var{feature}
 Return true if and only if @var{item} has @var{feature} set.
 
-@item concat-waves @var{waves}
-Append wave forms and return the resulting wave form.  @var{waves}
-must be a list of wave forms to append.
-
 @item langvar @var{symbol}
 Return language dependent value stored under @var{symbol}.  First, the
 variable named @var{symbol.language}, where @var{language} is the
 language name as stored in the @code{Language} parmeter is checked and
 if it is unbound, @var{symbol}'s value is returned.
+
+@item do-relation-items (@var{var} @var{utterance} @var{relation}) @var{body-form} @var{...}
+@cindex looping
+Loop over @var{relation} items of @var{utterance}, performing
+@var{body-form}s for each of them, binding it to the variable
+@var{var}.  The macro arguments @var{var} and @var{relation} are not
+evaluated.
 @end ftable
 
-@node oo.scm, events.scm, util.scm, Reference Manual
+@node wave.scm, oo.scm, util.scm, Reference Manual
+@section Wave form handling
+@cindex wave forms
+
+There are some utility functions to help handling wave forms:
+
+@ftable @code
+@item wave-concat @var{waves}
+Append wave forms and return the resulting wave form.  @var{waves}
+must be a list of wave forms to append.
+
+@item wave-subwave @var{wave} @var{from-time} @var{to-time}
+Return the part of @var{wave} form that starts at @var{from-time} and
+finishes at @var{to-time}.  Both times are in seconds.
+
+@item wave-utt @var{wave}
+Create and return an utterance, that contains just the @code{Wave}
+relation holding @var{wave}.
+@end ftable
+
+@node oo.scm, events.scm, wave.scm, Reference Manual
 @section oo.scm
 
 @cindex wrappers

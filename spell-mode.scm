@@ -26,8 +26,8 @@
 (defvar spell-orig-pos-method nil)
 
 (define (spell-pos utt)
-  (mapcar (lambda (w) (item.set_feat w "pos" "sym"))
-          (utt.relation.items utt 'Word))
+  (do-relation-items (w utt Word)
+    (item.set_feat w 'pos 'sym))
   utt)
 
 (define (spell_init_func)

@@ -1,3 +1,74 @@
+2004-03-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* punctuation.scm (punctuation-process-words): Argument of
+	word-mapping-of fixed.
+
+	* events.scm (Pause_Method): Typo in insert_pause call fixed.
+
+2004-03-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* util.scm (avg): New function.
+
+	* events.scm (Pauses): New wrapper.
+	(event-synth-text): Completely rewritten.
+	(event-synth-words, event-rest-of-synth, event-split-items) 
+	(event-split-items-1): Removed.
+
+2004-03-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* util.scm (do-items): Renamed to dolist.
+
+2004-03-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* word-mapping.scm (Word_Method): Use the new macros.
+	* spell-mode.scm (spell-pos): Likewise.
+	* events.scm (event-synth-words, event-synth-text): Likewise.
+	* punctuation.scm (punctuation-process-words, Word_Method): Likewise.
+
+	* util.scm (do-items, do-relation-items): New macros.
+
+2004-03-29  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (event-synth-text): Honor the change below.
+	(event-synth-text): Use wave-utt.
+
+	* util.scm (concat-waves): Moved to wave.scm and renamed to
+	wave-concat.
+
+	* wave.scm: New file.
+
+2004-03-28  Milan Zamazal  <pdm@brailcom.org>
+
+	* punctuation.scm: Require word-mapping.
+	(punctuation-process-words): Use word-mapping-of.
+	(punctuation-split-token): Don't substitute
+	punctuation-pronounciation characters; other simplifications.
+	(Word_Method): Code simplified.
+
+2004-03-28  Milan Zamazal  <pdm@brailcom.org>
+
+	* punctuation.scm (punctuation-process-final-punctuation):
+	Removed.
+	(Token_Method): Honor the previous change.
+
+2004-03-28  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (word-mapping): Moved to word-mapping.scm.
+	(event-mark-items): Removed.
+	(event-synth-text): Don't call it.
+
+	* word-mapping.scm: New file.
+
+2004-03-28  Milan Zamazal  <pdm@brailcom.org>
+
+	* punctuation.scm (punctuation-pronunciation): Right brace item
+	fixed.
+
+2004-03-25  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (character-event-mapping): Use escape sequences
+	instead of direct key ASCII codes.
+
 2004-03-09  Milan Zamazal  <pdm@brailcom.org>
 
 	* speech-dispatcher.scm (speechd-base-pitch): New variable.
