@@ -1,3 +1,8 @@
+2004-01-30  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-set-pitch): Support
+	int_general_params.
+
 2004-01-23  Milan Zamazal  <pdm@brailcom.org>
 
 	* oo.scm (oo-wrapped-var): New function.
