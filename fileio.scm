@@ -45,7 +45,7 @@
 
 (define (write-file filename string)
   (with-open-file (f filename "w")
-    (fwrite string f)))
+    (fwrite (if (symbol? string) (format nil "%s" string) string) f)))
 
 (define (read-file filename)
   (with-open-file (f filename)

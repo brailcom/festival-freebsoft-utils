@@ -81,7 +81,9 @@
 
 
 (define (ssml-attval attlist att)
-  (recode-utf8->current (car (xxml_attval att attlist))))
+  (let ((attval (car (xxml_attval att attlist))))
+    (if attval
+        (recode-utf8->current attval))))
 
 (define (ssml-attval-time attlist att)
   (let ((time (string-before (ssml-attval attlist 'time) "s")))
@@ -485,6 +487,8 @@
           (ssml-next-chunk))))
    (ssml-utterances
     (let ((utt (pop ssml-utterances)))
+      (if (eq? (typeof utt) 'string)
+          (set! utt (intern utt)))
       (if (or (symbol? utt) (utt.relation.items utt 'Token))
           utt
           (ssml-next-chunk))))

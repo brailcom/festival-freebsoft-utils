@@ -1,3 +1,15 @@
+2004-06-23  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-next-chunk): If utterance in the utterance
+	list is a string, convert it to a symbol.
+
+2004-06-23  Milan Zamazal  <pdm@brailcom.org>
+
+	* fileio.scm (write-file): Convert STRING to a string if it is
+	actually a symbol.
+
+	* ssml-mode.scm (ssml-attval): Don't recode if ATT is nil.
+
 2004-05-30  Milan Zamazal  <pdm@brailcom.org>
 
 	* spell-mode.scm: Missing require util added.
