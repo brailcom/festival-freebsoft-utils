@@ -1,3 +1,8 @@
+2004-07-25  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (event-synth-ssml): Apply synthesis on the utterance
+	before eating it; return the last utterance.
+
 2004-07-22  Milan Zamazal  <pdm@brailcom.org>
 
 	* events.scm (event-eat-utt): Don't use the Segment relation in

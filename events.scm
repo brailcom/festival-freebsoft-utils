@@ -213,11 +213,15 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
 
 (define (event-synth-ssml value wave-eater)
   (ssml-parse value)
-  (let ((utt (ssml-next-chunk)))
+  (let ((utt (ssml-next-chunk))
+        (last-utt nil))
     (while utt
+      (set! last-utt utt)
       (unless (symbol? utt)
+        (utt.synth utt)
         (event-eat-utt utt wave-eater))
-      (set! utt (ssml-next-chunk)))))
+      (set! utt (ssml-next-chunk)))
+    last-utt))
 
 (define (event-synth-key value wave-eater)
   (let ((text (string-append value)))
