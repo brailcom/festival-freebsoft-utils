@@ -1,5 +1,11 @@
 User-visible changes to festival-freebsoft-utils:
 
+* Changes in festival-freebsoft-utils 0.3
+
+** New module fileio.scm.
+
+** New module recode.scm.
+
 
 * Changes in festival-freebsoft-utils 0.2
 

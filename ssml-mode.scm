@@ -24,6 +24,7 @@
 (require_module 'rxp)
 
 (require 'prosody-param)
+(require 'recode)
 (require 'tokenize)
 (require 'util)
 (require 'voice-select)
@@ -80,7 +81,7 @@
 
 
 (define (ssml-attval attlist att)
-  (car (xxml_attval att attlist)))  
+  (recode-utf8->current (car (xxml_attval att attlist))))
 
 (define (ssml-attval-time attlist att)
   (let ((time (string-before (ssml-attval attlist 'time) "s")))
@@ -169,7 +170,7 @@
 
 (define (ssml-utt-text utt)
   (let ((last-token (and utt (utt.relation.last utt 'Token))))
-    (and last-token (item.name last-token))))
+    (and last-token (recode-utf8->current (item.name last-token)))))
 
 
 ;;; Markup handlers

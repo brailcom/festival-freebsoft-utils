@@ -21,6 +21,9 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
 
+(require 'util)
+
+
 (defvar spell-orig-token.singlecharsymbols nil)
 
 (defvar spell-orig-pos-method nil)

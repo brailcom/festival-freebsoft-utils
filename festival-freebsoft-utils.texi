@@ -40,7 +40,7 @@ Documentation License''.
 @contents
 
 @ifnottex
-@node Top, Motivation, (dir), (dir)
+@node Top
 @top festival-freebsoft-utils
 
 @insertcopying
@@ -59,7 +59,7 @@ Documentation License''.
 
 @c ****************************************************************************
 
-@node Motivation, Installation, Top, Top
+@node Motivation
 @chapter Motivation
 @cindex Festival
 @cindex Speech Dispatcher
@@ -111,7 +111,7 @@ its home page
 
 @c ****************************************************************************
 
-@node Installation, User Customization, Motivation, Top
+@node Installation
 @chapter Installation
 
 festival-freebsoft-utils was tested with Festival 1.4.3.  Other
@@ -120,6 +120,10 @@ versions of Festival may or may not work.
 Having SoX (@url{http://sox.sourceforge.net}) installed is strongly
 recommended, many festival-freebsoft-utils functions don't work
 without it.
+
+If you want to perform character set conversions, which is necessary
+for the SSML support, you need the @emph{recode} utility
+(@url{http://recode.progiciels-bpi.ca/}).
 
 Installation itself is easy, just copy all the @file{*.scm} files to
 one of the directories present in the Festival's load-path.  This is
@@ -136,7 +140,7 @@ to your @file{~/.festivalrc} file.
 
 @c ****************************************************************************
 
-@node User Customization, Reference Manual, Installation, Top
+@node User Customization
 @chapter User Customization
 
 You can customize festival-freebsoft-utils through several user
@@ -164,7 +168,7 @@ capital signalling or punctuation modes.
 * Speech Dispatcher::           Using with Speech Dispatcher.
 @end menu
 
-@node Events, Word Substitution, User Customization, User Customization
+@node Events
 @section The Concept of Events
 @cindex events
 
@@ -260,7 +264,7 @@ Example:
 (set-event-mapping! 'logical 'hello 'text "Hello, world!")
 @end lisp
 
-@node Word Substitution, Capital Letters, Events, User Customization
+@node Word Substitution
 @section Word Substitution
 
 You can map words to events.  This is useful especially when you want
@@ -274,7 +278,7 @@ Alist mapping words to events.  Each entry of the list is of the form
 given event.
 @end vtable
 
-@node Capital Letters, Punctuation Characters, Word Substitution, User Customization
+@node Capital Letters
 @section Signalling Capital Characters
 
 When capital character signalling is enabled,
@@ -291,7 +295,7 @@ the sound signalling to saying the word @emph{capital}:
 (set-event-mapping! 'logical 'capital 'text "capital")
 @end lisp
 
-@node Punctuation Characters, Initial Pauses, Capital Letters, User Customization
+@node Punctuation Characters
 @section Reading Punctuation Characters
 
 Through the punctuation modes, @ref{punctuation.scm}, you can force
@@ -312,7 +316,7 @@ inside separate double quotes.  Example entry:
 @end lisp
 @end vtable
 
-@node Initial Pauses, Tokenization, Punctuation Characters, User Customization
+@node Initial Pauses
 @section Avoiding Initial Pauses
 @cindex pauses
 
@@ -341,7 +345,7 @@ pause insertion:
 When set to a non-@code{nil} value, initial pauses are inhibited.
 @end vtable
 
-@node Tokenization, Voice Selection, Initial Pauses, User Customization
+@node Tokenization
 @section Tokenization
 
 @cindex eou_tree
@@ -361,7 +365,7 @@ contains more characters than is stated by this limit, it is split
 into smaller tokens.
 @end vtable
 
-@node Voice Selection, Speech Dispatcher, Tokenization, User Customization
+@node Voice Selection
 @section Voice Selection
 
 @cindex voices
@@ -391,7 +395,7 @@ actual parameter value or @code{nil}, meaning the value is
 unspecified.
 @end vtable
 
-@node Speech Dispatcher,  , Voice Selection, User Customization
+@node Speech Dispatcher
 @section Using with Speech Dispatcher
 
 One of the primary goals of festival-freebsoft-utils is to serve as a
@@ -408,7 +412,7 @@ Selection}.
 
 @c ****************************************************************************
 
-@node Reference Manual, Contact, User Customization, Top
+@node Reference Manual
 @chapter Reference Manual
 
 festival-freebsoft-utils consists of several modules described in the
@@ -427,10 +431,12 @@ following sections.
 * voice-select.scm::            Selecting voices and languages.
 * prosody-param.scm::           Changing prosodic parameters.
 * ssml-mode.scm::               Partial SSML support.
+* fileio.scm::                  File utilities.
+* recode.scm::                  Character set conversions.
 * speech-dispatcher.scm::       Speech Dispatcher interface.
 @end menu
 
-@node util.scm, wave.scm, Reference Manual, Reference Manual
+@node util.scm
 @section util.scm
 
 This module contains miscellaneous utilities useful in general SIOD
@@ -563,7 +569,7 @@ Loop over @var{relation} items of @var{utterance}, performing
 evaluated.
 @end ftable
 
-@node wave.scm, oo.scm, util.scm, Reference Manual
+@node wave.scm
 @section Wave form handling
 @cindex wave forms
 
@@ -596,7 +602,7 @@ relation holding a wave loaded from @var{filename} via the function
 @code{wave-load}.
 @end ftable
 
-@node oo.scm, events.scm, wave.scm, Reference Manual
+@node oo.scm
 @section oo.scm
 
 @cindex wrappers
@@ -679,7 +685,7 @@ Similar to @code{let*} (@pxref{util.scm}) except that the variables in
 variables in @var{bindings} must be global variables.
 @end ftable
 
-@node events.scm, spell-mode.scm, oo.scm, Reference Manual
+@node events.scm
 @section events.scm
 
 For introductory and configuration information about events see
@@ -715,7 +721,7 @@ Turn the debugging off.  @code{_debug_off} is just a prefix, it can be
 followed by any symbol constituent characters.
 @end table
 
-@node spell-mode.scm, cap-signalization.scm, events.scm, Reference Manual
+@node spell-mode.scm
 @section spell-mode.scm
 @cindex @code{spell}
 
@@ -728,7 +734,7 @@ immediately, e.g.
 (tts_file "file" 'spell)
 @end example
 
-@node cap-signalization.scm, punctuation.scm, spell-mode.scm, Reference Manual
+@node cap-signalization.scm
 @section cap-signalization.scm
 
 Defines mode that allows signalling of capital letters through the
@@ -740,7 +746,7 @@ If @var{mode} is true, enable capital letter signalling, otherwise
 disable it.
 @end ftable
 
-@node punctuation.scm, tokenize.scm, cap-signalization.scm, Reference Manual
+@node punctuation.scm
 @section punctuation.scm
 
 Sometimes it is useful to get read all the punctuation characters
@@ -761,7 +767,7 @@ corresponding to the current language and voice.
 @xref{Punctuation Characters}, for information about punctuation mode
 configuration.
 
-@node tokenize.scm, multiwave.scm, punctuation.scm, Reference Manual
+@node tokenize.scm
 @section tokenize.scm
 
 Festival's tokenization is implemented mostly in C++, so it is
@@ -791,7 +797,7 @@ implemented as follows:
           (SayText* text)))))
 @end lisp
 
-@node multiwave.scm, voice-select.scm, tokenize.scm, Reference Manual
+@node multiwave.scm
 @section multiwave.scm
 @cindex multiple wave forms
 
@@ -841,7 +847,7 @@ automatically, but the function may be useful under special
 circumstances.
 @end ftable
 
-@node voice-select.scm, prosody-param.scm, multiwave.scm, Reference Manual
+@node voice-select.scm
 @section voice-select.scm
 
 The voice-select module provides a mechanism for voice and language
@@ -895,7 +901,7 @@ the @code{voice-select} function:
 Alist containing current voice properties used by voice selection.
 @end vtable
 
-@node prosody-param.scm, ssml-mode.scm, voice-select.scm, Reference Manual
+@node prosody-param.scm
 @section prosody-param.scm
 
 Ever wished to be able to change prosodic parameters in Festival
@@ -945,7 +951,7 @@ Example setting doubling the current voice speed:
 (set-rate (prosody-relative-value 2))
 @end lisp
 
-@node ssml-mode.scm, speech-dispatcher.scm, prosody-param.scm, Reference Manual
+@node ssml-mode.scm
 @section ssml-mode.scm
 
 @cindex SSML
@@ -1000,16 +1006,85 @@ be as follows:
           (ssml-say*-1)))))
 @end lisp
 
+If you need quick synthesizer response, avoid the DOCTYPE declaration
+in your SSML data.  The DOCTYPE declaration takes an observable time
+when processed in the Festival's XML parser.
+
 festival-freebsoft-utils does not provide conforming SSML
 implementation and implements only a limited subset of the standard.
 Moreover, due to the limitations of the built-in Festival XML parser,
-SSML markup texts must be provided in the target encoding of the
-document languages.
+SSML markup texts that contain non-ASCII characters can only be
+processed with the @code{ssml-parse} and @code{ssml-next-chunk}
+functions, must be provided in the UTF-8 encoding and the
+@code{recode} utility must be available on your system.
 
 It is not easy to fully support SSML in Festival.  Contingent support
 and contributions are welcome.
 
-@node speech-dispatcher.scm,  , ssml-mode.scm, Reference Manual
+@node fileio.scm
+@section fileio.scm
+
+Functions in this module try to help to improve Festival file
+input/output.
+
+@ftable @code
+@item with-open-file (@var{variable} @var{filename} &optional @var{how}) @var{body-form} ...
+Open file named @var{filename} in mode @var{how} (for reading if not
+provided) and bind it to a newly created local @var{variable}.
+Execute @var{body-form}s in that context.
+
+@item read-file @var{filename}
+Read and return whole contents of the file named @var{filename}.
+
+@item write-file @var{filename} @var{string}
+Write @var{string} to a file named @var{filename}.
+
+@item make-read-line-state
+Create and return a state object required by the function
+@code{read-line}.
+
+@item read-line @var{file} @var{state}
+Read a single line from @var{file} and return it without the final
+newline character.  If there is no next line in @var{file}, return
+@code{nil}.  @var{state} is a state as initially returned by the
+@code{make-read-line-state} function.
+
+The typical @code{read-line} usage idiom is:
+
+@lisp
+(let ((state (make-read-line-state))
+      (f (fopen "..."))
+      (line t))
+  (while line
+    (set! line (read-line f state))
+    ...))
+@end lisp
+@end ftable
+
+@node recode.scm
+@section recode.scm
+
+Festival doesn't support different character sets directly.  But it is
+8-bit clean and you can use whatever character coding you like if you
+can process it in the form of 8-bit characters.  The
+@code{recode.scm} module offers the following functions to convert
+between different character sets:
+
+@ftable @code
+@item recode @var{string} @var{from-coding} @var{to-coding}
+Return given @var{string}, originally encoded in @var{from-coding},
+recoded to @var{to-coding}.
+
+@item recode-utf8->current @var{string}
+Return given @var{string}, originally encoded in @code{UTF-8}, recoded
+to the coding of the current voice.
+@end ftable
+
+The recoding functions use the @code{recode} program and temporary
+files to convert between character sets.  There is no known better
+way to do the conversions.
+
+@node speech-dispatcher.scm
 @section speech-dispatcher.scm
 
 This module provides Speech Dispatcher interface.  You need it if you
@@ -1028,7 +1103,7 @@ form (and can be used only in server mode), while the function
 
 @c ****************************************************************************
 
-@node Contact, Copying This Manual, Reference Manual, Top
+@node Contact
 @chapter How to contact us
 @cindex author
 @cindex contact
@@ -1050,7 +1125,7 @@ people.  The home page of the project is
 
 @c ****************************************************************************
 
-@node Copying This Manual, Index, Contact, Top
+@node Copying This Manual
 @appendix GNU Free Documentation License
 
 @cindex FDL, GNU Free Documentation License
@@ -1060,7 +1135,7 @@ people.  The home page of the project is
 
 @c ****************************************************************************
 
-@node Index,  , Copying This Manual, Top
+@node Index
 @unnumbered Index
 
 @printindex cp

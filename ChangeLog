@@ -1,3 +1,27 @@
+2004-05-30  Milan Zamazal  <pdm@brailcom.org>
+
+	* spell-mode.scm: Missing require util added.
+
+2004-05-28  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-attval, ssml-utt-text): Recode the text
+	string from UTF-8 to the current voice coding.
+
+2004-05-27  Milan Zamazal  <pdm@brailcom.org>
+
+	* recode.scm (recode-utf8->current): Extract voice coding
+	properly; don't recode if the voice coding is utf-8.
+
+2004-05-26  Milan Zamazal  <pdm@brailcom.org>
+
+	* fileio.scm (with-temp-file-data): Typo fixed.
+
+	* recode.scm: New module.
+
+2004-05-14  Milan Zamazal  <pdm@brailcom.org>
+
+	* fileio.scm: New module.
+
 2004-05-13  Milan Zamazal  <pdm@brailcom.org>
 
 	* util.scm (current-voice-coding): New function.
