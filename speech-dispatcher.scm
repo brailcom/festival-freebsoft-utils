@@ -166,7 +166,10 @@ Set speech PITCH, which must be a number in the range -100..100."
                                        'target_f0_mean (list mean))))
     (if (boundp 'int_simple_params)
         (set! int_simple_params (assoc-set int_simple_params
-                                           'f0_mean (list mean))))))
+                                           'f0_mean (list mean))))
+    (if (boundp 'int_general_params)
+        (set! int_general_params (assoc-set int_general_params
+                                            'f0_mean (list mean))))))
 
 (define (speechd-set-capital-character-recognition-mode mode)
   "(speechd-set-capital-character-recognition-mode MODE)
