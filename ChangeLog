@@ -1,3 +1,16 @@
+2004-07-20  Milan Zamazal  <pdm@brailcom.org>
+
+	* util.scm (utt-relation-top-items): New function.
+	(do-relation-top-items): Use it.
+
+2004-07-20  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm: Require ssml-mode.
+	(speechd-refresh-modes): New function.
+	(speechd-set-punctuation-mode, speechd-speak-ssml*): Ensure
+	ssml-change-voice is wrapped.
+	(ssml-change-voice): New wrapper.
+
 2004-07-19  Milan Zamazal  <pdm@brailcom.org>
 
 	* events.scm (event-eat-utt): Don't use segments directly, create

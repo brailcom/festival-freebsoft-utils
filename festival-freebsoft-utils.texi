@@ -564,6 +564,9 @@ description, if it is undefined or @code{nil}, ISO@ 8859-1 coding is
 assumed.  The @code{coding} voice attribute is introduced by
 festival-freebsoft-utils, it is not a standard Festival feature.
 
+@item utt-relation-top-items @var{utt} @var{relation}
+Return a list of top level items in @var{relation} in @code{utt}.
+
 @item do-relation-items (@var{var} @var{utterance} @var{relation}) @var{body-form} @var{...}
 @cindex looping
 Loop over @var{relation} items of @var{utterance}, performing

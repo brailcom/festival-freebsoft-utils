@@ -21,17 +21,19 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
 
-(require 'util)
-(require 'events)
-(require 'spell-mode)
-(require 'punctuation)
 (require 'cap-signalization)
+(require 'events)
 (require 'multiwave)
-(require 'voice-select)
 (require 'prosody-param)
+(require 'punctuation)
+(require 'spell-mode)
+(require 'ssml-mode)
+(require 'util)
+(require 'voice-select)
 
 
 (defvar speechd-base-pitch nil)
+
 
 (define (speechd-set-lang-voice lang voice)
   (let* ((voice* (downcase voice))
@@ -63,7 +65,17 @@
 (define (speechd-event-synth type value)
   ((if speechd-multi-mode multi-synth event-synth) type value))
 
+(define (speechd-refresh-modes)
+  (set-punctuation-mode punctuation-mode)
+  (set-cap-signalization-mode cap-signalization-mode))
+
+(define-wrapper (ssml-change-voice . args) speechd-ssml-change-voice
+  (apply (next-func) args)
+  (speechd-refresh-modes))
+
+
 ;;; Commands
+
 
 (defvar speechd-multi-mode nil)
   
@@ -96,6 +108,7 @@ Speak TEXT."
   (speechd-maybe-send-to-client (speechd-speak* text)))
 
 (define (speechd-speak-ssml* ssml-text)
+  (oo-ensure-function-wrapped 'ssml-change-voice)
   (speechd-event-synth 'ssml ssml-text))
 (define (speechd-speak-ssml ssml-text)
   "(speechd-speak-ssml TEXT)

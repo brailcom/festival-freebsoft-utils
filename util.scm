@@ -160,6 +160,14 @@
   (or (cadr (assoc 'coding (cadr (voice.description current-voice))))
       'ISO-8859-1))
 
+(define (utt-relation-top-items utt relation)
+  (let ((items '())
+        (i (utt.relation.first utt relation)))
+    (while i
+      (push i items)
+      (set! i (item.next i)))
+    (reverse items)))
+
 (defmac (do-relation-items form)
   (let ((var (first (nth 1 form)))
         (utt (second (nth 1 form)))
@@ -173,10 +181,8 @@
         (utt (second (nth 1 form)))
         (relation (third (nth 1 form)))
         (body (nth_cdr 2 form)))
-    `(let ((,var (utt.relation.first ,utt (quote ,relation))))
-       (while ,var
-         ,@body
-         (set! ,var (item.next ,var))))))
+    `(dolist (,var (utt-relation-top-items ,utt (quote ,relation)))
+       ,@body)))
 
                                      
 (provide 'util)
