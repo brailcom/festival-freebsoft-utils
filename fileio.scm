@@ -56,9 +56,12 @@
            (reading t))
       (while reading
         (set! n (fread buffer f))
-        (push (substring buffer 0 n) strings)
-        (when (< n buflen)
-          (set! reading nil)))
+        (if n
+            (begin
+              (push (substring buffer 0 n) strings)
+              (when (< n buflen)
+                (set! reading nil)))
+            (set! reading nil)))
       (apply string-append (reverse strings)))))
 
 (define (make-read-line-state)

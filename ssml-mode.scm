@@ -545,12 +545,12 @@
           (pop ssml-in-volatile)))
         ;; If there's a text, recode it and add it to the utterance
         (if text
-            (begin
-              (if (ssml-attval attlist 'xml:lang)
-                  (begin
-                    (ssml-change-language attlist)
-                    (set! text (recode-utf8->current text))
-                    (ssml-unchange-language)))
+            (let ((lang-change (ssml-attval attlist 'xml:lang)))
+              (if lang-change
+                  (ssml-change-language attlist))
+              (set! text (recode-utf8->current text))
+              (if lang-change
+                  (ssml-unchange-language))
               (if (or ssml-in-volatile (eq? func-name 'ssml.break))
                   (while (not (equal? text ""))
                     (set! text (get-token utt text)))

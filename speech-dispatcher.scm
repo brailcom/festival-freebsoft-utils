@@ -89,7 +89,7 @@ Return next synthesized wave form."
       (speechd-send-to-client utt))))
 
 (define (speechd-speak* text)
-  (speechd-event-synth 'text text))
+  (speechd-event-synth 'text (recode-utf8->current text)))
 (define (speechd-speak text)
   "(speechd-speak TEXT)
 Speak TEXT."
@@ -121,14 +121,14 @@ Play the sound or text bound to the sound icon named by the symbol NAME."
   (speechd-maybe-send-to-client (speechd-sound-icon* name)))
 
 (define (speechd-character* character)
-  (speechd-event-synth 'character character))
+  (speechd-event-synth 'character (recode-utf8->current character)))
 (define (speechd-character character)
   "(speechd-character CHARACTER)
 Speak CHARACTER, represented by a string."
   (speechd-maybe-send-to-client (speechd-character* character)))
 
 (define (speechd-key* key)
-  (speechd-event-synth 'key key))
+  (speechd-event-synth 'key (recode-utf8->current key)))
 (define (speechd-key key)
   "(speechd-key KEY)
 Speak KEY, represented by a string."

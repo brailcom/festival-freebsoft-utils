@@ -1,5 +1,19 @@
 2004-07-01  Milan Zamazal  <pdm@brailcom.org>
 
+	* speech-dispatcher.scm (speechd-character*, speechd-key*)
+	(speechd-speak*): Recode the input text.
+
+2004-07-01  Milan Zamazal  <pdm@brailcom.org>
+
+	* ssml-mode.scm (ssml-next-chunk): Always recode, not only on
+	language change.
+
+2004-07-01  Milan Zamazal  <pdm@brailcom.org>
+
+	* fileio.scm (read-file): Don't crash on an empty file.
+
+2004-07-01  Milan Zamazal  <pdm@brailcom.org>
+	
 	* ssml-mode.scm (ssml-utt-text): Don't recode at all.
 	(ssml-next-chunk): Many mark text processing fixes.
 
