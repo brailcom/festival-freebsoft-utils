@@ -5,6 +5,8 @@ Speech Dispatcher.  It provides especially the following features:
 
 - Use of sound icons in Festival.
 
+- Generalized concept of language, voice and basic prosody setting.
+
 - Punctuation modes.
 
 - Spelling mode.
@@ -12,6 +14,8 @@ Speech Dispatcher.  It provides especially the following features:
 - Capital letter signalization.
 
 - Word replacement.
+
+- Partial SSML support.
 
 - Speech Dispatcher interface.
 

@@ -211,7 +211,8 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
   (ssml-parse value)
   (let ((utt (ssml-next-chunk)))
     (while utt
-      (wave-eater (utt.wave (utt.synth utt)))
+      (unless (symbol? utt)
+        (wave-eater (utt.wave (utt.synth utt))))
       (set! utt (ssml-next-chunk)))))
 
 (define (event-synth-key value wave-eater)

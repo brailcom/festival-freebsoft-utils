@@ -70,9 +70,13 @@
       wave))
    (multi-ssml-processing
     (let ((utt (ssml-next-chunk)))
-      (if utt
-          (utt.wave (utt.synth utt))
-          (set! multi-ssml-processing nil))))
+      (cond
+       ((symbol? utt)
+        utt)
+       (utt
+        (utt.wave (utt.synth utt)))
+       (t
+        (set! multi-ssml-processing nil)))))
    ((not (equal? multi-waiting-text ""))
     (multi-synth-current-text)
     (multi-next))

@@ -164,6 +164,9 @@
 (define (ssml-process-sound file)
   (wave.play (wave-load file)))
 
+(define (ssml-process-mark mark)
+  (format t "Mark reached: %s\n" mark))
+
 (define (ssml-utt-text utt)
   (let ((last-token (and utt (utt.relation.last utt 'Token))))
     (and last-token (item.name last-token))))
@@ -348,7 +351,7 @@
 
 (define (ssml.mark attlist utt)
   (ssml-process-utt utt)
-  (format t "Marker reached: %s\n" (ssml-attval attlist 'name))
+  (ssml-process-mark (ssml-attval attlist 'name))
   nil)
 
 (define (ssml.desc.start attlist utt)
@@ -481,7 +484,7 @@
           (ssml-next-chunk))))
    (ssml-utterances
     (let ((utt (pop ssml-utterances)))
-      (if (utt.relation.items utt 'Token)
+      (if (or (symbol? utt) (utt.relation.items utt 'Token))
           utt
           (ssml-next-chunk))))
    (ssml-parsed
@@ -498,7 +501,10 @@
                (lambda (file)
                  (set! ssml-utterances
                        (append ssml-utterances
-                               (list (wave-import-utt file)))))))
+                               (list (wave-import-utt file))))))
+              (ssml-process-mark
+               (lambda (mark)
+                 (set! ssml-utterances (append ssml-utterances (list mark))))))
         (if text
             (begin
               (if (or ssml-in-volatile

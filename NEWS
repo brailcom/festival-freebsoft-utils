@@ -8,7 +8,7 @@ User-visible changes to festival-freebsoft-utils:
 Now the Speech Dispatcher to Festival pitch/rate value mapping is smooth and
 pitch is set relatively to the default pitch of current voice.
 
-** The event handling mechanism was reworked.
+** Event handling mechanism was reworked.
 
 Event handling was redesigned to produce better results and to be cleaner and
 more robust.
@@ -37,9 +37,9 @@ any extension function.
 See the manual entry of the multiple.scm module for description why this can be
 useful.  The Speech Dispatcher interface was enhanced this way too.
 
-** Rudimentary SSML support added.
+** Rudimentary SSML support.
 
-** New utility functions added.
+** New utility functions.
 
 See documentation of the util.scm and wave.scm files for the complete list of
 available utility functions.

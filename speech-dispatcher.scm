@@ -49,10 +49,12 @@
         'ISO-8859-1)))
 
 (define (speechd-send-to-client wave)
-  (let ((file-type (Param.get 'Wavefiletype)))
-    (Param.set 'Wavefiletype 'nist)
-    (unwind-protect* (utt.send.wave.client wave)
-      (Param.set 'Wavefiletype file-type))))
+  (if (symbol? wave)
+      (send_sexpr_to_client wave)
+      (let ((file-type (Param.get 'Wavefiletype)))
+        (Param.set 'Wavefiletype 'nist)
+        (unwind-protect* (utt.send.wave.client wave)
+          (Param.set 'Wavefiletype file-type)))))
 
 (define (speechd-maybe-send-to-client wave)
   (unless speechd-multi-mode
@@ -72,10 +74,13 @@ synthesized wave forms."
   (set! speechd-multi-mode mode))
 
 (define (speechd-next*)
-  (set_backtrace t)
+  (unless speechd-multi-mode
+    (error "Not in multi mode"))
   (let ((wave (multi-next)))
-    (when wave
-      (wave-utt wave))))
+    (cond
+     ((symbol? wave) wave)
+     (wave (wave-utt wave))
+     (t nil))))
 (define (speechd-next)
   "(speechd-next)
 Return next synthesized wave form."
@@ -95,7 +100,7 @@ Speak TEXT."
 (define (speechd-speak-ssml ssml-text)
   "(speechd-speak-ssml TEXT)
 Speak SSML-TEXT."
-  (speechd-maybe-send-to-client (speechd-speak-ssml* text)))
+  (speechd-maybe-send-to-client (speechd-speak-ssml* ssml-text)))
 
 (define (speechd-spell* text)
   (spell_init_func)

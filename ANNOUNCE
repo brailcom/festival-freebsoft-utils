@@ -1,7 +1,8 @@
-festival-freebsoft-utils 0.1 released
+festival-freebsoft-utils 0.2 released
 =====================================
 
-The Free(b)soft project is pleased to announce festival-freebsoft-utils 0.1.
+The Free(b)soft project is pleased to announce
+festival-freebsoft-utils 0.2.
 
 * What is festival-freebsoft-utils?
 
@@ -18,6 +19,9 @@ The Free(b)soft project is pleased to announce festival-freebsoft-utils 0.1.
 
   - Substitution of events for given words.
 
+  - High-level voice selection mechanism and setting of basic prosodic
+    parameters.
+
   - Spelling mode.
 
   - Capital letter signalization.
@@ -25,22 +29,44 @@ The Free(b)soft project is pleased to announce festival-freebsoft-utils 0.1.
   - Punctuation modes, for explicit reading or not reading punctuation
     characters.
 
+  - Incremental synthesis of texts and events.
+
   - Speech Dispatcher support.
 
-  - Enhancing the Festival extension language with some functions
-    commonly used in Lisp.  Also, wrapping already defined Festival
-    functions by your own code is possible.
+  - Rudimentary SSML support.
 
-  - Everything is written in Scheme, no patching of the Festival C++
-    sources is needed.
-  
+  - Enhancing the Festival extension language with some functions
+    commonly used in Lisp.  Support for wrapping already defined
+    Festival functions by your own code.
+
+  - Everything is written in the extension language, no patching of the
+    Festival C++ sources is needed.
+
+* What is new in the 0.2 version?
+
+  - Event handling mechanism was completely reworked to be cleaner and
+    more robust.
+
+  - Voice and language selection mechanism was generalized and
+    simplified.
+
+  - Incremental synthesis of texts and events, including utterance
+    chunking implemented in the extension language.
+
+  - Rudimentary SSML support.
+
+  - New functions for unified setting of prosodic parameters and
+    avoiding initial spaces.
+
+  - New utility functions.
+
 * Where to get it?
   
   You can get the distribution tarball of the released version from
-  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.1.tar.gz .
+  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.2.tar.gz .
 
   The home page of the project is
-  http://www.freebsoft.org/festival-freebsoft-utils .
+  http://www.freebsoft.org/festival-freebsoft-utils/ .
 
 
 Local Variables:

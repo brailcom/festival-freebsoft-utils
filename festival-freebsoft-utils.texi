@@ -1,7 +1,7 @@
 \input texinfo    @c -*-texinfo-*-
 @comment %**start of header
 @setfilename festival-freebsoft-utils.info
-@set VERSION 0.1
+@set VERSION 0.2
 @settitle festival-freebsoft-utils @value{VERSION}
 @syncodeindex fn cp
 @syncodeindex ky cp
@@ -823,6 +823,10 @@ Return the next wave form of the last event synthesized via the
 @code{multi-synth} function.  If there is no next wave form, return
 @code{nil}.
 
+If you synthesize an SSML text, the function may return a
+non-@code{nil} symbol instead of a wave form.  Then the symbol is a
+name of the mark just reached.
+
 @item multi-clear
 Throw away the synthesized data.  You usually don't need to call this
 function as the data is cleared on the next @code{multi-synth} call
@@ -959,10 +963,11 @@ Parse the given SSML @var{text} for later processing by the
 
 @item ssml-next-chunk
 Return next utterance containing tokens from the last SSML text parsed
-by @code{ssml-parse}.  If there is no next utterance, return
-@code{nil}.  The returned utterance contains only the @code{Token}
-relation and is intended to be further processed with the
-@code{utt.synth} function.
+by @code{ssml-parse} or a mark name.  If there is no next utterance or
+mark, return @code{nil}.  The returned utterance contains only the
+@code{Token} relation and is intended to be further processed with the
+@code{utt.synth} function.  The returned mark name is a non-@code{nil}
+symbol.
 @end ftable
 
 The @code{ssml-parse} and @code{ssml-next-chunk} functions are
@@ -980,7 +985,11 @@ be as follows:
   (let ((utt (ssml-next-chunk)))
     (if utt
         (begin
-          (utt.play (utt.synth utt))
+          (cond
+           ((symbol? utt)
+            (print utt))
+           (utt
+            (utt.play (utt.synth utt))))
           (ssml-say*-1)))))
 @end lisp
 

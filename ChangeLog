@@ -1,3 +1,32 @@
+2004-05-04  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (event-synth-ssml): Ignore symbols returned by
+	ssml-next-chunk, don't crash on them.
+
+2004-05-04  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-next*): Don't enable backtrace;
+	protect against single mode invocation.
+
+2004-05-04  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-send-to-client, speechd-next*):
+	Handle symbols.
+
+	* multiwave.scm (multi-next): Handle symbols from ssml-next-chunk.
+
+	* ssml-mode.scm (ssml-next-chunk): Return markers as symbols.
+
+2004-05-04  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-speak-ssml): Identifier typo
+	fixed.
+
+2004-05-04  Milan Zamazal  <pdm@brailcom.org>
+	
+	* ssml-mode.scm (ssml-process-mark): New function.
+	(ssml.mark): Use it.
+
 2004-05-03  Milan Zamazal  <pdm@brailcom.org>
 
 	* events.scm (event-synth-plain): event-synth-1 call arguments
