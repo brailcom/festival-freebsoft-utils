@@ -194,14 +194,10 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
     (if (utt.relation.items utt 'Event)
         (let ((last-break 0.0))
           (do-relation-items (seg utt Event)
-            (let ((break (cond
-                          ((string-equal (item.feat seg 'event-placement)
-                                         'after)
-                           (item.feat seg 'end))
-                          ((item.prev (item.relation seg 'Segment))
-                           (item.feat seg 'pend))
-                          (t
-                           0.0)))
+            (let ((break (if (string-equal (item.feat seg 'event-placement)
+                                           'after)
+                             (item.feat seg 'end)
+                             (or (item.feat seg 'pend) 0.0)))
                   (event (item.feat seg 'event)))
               (wave-eater (wave-subwave w last-break break))
               (event-synth-plain (first event) (second event) wave-eater)

@@ -1,3 +1,8 @@
+2004-07-22  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (event-eat-utt): Don't use the Segment relation in
+	wave eating, use the `pend' feature instead.
+
 2004-07-20  Milan Zamazal  <pdm@brailcom.org>
 
 	* util.scm (utt-relation-top-items): New function.

@@ -1147,10 +1147,12 @@ The author of festival-freebsoft-utils is Milan Zamazal
 @email{pdm@@freebsoft.org}.  The home page of festival-freebsoft-utils
 is @url{http://www.freebsoft.org/festival-freebsoft-utils/}.
 
+@cindex bugs
 @cindex mailing list
-You can contact us with your comments, questions, bug reports,
-suggestions, patches or anything at the Speech Dispatcher mailing list
-@email{speechd@@freebsoft.org}.
+You can contact us with your comments, questions, suggestions, patches
+or anything at the Speech Dispatcher mailing list
+@email{speechd@@freebsoft.org}.  Bug reports can be sent to the e-mail
+address @email{festival-freebsoft-utils@@bugs.freebsoft.org}.
 
 @cindex Free(b)soft project
 festival-freebsoft-utils is part of the Free(b)soft project aimed at
