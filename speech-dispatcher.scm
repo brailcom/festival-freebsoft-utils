@@ -1,6 +1,6 @@
 ;;; Speech Dispatcher interface
 
-;; Copyright (C) 2003 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -60,7 +60,7 @@ definition.  CODING may be one of the symbols ISO-8859-<N>, where <N> is a
 number within the range 1-16.")
 
 
-(Parameter.set 'Wavefiletype 'nist)
+(Param.set 'Wavefiletype 'nist)
 
 
 (define (speechd-set-lang-voice lang voice)
@@ -162,9 +162,11 @@ Set speech RATE, which must be a number in the range -100..100."
 Set speech PITCH, which must be a number in the range -100..100."
   (let ((mean (if (< pitch 0) (+ 100 (/ pitch 2)) (+ 100 pitch))))
     (if (boundp 'int_lr_params)
-        (set! int_lr_params (assoc-set int_lr_params 'target_f0_mean mean)))
+        (set! int_lr_params (assoc-set int_lr_params
+                                       'target_f0_mean (list mean))))
     (if (boundp 'int_simple_params)
-        (set! int_simple_params (assoc-set int_simple_params 'f0_mean mean)))))
+        (set! int_simple_params (assoc-set int_simple_params
+                                           'f0_mean (list mean))))))
 
 (define (speechd-set-capital-character-recognition-mode mode)
   "(speechd-set-capital-character-recognition-mode MODE)

@@ -1,3 +1,61 @@
+2004-01-22  Milan Zamazal  <pdm@brailcom.org>
+
+	* oo.scm (oo-wrappers-var, oo-ensure-function-wrapped): New
+	functions.
+	(define-wrapper): Use them.
+
+	* util.scm (apply*): New function.
+
+	* ttw.scm: Removed.
+
+	* cap-signalization.scm: Use oo.scm instead of ttw.scm.
+	* punctuation.scm: Likewise.
+	(punctuation-process-words): Check for string form of the Language
+	parameter too.
+
+2004-01-22  Milan Zamazal  <pdm@brailcom.org>
+	
+	* festival-freebsoft-utils.texi (oo.scm): Parameter wrapping
+	documented.
+
+	* oo.scm (oo-last-wrapper-func): New function.
+	(oo-param-wrappers-var, Param.wrap): New functions.
+	(Param.get): New wrapper.
+
+2004-01-21  Milan Zamazal  <pdm@brailcom.org>
+
+	* punctuation.scm (punctuation-process-words): Use Param.set, not
+	Parameter.set.
+	
+	* speech-dispatcher.scm: Likewise.
+
+2004-01-21  Milan Zamazal  <pdm@brailcom.org>
+
+	* festival-freebsoft-utils.texi (oo.scm): Documented.
+
+	* oo.scm: New file.
+
+2004-01-21  Milan Zamazal  <pdm@brailcom.org>
+
+	* festival-freebsoft-utils.texi (util.scm): Document let*.
+
+	* util.scm (let*): New macro.
+	(let*-bindings): New function.
+
+2004-01-21  Milan Zamazal  <pdm@brailcom.org>
+
+	* spell-mode.scm (mode, orig-mode): Removed.
+	(spell_init_func, spell_exit_func): Honor the previous change.
+
+2004-01-07  Milan Zamazal  <pdm@brailcom.org>
+
+	* util.scm (assoc-set): Cons the value, don't put it as a list.	
+	* speech-dispatcher.scm (speechd-set-pitch): Honor the previous
+	change.
+
+	* events.scm (event-synth-result-format): Removed.
+	(set-event-mapping!): New function.
+
 2003-12-22  Milan Zamazal  <pdm@brailcom.org>
 
 	* speech-dispatcher.scm (speechd-language-voices): Change czech

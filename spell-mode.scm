@@ -1,6 +1,6 @@
 ;;; Spelling mode
 
-;; Copyright (C) 2003 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -21,9 +21,6 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
 
-(defvar mode nil)
-(defvar orig-mode nil)
-
 (defvar spell-orig-token.singlecharsymbols nil)
 
 (defvar spell-orig-pos-method nil)
@@ -37,14 +34,11 @@
   (set! spell-orig-token.singlecharsymbols token.singlecharsymbols)
   (set! token.singlecharsymbols "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüış")
   (set! spell-orig-pos-method (Param.get 'POS_Method))
-  (Param.set 'POS_Method spell-pos)
-  (set! orig-mode mode)
-  (set! mode 'spell))
+  (Param.set 'POS_Method spell-pos))
 
 (define (spell_exit_func)
   (set! token.singlecharsymbols spell-orig-token.singlecharsymbols)
-  (Param.set 'POS_Method spell-orig-pos-method)
-  (set! mode orig-mode))
+  (Param.set 'POS_Method spell-orig-pos-method))
 
 (set! tts_text_modes
       (cons

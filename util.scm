@@ -1,6 +1,6 @@
 ;;; Miscellaneous utilities
 
-;; Copyright (C) 2003 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -38,6 +38,17 @@
      ,@(cddr form)
      result))
 
+(define (let*-bindings bindings body)
+  (if bindings
+      `(let (,(car bindings))
+         ,(let*-bindings (cdr bindings) body))
+      `(progn ,@body)))
+
+(defmac (let* form)
+  (let ((bindings (cadr form))
+        (body (cddr form)))
+    (let*-bindings bindings body)))
+  
 (defmac (unwind-protect* form)
   (let ((protected-form (nth 1 form))
         (cleanup-forms (nth_cdr 2 form)))
@@ -59,6 +70,9 @@
 (define (identity x)
   x)
 
+(define (apply* function list)
+  (apply (if (eq? (typeof function) 'string) (intern function) function) list))
+
 ;;; General utilities
 
 (defmac (add-hook form)
@@ -72,7 +86,7 @@
                              (cons ,hook ,hook-var))))))
 
 (define (assoc-set lst key value)
-  (cons (list key value)
+  (cons (cons key value)
         (remove (assoc key lst) lst)))
 
 ;;; Festival specific utilities

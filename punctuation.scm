@@ -1,6 +1,6 @@
 ;;; Punctuation modes
 
-;; Copyright (C) 2003 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -21,13 +21,10 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
 
-(require 'ttw)
+(require 'oo)
 
 
 (defvar punctuation-mode 'default)
-
-(defvar punctuation-orig-token_to_words nil)
-(defvar punctuation-orig-word_method)
 
 (defvar punctuation-chars "[- !\"#$%&'()*+,./\\^_`:;<=>?@{|}~]")
 (defvar punctuation-chars-2 "[][]")
@@ -83,16 +80,17 @@
               (punctuation-split-token
                token (substring name i (- (length name) i)) ttw))))))
              
-(define (punctuation-token-to-words token name ttw)
+(define-wrapper (token_to_words token name) punctuation
   (if (eq? punctuation-mode 'default)
-      (ttw token name)
-      (punctuation-split-token token name ttw)))
+      ((next-func) token name)
+      (punctuation-split-token token name (next-func))))
 
 (define (punctuation-process-words utt)
   (cond
    ((and (eq? punctuation-mode 'all)
-         (member (Parameter.get 'Language)
-                 '(english britishenglish americanenglish)))
+         (member (Param.get 'Language)
+                 '(english britishenglish americanenglish
+                   "english" "britishenglish" "americanenglish")))
     (mapcar
      (lambda (w)
        (let ((trans (assoc (item.name w) punctuation-pronunciation)))
@@ -129,31 +127,28 @@
        (utt.relation.items utt 'Word)))
   utt)
 
-(define (punctuation-word_method utt)
-  (if (eq? punctuation-mode 'all)
-      (mapcar
-       (lambda (w)
-         (let ((pos (item.feat w "pos")))
-           (if (or (string-equal "punc" pos)
-                   (string-equal "fpunc" pos))
-               (item.set_feat w "pos" "allpunc"))))
-       (utt.relation.items utt 'Word)))
-  (punctuation-orig-word_method utt))
+(Param.wrap Token_Method punctuation
+  (lambda (utt)
+    (apply* (next-value) (list utt))
+    (punctuation-process-final-punctuation utt)
+    (punctuation-process-words utt)))
 
-(define (setup-punctuation-mode)
-  (ttw-setup)
-  (add-hook ttw-token-to-words-funcs punctuation-token-to-words)
-  (add-hook ttw-token-method-hook punctuation-process-words)
-  (add-hook ttw-token-method-hook punctuation-process-final-punctuation)
-  (if (not (eq? (Param.get 'Word_Method) punctuation-word_method))
-      (begin
-        (set! punctuation-orig-word_method (Param.get 'Word_Method))
-        (Param.set 'Word_Method punctuation-word_method))))
+(Param.wrap Word_Method punctuation
+  (lambda (utt)
+    (if (eq? punctuation-mode 'all)
+        (mapcar
+         (lambda (w)
+           (let ((pos (item.feat w "pos")))
+             (if (or (string-equal "punc" pos)
+                     (string-equal "fpunc" pos))
+                 (item.set_feat w "pos" "allpunc"))))
+         (utt.relation.items utt 'Word)))
+    (apply* (next-value) (list utt))))
 
 (define (set-punctuation-mode mode)
-  (if (member mode '(default all none))
-      (setup-punctuation-mode)
+  (or (member mode '(default all none))
       (error "Unknown punctuation mode" mode))
+  (oo-ensure-function-wrapped 'token_to_words)
   (set! punctuation-mode mode))
 
 

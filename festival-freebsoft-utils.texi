@@ -18,7 +18,7 @@ under the terms of the GNU Free Documentation License, Version 1.2 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts and no Back-Cover Texts.
 A copy of the license is included in the section entitled ``GNU Free
-Documentation License.''
+Documentation License''.
 @end quotation
 @end copying
 
@@ -141,6 +141,14 @@ primarily focused on Speech Dispatcher users and other users not using
 festival-freebsoft-utils directly.  For a complete usage description
 see @ref{Reference Manual}.
 
+@cindex @code{SayText}
+Most of the extensions presented here don't work with usual Festival
+functions such as @code{SayText}, which are too limited in their use.
+You must use either the Speech Dispatcher functions,
+@ref{speech-dispatcher.scm}, or the event speaking functions,
+@ref{events.scm}, to utilize the features like word substitution,
+capital signalization or punctuation modes.
+
 @menu
 * Events::                      Basic event handling.
 * Word Substitution::           Substituting events for certain words.
@@ -225,7 +233,7 @@ replace single event mappings in the @code{event-mappings} variable in
 an easier way than redefining the whole variable value:
 
 @ftable @code
-@item set-event-mapping @var{event-type} @var{event-value} @var{new-event-type} @code{new-event-value}
+@item set-event-mapping! @var{event-type} @var{event-value} @var{new-event-type} @code{new-event-value}
 Ensure the event of @var{event-type} and @var{event-value} is mapped
 to the event of @var{new-event-type} @code{new-event-value}.
 @end ftable
@@ -233,7 +241,7 @@ to the event of @var{new-event-type} @code{new-event-value}.
 Example:
 
 @lisp
-(set-event-mapping 'logical 'hello 'text "Hello, world!")
+(set-event-mapping! 'logical 'hello 'text "Hello, world!")
 @end lisp
 
 @node Word Substitution, Capital Letters, Events, User Customization
@@ -264,7 +272,7 @@ the sound signalization to saying the word @emph{capital}:
 
 @lisp
 (require 'events)
-(set-event-mapping 'logical 'capital 'text "capital")
+(set-event-mapping! 'logical 'capital 'text "capital")
 @end lisp
 
 @node Punctuation Characters, Speech Dispatcher, Capital Letters, User Customization
@@ -282,7 +290,10 @@ the list is of the form @code{("@var{character}" "@var{word}" ...},
 where @var{character} is the pronounced character and @var{word}s are
 the words of its pronounciation.  Please note you must put each word
 inside separate double quotes.  Example entry:
-@code{("!" "exclamation" "mark")}
+
+@lisp
+("!" "exclamation" "mark")
+@end lisp
 @end vtable
 
 @node Speech Dispatcher,  , Punctuation Characters, User Customization
@@ -348,6 +359,10 @@ If and only if @var{condition} is false, evaluate @code{body-form}s.
 @item prog1 @var{form} @var{...}
 Evaluate all forms and return the return value of the first one.
 
+@item let* @var{bindings} @var{body-form} @var{...}
+The same as @code{let} except that variable bindings are applied
+sequentially rather than in parallel.
+
 @item unwind-protect* @var{protected-form} @var{cleanup-form} @var{...}
 Eval @var{protected-form}, and after it is finished, whether
 successfully or with errors, evaluate all @var{cleanup-form}s.  If
@@ -399,6 +414,73 @@ if it is unbound, @var{symbol}'s value is returned.
 @node oo.scm, events.scm, util.scm, Reference Manual
 @section oo.scm
 
+@cindex wrappers
+Sometimes it is useful to extend a Festival function in some way.
+Standard Festival functions don't provide easy to use means for it.
+This module tries to fill the gap.
+
+The following macro allows you to wrap a defined function:
+
+@ftable @code
+@item define-wrapper (@var{function} @var{arg ...}) @var{wrapper-name} . @var{body})
+Wrap @var{function} with arguments @var{arg ...} by the code
+@var{body}.  Given function arguments must match the arguments of the
+wrapped function.  @var{wrapper-name} is a symbol uniquely identifying
+the wrapper, it allows redefinition of the wrapper.  One function can
+be wrapped by any number buffers.  None of the @code{define-wrapper}
+arguments is evaluated.
+
+@cindex next-func
+Within @var{body}, a function named @code{next-func} is automatically
+defined.  It returns the next wrapper or the original function.
+
+@item oo-ensure-function-wrapped @var{function-name}
+If a wrapped function gets redefined, its wrapper is lost.  If you
+want to ensure the function is still wrapped before its use, you may
+call this function, with its symbol name as the argument.
+@end ftable
+
+Example use:
+
+@lisp
+festival> (define (foo x) (+ x 42))
+#<CLOSURE (x) (+ x 42)>
+festival> (foo 1)
+43
+festival> (define-wrapper (foo x) my-foo-wrapper (print "Foo called.") ((next-func) x))
+nil
+festival> (foo 1)
+"Foo called."
+43
+@end lisp
+
+@cindex @code{Param.set}
+You can also wrap parameters, set by @code{Param.set}:
+
+@table @code
+@item Param.wrap @var{name} @var{wrapper-name} . @var{body}
+Wrap access to parameter @var{name} by code @var{body}.  If the given
+parameter is accessed, its wrapper is invoked instead of just
+returning the parameter value.  @var{wrapper-name} is the same as in
+@code{define-wrapper}.
+
+@cindex @code{next-value}
+Macro @code{next-value} is automatically defined within @var{body}.
+It returnes the parameter value, either plain or modified by another
+wrapper.
+@end table
+
+Example use of parameter wrapping:
+
+@lisp
+festival> (Param.set 'foo 42)
+#<feats 0x8169950>
+festival> (Param.wrap foo foo-w (+ (next-value) 1))
+nil
+festival> (Param.get 'foo)
+43
+@end lisp
+
 @node events.scm, spell-mode.scm, oo.scm, Reference Manual
 @section events.scm
 
@@ -417,6 +499,23 @@ the event type.
 Play event.  The @var{type} and @var{value} arguments are the same as
 in @code{event-synth}.
 @end ftable
+
+Logical events starting with underscore are reserved for special
+purposes.  Currently, the following special purpose logical events are
+recognized:
+
+@table @code
+@cindex @code{_debug_on}
+@item _debug_on*
+Turn on debugging.  That means every processed event is logged.
+@code{_debug_off} is just a prefix, it can be followed by any symbol
+constituent characters.
+
+@cindex @code{_debug_off}
+@item _debug_off*
+Turn the debugging off.  @code{_debug_off} is just a prefix, it can be
+followed by any symbol constituent characters.
+@end table
 
 @node spell-mode.scm, cap-signalization.scm, events.scm, Reference Manual
 @section spell-mode.scm
@@ -446,11 +545,11 @@ disable it.
 @node punctuation.scm, speech-dispatcher.scm, cap-signalization.scm, Reference Manual
 @section punctuation.scm
 
-Sometimes it is useful to hear all the punctuation characters present
-in the synthesized text (for exact information about the text) and
-sometimes it is useful to read no punctuation character (for faster
-reading).  Punctuation modes allow you to tell Festival, whether it
-should read punctuation characters or not.
+Sometimes it is useful to get read all the punctuation characters
+present in the synthesized text (for exact information about the text)
+and sometimes it is useful to read no punctuation character (for
+faster reading).  Punctuation modes allow you to tell Festival,
+whether it should read punctuation characters or not.
 
 @ftable @code
 @item set-punctuation-mode @var{mode}

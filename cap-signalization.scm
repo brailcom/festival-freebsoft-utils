@@ -1,6 +1,6 @@
 ;;; Capital character signalization
 
-;; Copyright (C) 2003 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -22,17 +22,17 @@
 
 
 (require 'util)
-(require 'ttw)
+(require 'oo)
 
 
 (defvar cap-signalization-mode nil)
 
-(define (cap-token-to-words token name ttw)
+(define-wrapper (token_to_words token name) cap-signalization
   (if cap-signalization-mode
       (let ((ttw* (lambda (token name)
                     (append (if (string-matches name "^[A-Z¡»œ…ÃÕ“”ÿ©´⁄Ÿ›Æ].*")
                                 (list '((name "") (capital-event ""))))
-                            (ttw token name)))))
+                            ((next-func) token name)))))
         (if (string-matches name "^..*[A-Z¡»œ…ÃÕ“”ÿ©´⁄Ÿ›Æ].*")
             (let ((i 1))
               (while (not (string-matches (substring name i 1)
@@ -42,29 +42,26 @@
                       (cap-token-to-words
                        token
                        (substring name i (- (length name) i))
-                       ttw)))
+                       (next-func))))
             (ttw* token name)))
-      (ttw token name)))
+      ((next-func) token name)))
 
-(define (cap-mark-items utt)
-  (mapcar
-    (lambda (w)
-      (if (item.has_feat w 'capital-event)
-          (item.set_feat w 'event '(logical capital))))
-    (utt.relation.items utt 'Word))
-  utt)
+(Param.wrap Token_Method cap-signalization
+  (lambda (utt)
+    (apply* (next-value) (list utt))
+    (mapcar
+     (lambda (w)
+       (if (item.has_feat w 'capital-event)
+           (item.set_feat w 'event '(logical capital))))
+     (utt.relation.items utt 'Word))
+    utt))
 
 
-(define (setup-cap-signalization)
-  (add-hook ttw-token-to-words-funcs cap-token-to-words t)
-  (add-hook ttw-token-method-hook cap-mark-items nil)
-  (ttw-setup))
-  
 (define (set-cap-signalization-mode mode)
   "(set-cap-signalization-mode MODE)
 Enable or disable capital letter signalization mode.
 If MODE is non-nil, enable the mode, otherwise disable it."
-  (setup-cap-signalization)
+  (oo-ensure-function-wrapped 'token_to_words)
   (set! cap-signalization-mode mode))
 
 
