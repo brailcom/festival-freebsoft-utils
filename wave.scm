@@ -21,6 +21,19 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 
 
+(require 'util)
+
+
+(define (wave-load filename)
+  (let ((wave (and (not (string-matches filename ".*\.ogg"))
+                   (wave.load filename))))
+    (when (or (not wave) (<= (cadr (assoc 'num_samples (wave.info wave))) 0))
+      (let ((wavfile (make-temp-filename "%s.wav")))
+        (system (format nil "sox %s %s" filename wavfile))
+        (unwind-protect* (set! wave (wave.load wavfile))
+          (delete-file wavfile))))
+    wave))
+
 (define (wave-concat waves)
   (let ((first-wave (car waves)))
     (if (<= (length waves) 1)
@@ -32,7 +45,7 @@
 
 (define (wave-subwave wave from to)
   (let ((ifile (make_tmp_filename))
-        (ofile (string-append (make_tmp_filename) ".sph")))
+        (ofile (string-append (make-temp-filename "%s.sph"))))
     (unwind-protect*
         (let ((length (- to from)))
           (if (<= length 0)
@@ -49,6 +62,9 @@
     (utt.relation.create utt 'Wave)
     (item.set_feat (utt.relation.append utt 'Wave nil) 'wave wave)
     utt))
+
+(define (wave-import-utt filename)
+  (wave-utt (wave-load filename)))
 
 
 (provide 'wave)

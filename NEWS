@@ -17,6 +17,15 @@ more robust.
 
 See the variable inhibit-initial-pauses.
 
+** New utility functions added.
+
+See documentation of the util.scm and wave.scm files for the complete list of
+available utility functions.
+
+** SoX is required.
+
+The SoX sound processing tool is now required for most of the functionality.
+
 
 Local variables:
 mode: outline

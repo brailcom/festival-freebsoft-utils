@@ -117,6 +117,10 @@ its home page
 festival-freebsoft-utils was tested with Festival 1.4.3.  Other
 versions of Festival may or may not work.
 
+Having SoX (@url{http://sox.sourceforge.net}) installed is strongly
+recommended, many festival-freebsoft-utils functions don't work
+without it.
+
 Installation itself is easy, just copy all the @file{*.scm} files to
 one of the directories present in the Festival's load-path.  This is
 typically @file{/usr/share/festival/}, you can get the exact list of
@@ -436,6 +440,21 @@ stored under @var{key} are removed from the resulting list.
 @item avg . @var{args}
 @cindex math functions
 Return average value of @var{args}.
+
+@item dirname @var{path}
+Return the directory part of @var{path}.
+
+@item make-temp-filename @var{template}
+Return name of a (probably non-existent) temporary file.
+@var{template} is a basename of the file, that is formatted with the
+@code{format} function and must contain exactly one @code{%s} sequence
+to be replaced with a variable part of the file name.
+
+Actually, this function is somewhat limited by the available Festival
+system interface.  So it is not safe, the file may be created before
+it is actually used or the function may fail with an error.  But for
+simple purposes the function should work fine and it shouldn't be
+worse than the standard @code{make_tmp_filename} function.
 @end ftable
 
 Festival specific utilities:
@@ -473,9 +492,22 @@ must be a list of wave forms to append.
 Return the part of @var{wave} form that starts at @var{from-time} and
 finishes at @var{to-time}.  Both times are in seconds.
 
+@item wave-load @var{filename}
+@cindex Ogg Vorbis
+@cindex Vorbis
+Load and return a waveform from @var{filename}.  This function is
+similar to @code{wave.load}, but more sound file formats (most
+significantly Ogg Vorbis, if your SoX installation supports it) can be
+loaded.
+
 @item wave-utt @var{wave}
 Create and return an utterance, that contains just the @code{Wave}
 relation holding @var{wave}.
+
+@item wave-import-utt @var{filename}
+Create and return an utterance, that contains just the @code{Wave}
+relation holding a wave loaded from @var{filename} via the function
+@code{wave-load}.
 @end ftable
 
 @node oo.scm, events.scm, wave.scm, Reference Manual

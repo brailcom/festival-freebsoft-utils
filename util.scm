@@ -101,6 +101,26 @@
         0
         (/ (apply + args) n))))
 
+(define (dirname path)
+  (path-as-directory
+   (substring path 0 (- (length path) (length (basename path))))))
+
+(define (make-temp-filename template)
+  (let ((tmp-name (string-append (make_tmp_filename) "%d")))
+    (set! template (format nil "%s%s" (dirname tmp-name)
+                           (format nil template (basename tmp-name))))
+    (let* ((i 0)
+           (format-name (lambda (i) (format nil template i)))
+           (name (format-name i))
+           (max-attempts 1000))
+      (while (and (< i max-attempts)
+                  (probe_file name))
+        (set! i (+ i 1))
+        (set! name (format-name i)))
+      (if (eqv? i max-attempts)
+          (error "Temporary file not created" nil))
+      name)))
+
 ;;; Festival specific utilities
 
 (define (item.has_feat item feat)

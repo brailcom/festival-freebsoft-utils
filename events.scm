@@ -219,8 +219,7 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
   (event-synth-text value))
 
 (define (event-synth-sound value)
-  (utt.import.wave (Utterance Wave nil)
-                   (if (string-matches value "^/.*")
+  (wave-import-utt (if (string-matches value "^/.*")
                        value
                        (string-append sound-icon-directory "/" value))))
 
