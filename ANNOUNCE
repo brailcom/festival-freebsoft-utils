@@ -12,25 +12,27 @@ The Free(b)soft project is pleased to announce festival-freebsoft-utils 0.1.
   Key festival-freebsoft-utils features are:
 
   - Generalized concept of input events.  festival-freebsoft-utils
-    allows not only plain text synthesis, but also insertion of sounds
-    and logical event mapping.
+    allows not only plain text synthesis, but also combining it with
+    sounds.  Additionally, mechanism of logical events mapped to other
+    events is provided.
 
   - Substitution of events for given words.
 
-  - Spell mode.
+  - Spelling mode.
 
   - Capital letter signalization.
 
-  - Punctuation modes, for reading or not reading punctuation
+  - Punctuation modes, for explicit reading or not reading punctuation
     characters.
 
   - Speech Dispatcher support.
 
   - Enhancing the Festival extension language with some functions
-    commonly used in Lisp.  Also, wrapping existing Festival functions
-    by your code is possible.
+    commonly used in Lisp.  Also, wrapping already defined Festival
+    functions by your own code is possible.
 
-  - Everything is written in Scheme, no patching of Festival is needed.
+  - Everything is written in Scheme, no patching of the Festival C++
+    sources is needed.
   
 * Where to get it?
   
