@@ -1,3 +1,9 @@
+2004-04-01  Milan Zamazal  <pdm@brailcom.org>
+
+	* nopauses.scm: New file.
+
+	* oo.scm (oo-unwrapped): New function.
+
 2004-03-31  Milan Zamazal  <pdm@brailcom.org>
 
 	* wave.scm (wave-concat): Concat the waveforms in the opposite

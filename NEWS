@@ -8,6 +8,15 @@ User-visible changes to festival-freebsoft-utils:
 Now the Speech Dispatcher to Festival pitch/rate value mapping is smooth and
 pitch is set relatively to the default pitch of current voice.
 
+** The event handling mechanism was reworked.
+
+Event handling was redesigned to produce better results and to be cleaner and
+more robust.
+
+** There is new option for disabling initial pauses in synthesized samples.
+
+See the variable inhibit-initial-pauses.
+
 
 Local variables:
 mode: outline

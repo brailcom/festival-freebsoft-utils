@@ -154,6 +154,7 @@ capital signalization or punctuation modes.
 * Word Substitution::           Substituting events for certain words.
 * Capital Letters::             Capital letter signalization.
 * Punctuation Characters::      Pronouncing punctuation characters.
+* Initial Pauses::              Avoiding initial pauses.
 * Speech Dispatcher::           Speech Dispatcher interface.
 @end menu
 
@@ -275,7 +276,7 @@ the sound signalization to saying the word @emph{capital}:
 (set-event-mapping! 'logical 'capital 'text "capital")
 @end lisp
 
-@node Punctuation Characters, Speech Dispatcher, Capital Letters, User Customization
+@node Punctuation Characters, Initial Pauses, Capital Letters, User Customization
 @section Reading Punctuation Characters
 
 Through the punctuation modes, @ref{punctuation.scm}, you can force
@@ -296,7 +297,36 @@ inside separate double quotes.  Example entry:
 @end lisp
 @end vtable
 
-@node Speech Dispatcher,  , Punctuation Characters, User Customization
+@node Initial Pauses, Speech Dispatcher, Punctuation Characters, User Customization
+@section Avoiding Initial Pauses
+@cindex pauses
+
+Festival inserts initial pause in each synthesized utterance.  There
+is a good reason for it---speech starts from silence and thus the
+first diphone of the synthesized sample should be @emph{pause-first
+phoneme}.
+
+However there are some situations when the initial pause is
+undesirable.  For instance, when reading characters in a speech
+enabled editor, the initial pauses slow down the reading.  So
+festival-freebsoft-utils provide a way to disable the initial pause by
+making its effective duration zero.
+
+First, you must load the corresponding code:
+
+@lisp
+(require 'nopauses)
+@end lisp
+
+After this, there is a variable available controlling the initial
+pause insertion:
+
+@vtable @code
+@item inhibit-initial-pauses
+When set to a non-@code{nil} value, initial pauses are inhibited.
+@end vtable
+
+@node Speech Dispatcher,  , Initial Pauses, User Customization
 @section Speech Dispatcher Interface Configuration
 
 You can configure languages and voices used by Speech Dispatcher
@@ -475,6 +505,9 @@ defined.  It returns the next wrapper or the original function.
 If a wrapped function gets redefined, its wrapper is lost.  If you
 want to ensure the function is still wrapped before its use, you may
 call this function, with its symbol name as the argument.
+
+@item oo-unwrapped @var{function-name}
+Return the original definition of a wrapped function.
 @end ftable
 
 Example use:

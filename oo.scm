@@ -73,6 +73,12 @@
         (set-symbol-value! funcname wrapper)
         (set-symbol-value! shadow wrapper)))))
 
+(define (oo-unwrapped funcname)
+  (let ((wrappers-var (oo-wrappers-var funcname)))
+    (if (boundp wrappers-var)
+        (cdar (last (symbol-value wrappers-var)))
+        (symbol-value funcname))))
+
 (defmac (define-wrapper form)
   ;; (define-wrapper (FUNCTION ARG ...) WRAPPER-NAME . BODY)
   (let ((func (car (cadr form)))
