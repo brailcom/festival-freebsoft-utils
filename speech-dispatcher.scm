@@ -49,7 +49,7 @@
 
 (define (speechd-send-to-client wave)
   (if (symbol? wave)
-      (send_sexpr_to_client wave)
+      wave
       (let ((file-type (Param.get 'Wavefiletype)))
         (Param.set 'Wavefiletype 'nist)
         (unwind-protect* (utt.send.wave.client wave)

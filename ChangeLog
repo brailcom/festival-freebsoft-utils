@@ -1,3 +1,8 @@
+2004-06-25  Milan Zamazal  <pdm@brailcom.org>
+
+	* speech-dispatcher.scm (speechd-send-to-client): If WAVE is a
+	symbol, just return it, don't send it explicitly.
+
 2004-06-23  Milan Zamazal  <pdm@brailcom.org>
 
 	* ssml-mode.scm (ssml-next-chunk): If utterance in the utterance
