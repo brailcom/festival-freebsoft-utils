@@ -1,5 +1,20 @@
 2005-06-13  Milan Zamazal  <pdm@brailcom.org>
 
+	* ssml-mode.scm (ssml-next-chunk): Ensure index marks don't create
+	utterance boundary.
+	(ssml-join): New variable.
+	(ssml-parse): Reset it.
+
+	* events.scm (event-synth-plain): Support for `mark' event type
+	added.
+	(event-eat-utt): Process index marks.
+
+	* tokenize.scm (token-utterance-append): New function.
+	(get-regular-token, get-single-char-token): Use it.
+	(append-token-utterances): New function.
+
+2005-06-13  Milan Zamazal  <pdm@brailcom.org>
+
 	* events.scm (event-eat-utt): Omission in the segment event
 	assignment fixed.
 

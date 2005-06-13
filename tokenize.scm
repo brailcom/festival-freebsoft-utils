@@ -1,6 +1,6 @@
 ;;; Tokenization and utterance chunking
 
-;; Copyright (C) 2004 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2005 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -35,6 +35,12 @@
 (define (token-utterance)
   (let ((utt (Utterance Tokens)))
     (utt.relation.create utt 'Token)))
+
+(define (token-utterance-append utt name whitespace punc prepunc)
+  (utt.relation.append utt 'Token
+                       `(,name
+                         ((name ,name) (whitespace ,whitespace)
+                          (punc ,punc) (prepunctuation ,prepunc)))))
 
 (define (get-regular-token utt text)
   (let* ((l-whitespace (symbolexplode token.whitespace))
@@ -92,19 +98,14 @@
          (t ; final whitespace -- ignored
           (set! text "")))))
     (unless (string-equal name "")
-      (utt.relation.append utt 'Token
-                           `(,name
-                             ((name ,name) (whitespace ,whitespace)
-                              (punc ,punc) (prepunctuation ,prepunctuation)))))
+      (token-utterance-append utt name whitespace punc prepunctuation))
     text))
 
 (define (get-single-char-token utt text)
   (let ((name (substring text 0 1)))
     (set! text (substring text 1 (length text)))
     (unless (string-equal name "")
-      (utt.relation.append utt 'Token
-                           `(,name ((name ,name) (whitespace "")
-                                    (punc "") (prepunctuation ""))))))
+      (token-utterance-append utt name "" "" "")))
   text)
 
 (define (get-token utt text)
@@ -135,5 +136,17 @@
           (set! ntokens (+ ntokens 1))))))
     (list utt text)))
 
+(define (append-token-utterances . utts)
+  (let ((u (token-utterance)))
+    (while utts
+      (let ((i (utt.relation (car utts) 'Token)))
+        (while i
+          (token-utterance-append u (item.name i)
+                                  (item.feat i 'whitespace)
+                                  (item.feat i 'punc)
+                                  (item.feat i 'prepunctuation))
+          (set! i (item.next i))))
+      (set! utts (cdr utts))))
+  u)
 
 (provide 'tokenize)

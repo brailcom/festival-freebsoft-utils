@@ -184,23 +184,36 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
           (item.set_feat seg 'event-placement placement)
           (let ((event (utt.relation.append
                         utt 'Event
-                        `(event
-                          ((event ,(item.feat w 'event))
-                           (event-placement ,placement)
-                           (end ,(item.feat seg 'end))
-                           (pend ,(item.feat seg "R:Segment.p.end")))))))
+                        `(event ((event ,(item.feat w 'event))
+                                 (event-placement ,placement)
+                                 (end ,(item.feat seg 'end))
+                                 (pend ,(item.feat seg "R:Segment.p.end")))))))
+            (item.set_feat seg 'event event))))
+    (let ((token (item.parent (item.relation w 'Token))))
+      (if (and (or (not (item.next w))
+                   (not (equal? token (item.parent (item.relation (item.next w) 'Token)))))
+               (item.has_feat token 'mark))
+          (let* ((seg (item.relation (item.daughtern
+                                      (item.daughtern
+                                       (item.relation w 'SylStructure)))
+                                     'Segment))
+                 (event (utt.relation.append
+                         utt 'Event
+                         `(event ((event (mark ,(item.feat token 'mark)))
+                                  (event-placement after)
+                                  (end ,(item.feat seg 'end)))))))
             (item.set_feat seg 'event event)))))
   (let ((w (utt.wave utt)))
     (if (utt.relation.items utt 'Event)
         (let ((last-break 0.0))
-          (do-relation-items (seg utt Event)
-            (let ((break (if (string-equal (item.feat seg 'event-placement)
+          (do-relation-items (event utt Event)
+            (let ((break (if (string-equal (item.feat event 'event-placement)
                                            'after)
-                             (item.feat seg 'end)
-                             (or (item.feat seg 'pend) 0.0)))
-                  (event (item.feat seg 'event)))
+                             (item.feat event 'end)
+                             (or (item.feat event 'pend) 0.0)))
+                  (event* (item.feat event 'event)))
               (wave-eater (wave-subwave w last-break break))
-              (event-synth-plain (first event) (second event) wave-eater)
+              (event-synth-plain (first event*) (second event*) wave-eater)
               (set! last-break break)))
           (wave-eater (wave-subwave
                        w last-break
@@ -248,6 +261,8 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
     (event-synth-ssml value wave-eater))
    ((eq? type 'sound)
     (event-synth-sound value wave-eater))
+   ((eq? type 'mark)
+    (wave-eater (intern value)))
    (t
     (let ((transformed
            (cdr (assoc value (cadr (assq type (langvar 'event-mappings)))))))

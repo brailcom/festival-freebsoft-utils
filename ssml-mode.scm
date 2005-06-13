@@ -1,6 +1,6 @@
 ;;; Speech Synthesis Markup Language 1.0 support
 
-;; Copyright (C) 2004 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2005 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -413,6 +413,7 @@
 (defvar ssml-current-text nil)
 (defvar ssml-current-utt nil)
 (defvar ssml-in-volatile nil)
+(defvar ssml-join nil)
 
 (defvar ssml-elements-parsing
   (apply
@@ -498,6 +499,7 @@
   (set! ssml-current-text "")
   (set! ssml-current-utt nil)
   (set! ssml-in-volatile nil)
+  (set! ssml-join nil)
   (glet* ((ssml-elements ssml-elements-parsing)
           (token.singlecharsymbols "")
           (token.punctuation "")
@@ -513,7 +515,7 @@
   (cond
    ((and ssml-current-utt
          (not (equal? ssml-current-text ""))
-         (not ssml-in-volatile))
+         (not ssml-join))
     (let ((utt ssml-current-utt))
       (set! ssml-current-utt nil)
       (if (utt.relation.items utt 'Token)
@@ -552,7 +554,7 @@
               (ssml-process-mark
                (lambda (mark)
                  (set! ssml-utterances (append ssml-utterances (list mark))))))
-        ;; Texts of some marks should be processed in a single step
+        ;; Texts of some elements should be processed in a single step
         (cond
          ((member func-name '(sub.start prosody.start audio.start))
           (push t ssml-in-volatile))
@@ -566,12 +568,28 @@
               (set! text (recode-utf8->current text))
               (if lang-change
                   (ssml-unchange-language))
-              (if (or ssml-in-volatile (eq? func-name 'ssml.break))
-                  (while (not (equal? text ""))
-                    (set! text (get-token utt text)))
-                  (set! ssml-current-text text))
-              (push (list func-name attlist nil) ssml-parsed))
-            ;; If there's no text, just call the mark function
+              (if (or ssml-in-volatile
+                      ssml-join
+                      (eq? func-name 'ssml.break)
+                      (eq? func-name 'ssml.mark))
+                  (begin
+                    (when (or ssml-in-volatile
+                              (eq? func-name 'ssml.break)
+                              (eq? func-name 'ssml.mark))
+                      (set! ssml-join t))
+                    (while (not (equal? text ""))
+                      (set! text (get-token utt text)))
+                    (when (eq? func-name 'ssml.mark)
+                      (let ((last-token (utt.relation.last utt 'Token)))
+                        (when last-token
+                          (item.set_feat last-token 'mark (ssml-attval attlist 'name))
+                          (set! func-name nil)))))
+                  (begin
+                    (set! ssml-current-text text)
+                    (set! ssml-join nil)))
+              (when func-name
+                (push (list func-name attlist nil) ssml-parsed)))
+            ;; If there's no text, just call the element's function
             (set! ssml-current-utt ((symbol-value func-name) attlist utt))))
       (ssml-next-chunk)))))
 
@@ -581,7 +599,6 @@
      ((not utt)
       nil)
      ((symbol? utt)
-      (print utt)
       (ssml-speak-chunks))
      (t
       (utt.synth utt)
