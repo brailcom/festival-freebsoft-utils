@@ -1,6 +1,6 @@
 ;;; Support of miscellaneous kinds of speech events
 
-;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -181,15 +181,15 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
                (seg-placement (event-find-seg utt w placement*))
                (seg (first seg-placement))
                (placement (second seg-placement)))
-          (item.set_feat seg 'event )
           (item.set_feat seg 'event-placement placement)
-          (utt.relation.append utt 'Event
-                               `(event
-                                 ((event ,(item.feat w 'event))
-                                  (event-placement ,placement)
-                                  (end ,(item.feat seg 'end))
-                                  (pend ,(item.feat seg "R:Segment.p.end"))))
-                               ))))
+          (let ((event (utt.relation.append
+                        utt 'Event
+                        `(event
+                          ((event ,(item.feat w 'event))
+                           (event-placement ,placement)
+                           (end ,(item.feat seg 'end))
+                           (pend ,(item.feat seg "R:Segment.p.end")))))))
+            (item.set_feat seg 'event event)))))
   (let ((w (utt.wave utt)))
     (if (utt.relation.items utt 'Event)
         (let ((last-break 0.0))
