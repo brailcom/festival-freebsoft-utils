@@ -190,7 +190,8 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
                                  (pend ,(item.feat seg "R:Segment.p.end")))))))
             (item.set_feat seg 'event event))))
     (let ((token (item.parent (item.relation w 'Token))))
-      (if (and (or (not (item.next w))
+      (if (and token
+               (or (not (item.next w))
                    (not (equal? token (item.parent (item.relation (item.next w) 'Token)))))
                (item.has_feat token 'mark))
           (let* ((seg (item.relation (item.daughtern

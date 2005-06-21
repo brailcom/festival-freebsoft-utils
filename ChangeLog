@@ -1,3 +1,8 @@
+2005-06-21  Milan Zamazal  <pdm@brailcom.org>
+
+	* events.scm (event-eat-utt): Don't try to examine `token' if it
+	is nil.
+
 2005-06-13  Milan Zamazal  <pdm@brailcom.org>
 
 	* ssml-mode.scm (ssml-next-chunk): Ensure index marks don't create
