@@ -1,5 +1,10 @@
 2005-06-21  Milan Zamazal  <pdm@brailcom.org>
 
+	* punctuation.scm (punctuation-process-words): Append the new item
+	to the corresponding token.
+
+2005-06-21  Milan Zamazal  <pdm@brailcom.org>
+
 	* events.scm (event-eat-utt): Don't try to examine `token' if it
 	is nil.
 

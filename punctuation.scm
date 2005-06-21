@@ -1,6 +1,6 @@
 ;;; Punctuation modes
 
-;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -96,7 +96,9 @@
               (item.set_name w (car (cdr trans)))
               (set! trans (cdr (cdr trans)))
               (while trans
-                (item.insert w (list (car trans)))
+                (let ((i (item.insert w (list (car trans)))))
+                  (item.append_daughter (item.parent (item.relation w 'Token))
+                                        i))
                 (set! trans (cdr trans))))))))
    ;; Delete punctuation when punctuation-mode is none
    ((eq punctuation-mode 'none)
