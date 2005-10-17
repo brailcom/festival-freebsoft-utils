@@ -10,7 +10,7 @@
 @copying
 This manual is for festival-freebsoft-utils, version @value{VERSION}.
 
-Copyright @copyright{} 2004 Brailcom, o.p.s.
+Copyright @copyright{} 2004, 2005 Brailcom, o.p.s.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -628,12 +628,14 @@ Wrap @var{function} with arguments @var{arg ...} by the code
 @var{body}.  Given function arguments must match the arguments of the
 wrapped function.  @var{wrapper-name} is a symbol uniquely identifying
 the wrapper, it allows redefinition of the wrapper.  One function can
-be wrapped by any number buffers.  None of the @code{define-wrapper}
+be wrapped by any number of wrappers.  None of the @code{define-wrapper}
 arguments is evaluated.
 
 @cindex next-func
 Within @var{body}, a function named @code{next-func} is automatically
 defined.  It returns the next wrapper or the original function.
+Please note @code{next-func} is a function, not a variable, so its
+typical invocation looks as follows: @code{((next-func) @var{arg} @var{...})}.
 
 @item oo-ensure-function-wrapped @var{function-name}
 If a wrapped function gets redefined, its wrapper is lost.  If you
