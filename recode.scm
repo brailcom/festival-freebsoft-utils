@@ -1,6 +1,6 @@
 ;;; Character set conversions
 
-;; Copyright (C) 2004 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2005 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -26,7 +26,7 @@
 
 (define (recode string from to)
   (with-temp-file-data (tmpfile string)
-    (system (format nil "recode %s..%s %s" from to tmpfile))
+    (system (format nil "recode -f %s..%s %s" from to tmpfile))
     (read-file tmpfile)))
 
 (define (recode-utf8->current string)
