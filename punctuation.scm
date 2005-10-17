@@ -30,6 +30,8 @@
 (defvar punctuation-chars "[- !\"#$%&'()*+,./\\^_`:;<=>?@{|}~]")
 (defvar punctuation-chars-2 "[][]")
 
+(defvar punctuation-punc-languages '(english britishenglish americanenglish))
+
 ;; Default English voice doesn't have defined pronunciation of punctuation
 ;; characters
 (defvar punctuation-pronunciation
@@ -83,23 +85,31 @@
 
 (define (punctuation-process-words utt)
   (cond
-   ;; Standard English lexicon has no notion of punctuation pronounciation
-   ((and (eq? punctuation-mode 'all)
-         (member (Param.get 'Language)
-                 '(english britishenglish americanenglish
-                   "english" "britishenglish" "americanenglish")))
-    (do-relation-items (w utt Word)
-      (let ((trans (assoc (item.name w) punctuation-pronunciation)))
-        (if (and trans
-                 (not (word-mapping-of w)))
-            (begin
-              (item.set_name w (car (cdr trans)))
-              (set! trans (cdr (cdr trans)))
-              (while trans
-                (let ((i (item.insert w (list (car trans)))))
-                  (item.append_daughter (item.parent (item.relation w 'Token))
-                                        i))
-                (set! trans (cdr trans))))))))
+   ((eq? punctuation-mode 'all)
+    (if (member (intern (Param.get 'Language)) punctuation-punc-languages)
+        ;; Standard English lexicon has no notion of punctuation pronounciation
+        (do-relation-items (w utt Word)
+          (let ((trans (assoc (item.name w) punctuation-pronunciation)))
+            (if (and trans
+                     (not (word-mapping-of w)))
+                (begin
+                  (item.set_name w (car (cdr trans)))
+                  (set! trans (cdr (cdr trans)))
+                  (while trans
+                    (let ((i (item.insert w (list (car trans)))))
+                      (item.append_daughter (item.parent (item.relation w 'Token))
+                                            i))
+                    (set! trans (cdr trans)))))))
+        ;; We assume other languages don't insert punctuation words themselves
+        (do-relation-items (w utt Word)
+          (let* ((w* (item.relation w 'Token))
+                 (token (item.parent w*))
+                 (punc (item.feat token 'punc)))
+            (when (and (not (item.next w*))
+                       (item.has_feat token 'punc))
+              (dolist (p (reverse (symbolexplode (item.feat token 'punc))))
+                (let ((i (item.insert w `(,p ((name ,p))))))
+                  (item.append_daughter token i))))))))
    ;; Delete punctuation when punctuation-mode is none
    ((eq punctuation-mode 'none)
     (do-relation-top-items (token utt Token)
