@@ -70,6 +70,12 @@
 (define (fourth list)
   (nth 3 list))
 
+(define (min x y)
+  (if (< x y) x y))
+
+(define (max x y)
+  (if (>= x y) x y))
+
 (define (remove-if test list)
   (let ((result '()))
     (while list

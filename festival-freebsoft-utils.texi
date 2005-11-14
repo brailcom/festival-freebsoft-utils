@@ -477,6 +477,12 @@ accepts multiple @var{cleanup-form}s and evaluates them even when
 @item fourth @var{list}
 Return first, second, third or fourth element of @var{list}, respectively.
 
+@item min @var{x} @var{y}
+Return minimum of the two numeric values @var{x} and @var{y}.
+
+@item max @var{x} @var{y}
+Return maximum of the two numeric values @var{x} and @var{y}.
+
 @item remove-if @var{test} @var{list}
 Return @var{list} with elements, for which the @var{test} call returns
 non-@code{nil}, removed.  The order of list elements is preserved.
