@@ -1,6 +1,6 @@
 ;;; Speech Dispatcher interface
 
-;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -70,8 +70,9 @@
   (set-cap-signalization-mode cap-signalization-mode))
 
 (define-wrapper (ssml-change-voice . args) speechd-ssml-change-voice
-  (apply (next-func) args)
-  (speechd-refresh-modes))
+  (let ((result (apply (next-func) args)))
+    (speechd-refresh-modes)
+    result))
 
 
 ;;; Commands
