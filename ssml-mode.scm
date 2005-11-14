@@ -456,6 +456,9 @@
 (define ssml-utterance-break-functions
   '(ssml.p.start ssml.p.end ssml.s.start ssml.s.end))
 
+(define ssml-unbreakable-functions
+  '(ssml.sub.start ssml.audio.start))
+
 (define (ssml-next-parsed-part)
   (let ((open-elements '())
         (next-part '())
@@ -463,6 +466,7 @@
         (accepted-text "")
         (remaining-text "")
         (voice (ssml-current-voice))
+        (unbreakable '())
         (finished nil))
     ;; get next parts
     (while (and ssml-parsed (not finished))
@@ -482,25 +486,33 @@
         (unless (string-equal element-text "")
           (set! text (string-append text element-text))
           (set! remaining-text (second (next-chunk text)))
-          ;; Attention, sometimes the whole text makes utterance break within
-          ;; *previous* element (e.g. in "Some <element>word.  Another</element>
-          ;; word."
-          (when (> (length remaining-text) (length element-text))
-            (set! remaining-text element-text))
-          (set! accepted-text (substring
-                               element-text
-                               0 (- (length element-text)
-                                    (length remaining-text))))
+          (if unbreakable
+              (begin
+                (set! remaining-text "")
+                (set! accepted-text element-text))
+              (begin
+                ;; Attention, sometimes the whole text makes utterance break within
+                ;; *previous* element (e.g. in "Some <element>word.  Another</element>
+                ;; word."
+                (when (> (length remaining-text) (length element-text))
+                  (set! remaining-text element-text))
+                (set! accepted-text (substring
+                                     element-text
+                                     0 (- (length element-text)
+                                          (length remaining-text))))))
           (push (list 'ssml.cdata '() accepted-text) next-part))
         ;; update element's text
         (set! element (list (first element) (second element) remaining-text))
         ;; utterance break (either implicit or explicit)?
         (when (or (not (string-equal remaining-text ""))
                   (and (member function ssml-utterance-break-functions)
+                       (not unbreakable) ; incorrect but currently required
                        (not (string-equal text ""))))
           (set! finished t))
         ;; voice change?
-        (unless finished
+        (when (and (not finished) (not unbreakable))
+          ;; Of course, break must be allowed on voice changed.
+          ;; But in the current implmementation it is not.
           (let ((new-voice (ssml-change-language attlist)))
             (when (and new-voice (not (eq? new-voice voice)))
               (if (string-equal text "")
@@ -513,9 +525,15 @@
             (begin
               (cond
                ((string-matches function ".*\.start$")
-                (push (list function attlist "" prev-voice) open-elements))
+                (push (list function attlist "" prev-voice) open-elements)
+                (when (member function ssml-unbreakable-functions)
+                  (push t unbreakable)))
                ((string-matches function ".*\.end$")
-                (let ((restored-voice (fourth (pop open-elements))))
+                (let* ((closed-element (pop open-elements))
+                       (function (first closed-element))
+                       (restored-voice (fourth closed-element)))
+                  (when (member function ssml-unbreakable-functions)
+                    (pop unbreakable))
                   (unless (eq? restored-voice voice)
                     (set! finished t)))))
               (push element next-part)))))
