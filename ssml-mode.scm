@@ -342,7 +342,7 @@
   nil)
 (define (ssml.audio.end attlist utt)
   (let ((uri (ssml-find-feature-value utt 'ssml-audio-uri))
-        (tmpfile (make-temp-filename "ssml-audio-%s"))
+        (tmpfile (make-temp-filename "ssml-audio-%s.delete-after-play"))
         (sound-available nil))
     (unwind-protect
       (begin

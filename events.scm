@@ -253,6 +253,8 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
                   value
                   (string-append sound-icon-directory "/" value)))))
     (wave-eater (utt.wave utt))
+    (when (string-matches value "^.*\.delete-after-play$")
+      (delete-file value))
     utt))
 
 (define (event-synth-plain type value wave-eater)
