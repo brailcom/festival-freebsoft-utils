@@ -359,7 +359,7 @@
   (ssml.audio.end attlist utt))
 
 (define (ssml.mark attlist utt)
-  (ssml-set-feature utt 'mark (ssml-attval attlist 'name))
+  (ssml-set-feature utt 'event (list 'mark (ssml-attval attlist 'name)))
   nil)
 
 (define (ssml.desc.start attlist utt)
