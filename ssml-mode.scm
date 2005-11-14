@@ -138,7 +138,8 @@
   current-voice)
 
 (define (ssml-change-voice lang-code gender age variant name)
-  (select-voice* lang-code gender age variant name))
+  (prog1 (select-voice* lang-code gender age variant name)
+    (restore-prosody)))
 
 (define (ssml-change-language attlist)
   (let ((lang (ssml-attval attlist 'xml:lang)))
@@ -263,6 +264,7 @@
 
 (define (ssml.speak.start attlist utt)
   (set! ssml-base-uri (ssml-attval attlist 'xml:base))
+  (ssml-change-voice nil nil nil nil nil)
   nil)
 (define (ssml.speak.end attlist utt)
   nil)
