@@ -1001,9 +1001,6 @@ available:
 @item ssml-say @var{text}
 Speak the given SSML @var{text}.
 
-@item ssml-say* @var{text}
-Speak the given SSML @var{text} honoring the event m
-
 @item ssml-parse @var{text}
 Parse the given SSML @var{text} for later processing by the
 @code{ssml-next-chunk} function.

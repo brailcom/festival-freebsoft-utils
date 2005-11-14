@@ -415,7 +415,7 @@
 (defvar ssml-in-volatile nil)
 (defvar ssml-join nil)
 
-(defvar ssml-elements-parsing
+(defvar ssml-elements
   (apply
    append
    (mapcar (lambda (elt)
@@ -436,24 +436,6 @@
                       ssml-parsed)
                 nil)))
            ssml-tags)))
-
-(defvar ssml-elements-speaking
-  (apply
-   append
-   (mapcar (lambda (elt)
-             (list
-              (list
-               (format nil "(%s" elt) '(ATTLIST UTT)
-               (list (intern (format nil "ssml.%s.start" elt)) 'ATTLIST 'UTT))
-              (list
-               (format nil ")%s" elt) '(ATTLIST UTT)
-               (list (intern (format nil "ssml.%s.end" elt)) 'ATTLIST 'UTT))
-              (list
-               (format nil "%s" elt) '(ATTLIST UTT)
-               (list (intern (format nil "ssml.%s" elt)) 'ATTLIST 'UTT))))
-           ssml-tags)))
-
-(define ssml-elements ssml-elements-speaking)
 
 (define (ssml_init_func)
   (set! ssml-xxml-elements.orig xxml_elements)
@@ -482,16 +464,12 @@
 ;;; Special functions
 
 
-(define (ssml-say ssml-text)
+(define (ssml-parse-xml ssml-text)
   (with-temp-file ssml-file
     (let ((fd (fopen ssml-file "w")))
       (fwrite ssml-text fd)
       (fclose fd))
     (tts_file ssml-file 'ssml)))
-
-(define (ssml-say* ssml-text)
-  (ssml-parse ssml-text)
-  (ssml-speak-chunks))
 
 (define (ssml-parse ssml-text)
   (set! ssml-parsed '())
@@ -500,13 +478,18 @@
   (set! ssml-current-utt nil)
   (set! ssml-in-volatile nil)
   (set! ssml-join nil)
-  (glet* ((ssml-elements ssml-elements-parsing)
-          (token.singlecharsymbols "")
+  (glet* ((token.singlecharsymbols "")
           (token.punctuation "")
           (token.prepunctuation "")
           (token.whitespace ""))
-    (ssml-say ssml-text))
+    (ssml-parse-xml ssml-text))
   (set! ssml-parsed (reverse ssml-parsed)))
+
+(define (ssml-say ssml-text)
+  (ssml-parse ssml-text)
+  (ssml-speak-chunks))
+
+(define ssml-say* ssml-say)
 
 (define (ssml-next-chunk)
   ;; It makes no sense to give ssml-parsed as an argument to this function,
