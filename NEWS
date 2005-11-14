@@ -2,7 +2,7 @@ User-visible changes to festival-freebsoft-utils:
 
 * Changes in festival-freebsoft-utils 0.5
 
-** Spelling support in SSML mode.
+** SSML mode rewritten and spelling support added to it.
 
 ** New utility functions min and max.
 
