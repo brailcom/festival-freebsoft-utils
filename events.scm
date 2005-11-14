@@ -148,7 +148,7 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
            (,mode-func ,mode-name))))))
 
 (define (event-find-seg-1 utt word placement)
-  (let ((neighbor ((if (eq? placement 'after) item.prev item.next) word)))
+  (let ((neighbor word))
     (cond
      ((not neighbor)
       (if (eq? placement 'after)
@@ -173,37 +173,38 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
 (define (event-eat-utt utt wave-eater)
   (utt.relation.create utt 'Event)
   (do-relation-items (w utt Word)
-    (if (item.has_feat w 'event)
-        (let* ((placement* (if (string-equal (item.feat w 'event-stick-to)
-                                             'next)
-                               'before
-                               'after))
-               (seg-placement (event-find-seg utt w placement*))
-               (seg (first seg-placement))
-               (placement (second seg-placement)))
-          (item.set_feat seg 'event-placement placement)
-          (let ((event (utt.relation.append
-                        utt 'Event
-                        `(event ((event ,(item.feat w 'event))
-                                 (event-placement ,placement)
-                                 (end ,(item.feat seg 'end))
-                                 (pend ,(item.feat seg "R:Segment.p.end")))))))
-            (item.set_feat seg 'event event))))
-    (let ((token (item.parent (item.relation w 'Token))))
-      (if (and token
-               (or (not (item.next w))
-                   (not (equal? token (item.parent (item.relation (item.next w) 'Token)))))
-               (item.has_feat token 'mark))
-          (let* ((seg (item.relation (item.daughtern
-                                      (item.daughtern
-                                       (item.relation w 'SylStructure)))
-                                     'Segment))
-                 (event (utt.relation.append
-                         utt 'Event
-                         `(event ((event (mark ,(item.feat token 'mark)))
-                                  (event-placement after)
-                                  (end ,(item.feat seg 'end)))))))
-            (item.set_feat seg 'event event)))))
+    (let* ((events '())
+           (get-event (lambda (item)
+                        (when (item.has_feat item 'event)
+                          (push (list (item.feat item 'event)
+                                      (if (string-equal (item.feat w 'event-stick-to) 'next)
+                                          'before
+                                          'after))
+                                events)))))
+      (get-event w)
+      (let ((token (item.parent (item.relation w 'Token))))
+        (if (and token
+                 (or (not (item.next w))
+                     (not (equal? token (item.parent (item.relation (item.next w) 'Token))))))
+            (while token
+              (get-event token)
+              (set! token (item.next token))
+              (when (and token (item.daughters token))
+                (set! token nil)))))
+      (mapcar (lambda (event-direction)
+                (let* ((event (first event-direction))
+                       (direction (second event-direction))
+                       (seg-placement (event-find-seg utt w direction))
+                       (seg (first seg-placement))
+                       (placement (second seg-placement))
+                       (event* (utt.relation.append
+                                utt 'Event
+                                `(event ((event ,event)
+                                         (event-placement ,placement)
+                                         (end ,(item.feat seg 'end))
+                                         (pend ,(item.feat seg "R:Segment.p.end")))))))
+                  (item.set_feat seg 'event event*)))
+              (reverse events))))
   (let ((w (utt.wave utt)))
     (if (utt.relation.items utt 'Event)
         (let ((last-break 0.0))
