@@ -526,7 +526,9 @@
         (unwind-protect
           (let ((orig-voice (ssml-current-voice)))
             (voice.select voice)
-            (set! element-text (recode-utf8->current element-text)))
+            (set! element-text (if (pair? element-text)
+                                   (first element-text)
+                                   (recode-utf8->current element-text))))
           (voice.select orig-voice))
         ;; add text
         (unless (string-equal element-text "")
@@ -548,7 +550,10 @@
                                           (length remaining-text))))))
           (push (list 'ssml.cdata '() accepted-text) next-part))
         ;; update element's text
-        (set! element (list (first element) (second element) remaining-text))
+        (set! element (list (first element) (second element)
+                            (if (string-equal remaining-text "")
+                                ""
+                                (list remaining-text))))
         ;; utterance break (either implicit or explicit)?
         (when (or (not (string-equal remaining-text ""))
                   (and (member function ssml-utterance-break-functions)
