@@ -148,23 +148,21 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
            (,mode-func ,mode-name))))))
 
 (define (event-find-seg-1 utt word placement)
-  (let ((neighbor word))
-    (cond
-     ((not neighbor)
-      (if (eq? placement 'after)
-          (list (utt.relation.first utt 'Segment) 'before)
-          (list (utt.relation.last utt 'Segment) 'after)))
-     ((not (string-equal
-            (item.feat neighbor "R:SylStructure.daughter1.daughter1.name")
-            0))
-      (let ((d (if (eq placement 'after) item.daughtern item.daughter1)))
-        (list (d (d (item.relation neighbor 'SylStructure))) placement)))
-     (t
-      (event-find-seg-1 utt neighbor placement)))))
+  (cond
+   ((not word)
+    (list ((if (eq? placement 'after) utt.relation.last utt.relation.first) utt 'Segment)
+          placement))
+   ((not (string-equal (item.feat word "R:SylStructure.daughter1.daughter1.name") 0))
+    (let ((d (if (eq placement 'after) item.daughtern item.daughter1)))
+      (list (d (d (item.relation word 'SylStructure))) placement)))
+   (t
+    (event-find-seg-1 utt ((if (eq? placement 'after) item.prev item.next) word) placement))))
 
 (define (event-find-seg utt word placement)
   (if (utt.relation.items utt 'Segment)
-      (event-find-seg-1 utt word placement)
+      (if (eq? placement 'after)
+          (event-find-seg-1 utt (item.next word) 'before)
+          (event-find-seg-1 utt (item.prev word) 'after))          
       (begin
         (utt.relation.append
          utt 'Segment (list (caar (cdar (PhoneSet.description '(silences))))))
