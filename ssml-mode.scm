@@ -94,10 +94,6 @@
 
 (defvar ssml-base-uri nil)
 
-(defvar ssml-voices '())
-(defvar ssml-voice-parameters '())
-(defvar ssml-prosodies '())
-
 
 (define (ssml-attval attlist att)
   (let ((attval (car (xxml_attval att attlist))))
@@ -125,56 +121,43 @@
       (set! value (string-after value "+")))
     (cond
      ((string-matches value ".*%$")
-      (prosody-relative-value
-       (+ 1 (* (read-from-string (string-before value "%")) 0.01))))
+      `(prosody-relative-value
+        ,(+ 1 (* (read-from-string (string-before value "%")) 0.01))))
      ((string-matches value ".*st$")
-      (prosody-relative-value
-       (pow 2 (/ (read-from-string (string-before value "st")) 12))))
+      `(prosody-relative-value
+        ,(pow 2 (/ (read-from-string (string-before value "st")) 12))))
      ((string-matches value ".*Hz$")
-      (prosody-shifted-value (read-from-string (string-before value "Hz"))))
+      `(prosody-shifted-value ,(read-from-string (string-before value "Hz"))))
      (t
-      (prosody-shifted-value (read-from-string value)))))))
+      `(prosody-shifted-value ,(read-from-string value)))))))
 
 (define (ssml-attval-complex attlist att alist)
   (ssml-val-complex (ssml-attval attlist att) alist))
 
-(define (ssml-change-voice lang-code gender age variant name)
-  (push current-voice ssml-voices)
-  (push voice-select-current-defaults ssml-voice-parameters)
-  (select-voice* lang-code gender age variant name)
-  (restore-prosody))
+(define (ssml-current-voice)
+  current-voice)
 
-(define (ssml-unchange-voice)
-  (voice.select (pop ssml-voices))
-  (restore-prosody)
-  (set! voice-select-current-defaults (pop ssml-voice-parameters)))
+(define (ssml-change-voice lang-code gender age variant name)
+  (select-voice* lang-code gender age variant name))
 
 (define (ssml-change-language attlist)
-  (ssml-change-voice (ssml-attval attlist 'xml:lang) nil nil nil nil))
+  (let ((lang (ssml-attval attlist 'xml:lang)))
+    (when lang
+      (ssml-change-voice lang nil nil nil nil))))
 
-(define ssml-unchange-language ssml-unchange-voice)
+(define (ssml-change-prosody utt prosody)
+  (ssml-set-feature utt 'ssml-prosody prosody))
 
-(defvar ssml-prosody-setters `((pitch ,set-pitch)
-                               (range ,set-pitch-range)
-                               (volume ,set-volume)
-                               (rate ,set-rate)))
-
-(define (ssml-set-prosody prosody)
-  (let ((old-prosody '()))
-    (while prosody
-      (let ((id (first (car prosody)))
-            (value (second (car prosody))))
-        (push (list id (change-prosody (avalue-get id ssml-prosody-setters)
-                                       value))
-              old-prosody))
-      (set! prosody (cdr prosody)))
-    old-prosody))
-
-(define (ssml-change-prosody prosody)
-  (push (ssml-set-prosody prosody) ssml-prosodies))
-
-(define (ssml-unchange-prosody)
-  (ssml-set-prosody (pop ssml-prosodies)))
+(define (ssml-process-prosody utt)
+  (let* ((item (ssml-find-feature utt 'ssml-prosody))
+         (prosody (item.feat item 'ssml-prosody)))
+    (while item
+      (set! item (item.next item))
+      (when item
+        (item.set_feat item 'prosody
+                       (if (item.has_feat item 'prosody)
+                           (cons prosody (item.feat item 'prosody))
+                           (list prosody)))))))
 
 (define (ssml-get-url url tmpfile)
   (get_url (cond
@@ -183,14 +166,40 @@
             (t (string-append "file:" url)))
            tmpfile))
 
-(define (ssml-process-utt utt)
-  (xxml_synth utt))
+(define (ssml-set-feature utt feature value)
+  ;; We insert a dummy token so that:
+  ;; 1. some token was always available for feature insertion
+  ;; 2. multiple features of the same name can be placed at the same place
+  ;; 3. each token contains exactly one SSML feature
+  (token-utterance-append utt "" "" "" "")
+  (item.set_feat (utt.relation.last utt 'Token) feature value))
 
-(define (ssml-process-sound file)
-  (wave.play (wave-load file)))
+(define (ssml-find-feature utt feature)
+  (let ((item (utt.relation.last utt 'Token)))
+    (while (and item (not (item.has_feat item feature)))
+      (set! item (item.prev item)))
+    item))
 
-(define (ssml-process-mark mark)
-  (format t "Mark reached: %s\n" mark))
+(define (ssml-find-feature-value utt feature)
+  (item.feat (ssml-find-feature utt feature) feature))
+
+(define (ssml-spread-feature utt starting-feature feature value)
+  (let ((item (ssml-find-feature utt starting-feature)))
+    (while item
+      (set! item (item.next item))
+      (when item
+        (item.set_feat item feature value)))))
+
+(define (ssml-delete-items-from-feature utt feature)
+  (let ((item (utt.relation.last utt 'Token))
+        (value nil))
+    (while (not value)
+      (if (item.has_feat item feature)
+          (set! value (item.feat item feature))
+          (let ((prev-item (item.prev item)))
+            (item.delete item)
+            (set! item prev-item))))
+    value))
 
 (define (ssml-utt-text utt)
   (let* ((last-token (and utt (utt.relation.last utt 'Token)))
@@ -203,104 +212,67 @@
       (item.set_feat last-token 'ssml-tag 'noticed))
     (apply string-append token-list)))
 
+(define (ssml-append-text utt text)
+  (while (not (string-equal text ""))
+    (set! text (get-token utt text))))
+
 
 ;;; Markup handlers
 
 
 (define (ssml.speak.start attlist utt)
   (set! ssml-base-uri (ssml-attval attlist 'xml:base))
-  (ssml-change-language attlist)
   nil)
 (define (ssml.speak.end attlist utt)
-  (ssml-process-utt utt)
-  (ssml-unchange-language)
-  (set! ssml-base-uri nil)
   nil)
 
 (define (ssml.lexicon attlist utt)
-  (ssml-process-utt utt)
   nil)
 
 (define (ssml.meta attlist utt)
-  (ssml-process-utt utt)
   nil)
 
 (define (ssml.metadata.start attlist utt)
-  (ssml-process-utt utt)
   nil)
 (define (ssml.metadata.end attlist utt)
   nil)
 
 (define (ssml.p.start attlist utt)
-  (ssml-process-utt utt)
-  (ssml-change-language attlist)
   nil)
 (define (ssml.p.end attlist utt)
-  (ssml-process-utt utt)
-  (ssml-unchange-language)
   nil)
 
 (define (ssml.s.start attlist utt)
-  (ssml-process-utt utt)
-  (ssml-change-language attlist)
   nil)
 (define (ssml.s.end attlist utt)
-  (ssml-process-utt utt)
-  (ssml-unchange-language)
   nil)
 
-(define ssml-say-as-settings '())
 (define (ssml.say-as.start attlist utt)
-  (ssml-process-utt utt)
-  (push spell-mode ssml-say-as-settings)
-  (when (and (string-equal (ssml-attval attlist 'detail) "spell")
-             (not spell-mode))
-    (spell_init_func))
-  nil)
-
+  (if (string-equal (ssml-attval attlist 'detail) "spell")
+      (ssml-set-feature utt 'ssml-say-as 'spell)
+      (ssml-set-feature utt 'ssml-say-as 'dummy)))
 (define (ssml.say-as.end attlist utt)
-  (ssml-process-utt utt)
-  (when (and (not (pop ssml-say-as-settings))
-             spell-mode)
-    (spell_exit_func))
+  (let ((value (ssml-find-feature-value utt 'ssml-say-as)))
+    (when (string-equal value 'spell)
+      (ssml-spread-feature utt 'ssml-say-as 'spell 1)))
   nil)
 
 (define (ssml.phoneme.start attlist utt)
-  (ssml-process-utt utt)
   nil)
 (define (ssml.phoneme.end attlist utt)
-  (ssml-process-utt utt)
   nil)
 
-(define ssml-sub-utt nil)
 (define (ssml.sub.start attlist utt)
   (let ((text (format nil "%s" (ssml-attval attlist 'alias))))
-    (while (not (string-equal text ""))
-      (set! text (get-token utt text))))
-  (set! ssml-sub-utt utt)
+    (ssml-set-feature utt 'ssml-sub text))
   nil)
 (define (ssml.sub.end attlist utt)
-  ssml-sub-utt)
+  (ssml-append-text utt (ssml-delete-items-from-feature utt 'ssml-sub)))
 
 (define (ssml.voice.start attlist utt)
-  (ssml-process-utt utt)
   (apply ssml-change-voice (mapcar (lambda (att) (ssml-attval attlist att))
-                                   '(xml:lang gender age variant name)))
-  nil)
+                                   '(xml:lang gender age variant name))))
 (define (ssml.voice.end attlist utt)
-  (ssml-process-utt utt)
-  (ssml-unchange-voice)
-  nil)
-
-(define (ssml.emphasis.start attlist utt)
-  (ssml-process-utt utt)
-  (ssml-change-prosody `((pitch ,(prosody-relative-value 1.1))
-                         (rate ,(prosody-relative-value 0.8))))
-  nil)
-
-(define (ssml.emphasis.end attlist utt)
-  (ssml-process-utt utt)
-  (ssml-unchange-prosody)
   nil)
 
 (define (ssml.break attlist utt)
@@ -314,19 +286,19 @@
                            (* (read-from-string ms-time) 0.001)))
                      (cadr (assoc_string strength ssml-break-values)))))
     (when length
-      (let ((token (utt.relation.last utt 'Token)))
-        (if token
-            (begin
-              (item.set_feat token 'pbreak "B")
-              (item.set_feat token 'breaklen length))
-            (utt.relation.append utt 'Token
-                                 `(token ((name "") (whitespace " ") (punc "")
-                                          (prepunctuation "") (pbreak "B")
-                                          (breaklen ,length))))))))
-  utt)
+      (ssml-set-feature utt 'breaklen length)))
+  nil)
+
+(define (ssml.emphasis.start attlist utt)
+  (ssml-change-prosody utt `((pitch ,(prosody-relative-value 1.1))
+                             (rate ,(prosody-relative-value 0.8))))
+  nil)
+
+(define (ssml.emphasis.end attlist utt)
+  (ssml-process-prosody utt)
+  nil)
 
 (define (ssml.prosody.start attlist utt)
-  (ssml-process-utt utt)
   (let* ((pitch (ssml-attval-complex attlist 'pitch ssml-pitch-values))
          (contour (ssml-attval attlist 'contour))
          (range (ssml-attval-complex attlist 'range ssml-range-values))
@@ -359,38 +331,35 @@
             (set-param 'pitch pitch))
           (when range
             (set-param 'pitch-range range))))
-    (ssml-change-prosody prosody))
+    (ssml-change-prosody utt prosody))
   nil)
 (define (ssml.prosody.end attlist utt)
-  (ssml-process-utt utt)
-  (ssml-unchange-prosody)
+  (ssml-process-prosody utt)
   nil)
 
-(define ssml-audio-uri nil)
 (define (ssml.audio.start attlist utt)
-  (ssml-process-utt utt)
-  (set! ssml-audio-uri (ssml-attval attlist 'src))
+  (ssml-set-feature utt 'ssml-audio-uri (ssml-attval attlist 'src))
   nil)
 (define (ssml.audio.end attlist utt)
-  (let ((uri ssml-audio-uri)
+  (let ((uri (ssml-find-feature-value utt 'ssml-audio-uri))
         (tmpfile (make-temp-filename "ssml-audio-%s"))
-        (played nil))
-    (unwind-protect*
+        (sound-available nil))
+    (unwind-protect
       (begin
         (ssml-get-url uri tmpfile)
-        (ssml-process-sound tmpfile)
-        (set! played t))
+        (set! sound-available t))
       (delete-file tmpfile))
-    (when (and (not played) utt)
-      (ssml-process-utt utt))
-    nil))
+    (when sound-available
+      (ssml-delete-items-from-feature utt 'ssml-audio-uri)
+      (ssml-set-feature utt 'audio tmpfile)
+      (ssml-set-feature utt 'delete-audio 1)))
+  nil)
 (define (ssml.audio attlist utt)
   (ssml.audio.start attlist utt)
-  (ssml.audio.end attlist nil))
+  (ssml.audio.end attlist utt))
 
 (define (ssml.mark attlist utt)
-  (ssml-process-utt utt)
-  (ssml-process-mark (ssml-attval attlist 'name))
+  (ssml-set-feature utt 'mark (ssml-attval attlist 'name))
   nil)
 
 (define (ssml.desc.start attlist utt)
@@ -398,6 +367,9 @@
 (define (ssml.desc.end attlist utt)
   nil)
 
+(define (ssml.cdata attlist utt)
+  ;; Dummy element representing just text.
+  nil)
 
 ;;; Setup
 
@@ -409,11 +381,6 @@
                     "audio" "mark" "desc"))
 
 (defvar ssml-parsed nil)
-(defvar ssml-utterances nil)
-(defvar ssml-current-text nil)
-(defvar ssml-current-utt nil)
-(defvar ssml-in-volatile nil)
-(defvar ssml-join nil)
 
 (defvar ssml-elements
   (apply
@@ -473,11 +440,6 @@
 
 (define (ssml-parse ssml-text)
   (set! ssml-parsed '())
-  (set! ssml-utterances '())
-  (set! ssml-current-text "")
-  (set! ssml-current-utt nil)
-  (set! ssml-in-volatile nil)
-  (set! ssml-join nil)
   (glet* ((token.singlecharsymbols "")
           (token.punctuation "")
           (token.prepunctuation "")
@@ -491,101 +453,102 @@
 
 (define ssml-say* ssml-say)
 
+(define ssml-utterance-break-functions
+  '(ssml.p.start ssml.p.end ssml.s.start ssml.s.end))
+
+(define (ssml-next-parsed-part)
+  (let ((open-elements '())
+        (next-part '())
+        (text "")
+        (accepted-text "")
+        (remaining-text "")
+        (voice (ssml-current-voice))
+        (finished nil))
+    ;; get next parts
+    (while (and ssml-parsed (not finished))
+      (let* ((element (car ssml-parsed))
+             (function (first element))
+             (attlist (second element))
+             (element-text (third element))
+             (prev-voice voice))
+        (set! ssml-parsed (cdr ssml-parsed))
+        ;; recode text
+        (unwind-protect
+          (let ((orig-voice (ssml-current-voice)))
+            (voice.select voice)
+            (set! element-text (recode-utf8->current element-text)))
+          (voice.select orig-voice))
+        ;; add text
+        (unless (string-equal element-text "")
+          (set! text (string-append text element-text))
+          (set! remaining-text (second (next-chunk text)))
+          (set! accepted-text (substring
+                               element-text
+                               0 (- (length element-text)
+                                    (length remaining-text))))
+          (push (list 'ssml.cdata '() accepted-text) next-part))
+        ;; update element's text
+        (set! element (list (first element) (second element) remaining-text))
+        ;; utterance break (either implicit or explicit)?
+        (when (or (not (string-equal remaining-text ""))
+                  (and (member function ssml-utterance-break-functions)
+                       (not (string-equal text ""))))
+          (set! finished t))
+        ;; voice change?
+        (unless finished
+          (let ((new-voice (ssml-change-language attlist)))
+            (when (and new-voice (not (eq? new-voice voice)))
+              (if (string-equal text "")
+                  (set! voice new-voice)
+                  (set! finished t)))))
+        (if finished
+            ;; finished -- return element and its remaining text to ssml-parsed
+            (push element ssml-parsed)
+            ;; not finished -- update open elements and next part
+            (begin
+              (cond
+               ((string-matches function ".*\.start$")
+                (push (list function attlist "" prev-voice) open-elements))
+               ((string-matches function ".*\.end$")
+                (let ((restored-voice (fourth (pop open-elements))))
+                  (unless (eq? restored-voice voice)
+                    (set! finished t)))))
+              (push element next-part)))))
+    ;; if tree split is necessary, finish it
+    (when (or ssml-parsed remaining-text)
+      (set! ssml-parsed (append (reverse open-elements) ssml-parsed)))
+    ;; done
+    (reverse next-part)))
+
+(define (ssml-process-parsed-part parsed)
+  (let ((utt (token-utterance))
+        (orig-voice (ssml-current-voice))
+        (voice (ssml-current-voice)))
+    ;; process elements
+    (while parsed
+      (let* ((element (car parsed))
+             (function (first element))
+             (attlist (second element))
+             (text (third element)))
+        (ssml-append-text utt text)
+        (set! voice (ssml-change-language attlist))
+        (set! voice (or ((symbol-value function) attlist utt) voice)))
+      (set! parsed (cdr parsed)))
+    ;; restore original voice and return the resulting utterance
+;    (voice.select orig-voice)
+    utt))
+
 (define (ssml-next-chunk)
-  ;; It makes no sense to give ssml-parsed as an argument to this function,
-  ;; since the function currently globally affects SSML prosody settings and so
-  ;; it can't process more than one tree simultaneously.
-  (cond
-   ((and ssml-current-utt
-         (not (equal? ssml-current-text ""))
-         (not ssml-join))
-    (let ((utt ssml-current-utt))
-      (set! ssml-current-utt nil)
-      (if (utt.relation.items utt 'Token)
-          utt
-          (ssml-next-chunk))))
-   ((not (equal? ssml-current-text ""))
-    (let* ((utt-text (next-chunk ssml-current-text))
-           (utt (first utt-text))
-           (text (second utt-text)))
-      (set! ssml-current-text text)
-      (if (utt.relation.items utt 'Token)
-          utt
-          (ssml-next-chunk))))
-   (ssml-utterances
-    (let ((utt (pop ssml-utterances)))
-      (if (eq? (typeof utt) 'string)
-          (set! utt (intern utt)))
-      (if (or (symbol? utt) (utt.relation.items utt 'Token))
-          utt
-          (ssml-next-chunk))))
-   (ssml-parsed
-    (let* ((elt (pop ssml-parsed))
-           (func-name (nth 0 elt))
-           (attlist (nth 1 elt))
-           (text (nth 2 elt))
-           (utt (or ssml-current-utt
-                    (set! ssml-current-utt (token-utterance)))))
-      (glet* ((ssml-process-utt
-               (lambda (utt)
-                 (set! ssml-utterances (append ssml-utterances (list utt)))))
-              (ssml-process-sound
-               (lambda (file)
-                 (set! ssml-utterances
-                       (append ssml-utterances
-                               (list (wave-import-utt file))))))
-              (ssml-process-mark
-               (lambda (mark)
-                 (set! ssml-utterances (append ssml-utterances (list mark))))))
-        ;; Texts of some elements should be processed in a single step
-        (cond
-         ((member func-name '(sub.start prosody.start audio.start))
-          (push t ssml-in-volatile))
-         ((member func-name '(sub.end prosody.end audio.end))
-          (pop ssml-in-volatile)))
-        ;; If there's a text, recode it and add it to the utterance
-        (if text
-            (let ((lang-change (ssml-attval attlist 'xml:lang)))
-              (if lang-change
-                  (ssml-change-language attlist))
-              (set! text (recode-utf8->current text))
-              (if lang-change
-                  (ssml-unchange-language))
-              (if (or ssml-in-volatile
-                      ssml-join
-                      (eq? func-name 'ssml.break)
-                      (eq? func-name 'ssml.mark))
-                  (begin
-                    (when (or ssml-in-volatile
-                              (eq? func-name 'ssml.break)
-                              (eq? func-name 'ssml.mark))
-                      (set! ssml-join t))
-                    (while (not (equal? text ""))
-                      (set! text (get-token utt text)))
-                    (when (eq? func-name 'ssml.mark)
-                      (let ((last-token (utt.relation.last utt 'Token)))
-                        (when last-token
-                          (item.set_feat last-token 'mark (ssml-attval attlist 'name))
-                          (set! func-name nil)))))
-                  (begin
-                    (set! ssml-current-text text)
-                    (set! ssml-join nil)))
-              (when func-name
-                (push (list func-name attlist nil) ssml-parsed)))
-            ;; If there's no text, just call the element's function
-            (set! ssml-current-utt ((symbol-value func-name) attlist utt))))
-      (ssml-next-chunk)))))
+  (let ((parsed (ssml-next-parsed-part)))
+    (if parsed
+        (ssml-process-parsed-part parsed)
+        nil)))
 
 (define (ssml-speak-chunks)
   (let ((utt (ssml-next-chunk)))
-    (cond
-     ((not utt)
-      nil)
-     ((symbol? utt)
-      (ssml-speak-chunks))
-     (t
+    (when utt
       (utt.synth utt)
       (event-eat-utt utt wave.play)
-      (ssml-speak-chunks)))))
+      (ssml-speak-chunks))))
 
 (provide 'ssml-mode)
