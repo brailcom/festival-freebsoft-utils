@@ -351,8 +351,7 @@
       (delete-file tmpfile))
     (when sound-available
       (ssml-delete-items-from-feature utt 'ssml-audio-uri)
-      (ssml-set-feature utt 'audio tmpfile)
-      (ssml-set-feature utt 'delete-audio 1)))
+      (ssml-set-feature utt 'event (list 'sound tmpfile))))
   nil)
 (define (ssml.audio attlist utt)
   (ssml.audio.start attlist utt)
