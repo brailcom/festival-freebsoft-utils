@@ -474,7 +474,8 @@ accepts multiple @var{cleanup-form}s and evaluates them even when
 @item first @var{list}
 @item second @var{list}
 @item third @var{list}
-Return first, second, or third element of @var{list}, respectively.
+@item fourth @var{list}
+Return first, second, third or fourth element of @var{list}, respectively.
 
 @item remove-if @var{test} @var{list}
 Return @var{list} with elements, for which the @var{test} call returns

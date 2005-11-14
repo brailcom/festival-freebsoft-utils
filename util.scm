@@ -1,6 +1,6 @@
 ;;; Miscellaneous utilities
 
-;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -66,6 +66,9 @@
 
 (define (third list)
   (nth 2 list))
+
+(define (fourth list)
+  (nth 3 list))
 
 (define (remove-if test list)
   (let ((result '()))
