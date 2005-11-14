@@ -150,7 +150,7 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
 (define (event-find-seg-1 utt word placement)
   (cond
    ((not word)
-    (list ((if (eq? placement 'after) utt.relation.last utt.relation.first) utt 'Segment)
+    (list ((if (eq? placement 'after) utt.relation.first utt.relation.last) utt 'Segment)
           placement))
    ((not (string-equal (item.feat word "R:SylStructure.daughter1.daughter1.name") 0))
     (let ((d (if (eq placement 'after) item.daughtern item.daughter1)))
@@ -175,7 +175,7 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
            (get-event (lambda (item)
                         (when (item.has_feat item 'event)
                           (push (list (item.feat item 'event)
-                                      (if (string-equal (item.feat w 'event-stick-to) 'next)
+                                      (if (string-equal (item.feat w 'event-stick-to) 'prev)
                                           'before
                                           'after))
                                 events)))))
