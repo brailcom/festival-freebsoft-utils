@@ -482,6 +482,11 @@
         (unless (string-equal element-text "")
           (set! text (string-append text element-text))
           (set! remaining-text (second (next-chunk text)))
+          ;; Attention, sometimes the whole text makes utterance break within
+          ;; *previous* element (e.g. in "Some <element>word.  Another</element>
+          ;; word."
+          (when (> (length remaining-text) (length element-text))
+            (set! remaining-text element-text))
           (set! accepted-text (substring
                                element-text
                                0 (- (length element-text)
