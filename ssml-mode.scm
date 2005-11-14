@@ -181,7 +181,8 @@
     item))
 
 (define (ssml-find-feature-value utt feature)
-  (item.feat (ssml-find-feature utt feature) feature))
+  (let ((item (ssml-find-feature utt feature)))
+    (and item (item.feat item feature))))
 
 (define (ssml-spread-feature utt starting-feature feature value)
   (let ((item (ssml-find-feature utt starting-feature)))
@@ -289,12 +290,18 @@
 
 (define (ssml.say-as.start attlist utt)
   (if (string-equal (ssml-attval attlist 'detail) "spell")
-      (ssml-set-feature utt 'ssml-say-as 'spell)
+      (begin
+        (ssml-set-feature utt 'ssml-say-as 'spell)
+        (spell_init_func))
       (ssml-set-feature utt 'ssml-say-as 'dummy)))
 (define (ssml.say-as.end attlist utt)
-  (let ((value (ssml-find-feature-value utt 'ssml-say-as)))
+  (let* ((item (ssml-find-feature utt 'ssml-say-as))
+         (value (item.feat item 'ssml-say-as)))
+    (item.remove_feature item 'ssml-say-as)
     (when (string-equal value 'spell)
-      (ssml-spread-feature utt 'ssml-say-as 'spell 1)))
+      (ssml-find-feature-value utt 'ssml-say-as)
+      (unless (string-equal (ssml-find-feature-value utt 'ssml-say-as) 'spell)
+        (spell_exit_func))))
   nil)
 
 (define (ssml.phoneme.start attlist utt)
