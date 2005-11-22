@@ -2,9 +2,14 @@ User-visible changes to festival-freebsoft-utils:
 
 * Changes in festival-freebsoft-utils 0.5
 
-** SSML mode rewritten and spelling support added to it.
+** SSML mode rewritten.
 
-** New utility functions min and max.
+Major cleanup of the mode.
+SSML interaction with Speech Dispatcher improved.
+Additionally spelling support was added, while SSML prosody settings remained
+unimplemented on the synthesis level in this version.
+
+** New utility functions `min' and `max'.
 
 
 * Changes in festival-freebsoft-utils 0.4
