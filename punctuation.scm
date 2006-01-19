@@ -1,6 +1,6 @@
 ;;; Punctuation modes
 
-;; Copyright (C) 2003, 2004, 2005 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -103,8 +103,12 @@
         ;; We assume other languages don't insert punctuation words themselves
         (do-relation-items (w utt Word)
           (let* ((w* (item.relation w 'Token))
-                 (token (item.parent w*))
-                 (punc (item.feat token 'punc)))
+                 (token (item.parent w*)))
+            (when (and (not (item.prev w*))
+                       (item.has_feat token 'prepunctuation))
+              (dolist (p (reverse (symbolexplode (item.feat token 'prepunctuation))))
+                (let ((i (item.insert w `(,p ((name ,p))) 'before)))
+                  (item.prepend_daughter token i))))
             (when (and (not (item.next w*))
                        (item.has_feat token 'punc))
               (dolist (p (reverse (symbolexplode (item.feat token 'punc))))
