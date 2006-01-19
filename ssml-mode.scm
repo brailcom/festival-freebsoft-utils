@@ -1,6 +1,6 @@
 ;;; Speech Synthesis Markup Language 1.0 support
 
-;; Copyright (C) 2004, 2005 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2005, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -423,6 +423,7 @@
 
 
 (defvar ssml-xxml-elements.orig nil)
+(defvar ssml-eou_tree.orig nil)
 
 (defvar ssml-tags '("speak" "lexicon" "meta" "metadata" "p" "s" "say-as"
                     "phoneme" "sub" "voice" "emphasis" "break" "prosody"
@@ -455,6 +456,8 @@
 (define (ssml_init_func)
   (set! ssml-xxml-elements.orig xxml_elements)
   (set! xxml_elements ssml-elements)
+  (set! ssml-eou_tree.orig eou_tree)
+  (set! eou_tree '((0)))
   (set! ssml-voices (list current-voice))
   ;; reset-voice used to be called here, but it's not much useful and it resets
   ;; current speechd settings, which is not what we want.
@@ -462,7 +465,8 @@
 
 (define (ssml_exit_func)
   (voice.select (car (last ssml-voices)))
-  (set! xxml_elements ssml-xxml-elements.orig))
+  (set! xxml_elements ssml-xxml-elements.orig)
+  (set! eou_tree ssml-eou_tree.orig))
 
 (set! tts_text_modes
    (cons
