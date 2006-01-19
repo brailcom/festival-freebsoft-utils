@@ -20,6 +20,26 @@ Invariant Sections, with no Front-Cover Texts and no Back-Cover Texts.
 A copy of the license is included in the section entitled ``GNU Free
 Documentation License''.
 @end quotation
+
+Alternatively, you can distribute this manual under the same
+conditions as festival-freebsoft-utils itself:
+
+@quotation
+festival-freebsoft-utils is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version.
+
+WAusers is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
+MA 02110-1301 USA.
+@end quotation
 @end copying
 
 @dircategory Sound
