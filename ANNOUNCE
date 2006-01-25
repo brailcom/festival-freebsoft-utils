@@ -1,8 +1,8 @@
-festival-freebsoft-utils 0.5 released
+festival-freebsoft-utils 0.6 released
 =====================================
 
 The Free(b)soft project is pleased to announce
-festival-freebsoft-utils 0.5.
+festival-freebsoft-utils 0.6.
 
 * What is festival-freebsoft-utils?
 
@@ -42,7 +42,7 @@ festival-freebsoft-utils 0.5.
   - Everything is written in the extension language, no patching of the
     Festival C++ sources is needed.
 
-* What is new in the 0.5 version?
+* What is new in the 0.5 and 0.6 versions?
 
   - SSML mode implementation was rewritten to improve operation with
     Speech Dispatcher and to provide better and cleaner framework for
@@ -52,12 +52,14 @@ festival-freebsoft-utils 0.5.
 
   - New utility functions `min' and `max'.
 
+  - Manual licensed under both GFDL and GPL.
+
   - Bug fixes.
 
 NOTE: If you use festival-freebsoft-utils with Speech Dispatcher, you
 must install Speech Dispatcher 0.5 or higher.  There was an incompatible
 change in the Speech Dispatcher Festival interface that prevents the new
-festival-freebsoft-utils version to fully cooperate with older Speech
+festival-freebsoft-utils versions to fully cooperate with older Speech
 Dispatcher versions.
 
 * Where to get it?
