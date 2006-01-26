@@ -39,6 +39,7 @@
 ;; desc: ignored (no reasonable use here known)
 
 
+(require 'duration)
 (require_module 'rxp)
 
 (require 'prosody-param)
@@ -234,29 +235,28 @@
   ((next-func) utt))
 
 ;; Breaks: Adjust silence durations.
-(Param.wrap Duration_Method ssml-duration-method
-  (lambda (utt)
-    ((next-value) utt)
-    (let ((token (utt.relation utt 'Token)))
-      (if (item.has_feat token 'ssml-break)
-          (let ((length (item.feat token 'ssml-break))
-                (starting-token token))
-            (set! token (item.next token))
-            (while (and token (not (item.daughtern token)))
-              (when (item.has_feat token 'ssml-break)
-                (set! length (+ length (item.feat token 'ssml-break))))
-              (set! token (item.next token)))
-            (while (and starting-token (and (not item.daughtern starting-token)))
-              (set! starting-token (item.prev starting-token)))
-            (when starting-token
-              (let* ((seg find_last_seg (item.daughtern starting-token))
-                     (silence (and seg (item.next seg))))
-                (when silence
-                  ;; The final step remains unimplemented for now.
-                  ;; We should adjust features of all the following segments here.
-                  (item.set_feat silence 'ssml-duration length)))))
-          (set! token (item.next token))))
-    utt))
+(define-wrapper (Duration utt) ssml-duration
+  ((next-func) utt)
+  (let ((token (utt.relation utt 'Token)))
+    (if (item.has_feat token 'ssml-break)
+        (let ((length (item.feat token 'ssml-break))
+              (starting-token token))
+          (set! token (item.next token))
+          (while (and token (not (item.daughtern token)))
+            (when (item.has_feat token 'ssml-break)
+              (set! length (+ length (item.feat token 'ssml-break))))
+            (set! token (item.next token)))
+          (while (and starting-token (and (not item.daughtern starting-token)))
+            (set! starting-token (item.prev starting-token)))
+          (when starting-token
+            (let* ((seg find_last_seg (item.daughtern starting-token))
+                   (silence (and seg (item.next seg))))
+              (when silence
+                ;; The final step remains unimplemented for now.
+                ;; We should adjust features of all the following segments here.
+                (item.set_feat silence 'ssml-duration length)))))
+        (set! token (item.next token))))
+  utt)
 
 
 ;;; Markup handlers
