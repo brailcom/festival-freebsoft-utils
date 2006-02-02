@@ -1,6 +1,6 @@
 ;;; Selecting voices
 
-;; Copyright (C) 2004 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -31,8 +31,9 @@
   '((en english
         (US american)
         (BR british))
+    (cs czech)
     (de german)
-    (cs czech))
+    (it italian))
   "Alist mapping ISO language codes to Festival language names.
 Each element of the alist is of the form (LANGUAGE-CODE LANGUAGE-NAME).
 Optionally, elements can have an extended
