@@ -1,6 +1,6 @@
 ;;; Tokenization and utterance chunking
 
-;; Copyright (C) 2004, 2005 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2005, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -50,8 +50,7 @@
          (r-punc (lambda (c) (member_string c l-punc)))
          (r-prepunctuation (lambda (c) (member_string c l-prepunctuation)))
          (r-name (lambda (c)
-                   (not
-                    (or (r-whitespace c) (r-punc c) (r-prepunctuation c)))))
+                   (not (or (r-whitespace c) (r-punc c)))))
          (name "")
          (whitespace "")
          (punc "")
