@@ -33,6 +33,7 @@
         (BR british))
     (cs czech)
     (de german)
+    (fr french)
     (it italian))
   "Alist mapping ISO language codes to Festival language names.
 Each element of the alist is of the form (LANGUAGE-CODE LANGUAGE-NAME).
