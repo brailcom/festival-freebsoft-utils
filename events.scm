@@ -1,6 +1,6 @@
 ;;; Support of miscellaneous kinds of speech events
 
-;; Copyright (C) 2003, 2004, 2005 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -222,7 +222,8 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
   utt)
   
 (define (event-synth-text text wave-eater)
-  (event-eat-utt (SynthText text) wave-eater))
+  (unless (string-equal text "")
+    (event-eat-utt (SynthText text) wave-eater)))
 
 (define (event-synth-ssml value wave-eater)
   (ssml-parse value)

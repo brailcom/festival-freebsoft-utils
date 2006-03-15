@@ -1,6 +1,6 @@
 ;;; Speech Dispatcher interface
 
-;; Copyright (C) 2003, 2004, 2005 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -51,7 +51,7 @@
     (current-voice-coding)))
 
 (define (speechd-send-to-client wave)
-  (if (symbol? wave)
+  (if (or (symbol? wave) (not wave))
       wave
       (let ((file-type (Param.get 'Wavefiletype)))
         (Param.set 'Wavefiletype 'nist)
