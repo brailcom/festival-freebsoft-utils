@@ -141,6 +141,12 @@ Having SoX (@url{http://sox.sourceforge.net}) installed is strongly
 recommended, many festival-freebsoft-utils functions don't work
 without it.
 
+As Festival does not support UTF-8 encoding, festival-freebsoft-utils
+uses the iconv utility for character coding conversions.  iconv is a
+standard part of some (e.g. GNU) operating systems, if you don't have
+it you can install it as a part of the libiconv library available at
+@url{http://www.gnu.org/software/libiconv/}.
+
 Installation itself is easy, just copy all the @file{*.scm} files to
 one of the directories present in the Festival's load-path.  This is
 typically @file{/usr/share/festival/}, you can get the exact list of
