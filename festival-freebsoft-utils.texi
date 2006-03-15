@@ -141,10 +141,6 @@ Having SoX (@url{http://sox.sourceforge.net}) installed is strongly
 recommended, many festival-freebsoft-utils functions don't work
 without it.
 
-If you want to perform character set conversions, which is necessary
-for the SSML support, you need the @emph{recode} utility
-(@url{http://recode.progiciels-bpi.ca/}).
-
 Installation itself is easy, just copy all the @file{*.scm} files to
 one of the directories present in the Festival's load-path.  This is
 typically @file{/usr/share/festival/}, you can get the exact list of
@@ -1076,8 +1072,7 @@ implementation and implements only a limited subset of the standard.
 Moreover, due to the limitations of the built-in Festival XML parser,
 SSML markup texts that contain non-ASCII characters can only be
 processed with the @code{ssml-parse} and @code{ssml-next-chunk}
-functions, must be provided in the UTF-8 encoding and the
-@code{recode} utility must be available on your system.
+functions and must be provided in the UTF-8 encoding.
 
 It is not easy to fully support SSML in Festival.  Contingent support
 and contributions are welcome.
@@ -1141,7 +1136,7 @@ Return given @var{string}, originally encoded in @code{UTF-8}, recoded
 to the coding of the current voice.
 @end ftable
 
-The recoding functions use the @code{recode} program and temporary
+The recoding functions use the @code{iconv} program and temporary
 files to convert between character sets.  There is no known better
 way to do the conversions.
 

@@ -1,5 +1,10 @@
 User-visible changes to festival-freebsoft-utils:
 
+* Changes in festival-freebsoft-utils 0.7
+
+** Use iconv instead of recode.
+
+
 * Changes in festival-freebsoft-utils 0.6
 
 ** Manual licensed under both GFDL and GPL.
