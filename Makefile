@@ -23,6 +23,9 @@
 VERSION := 0.6
 DISTDIR := festival-freebsoft-utils-$(VERSION)
 TARBALL := $(DISTDIR).tar
+DOCDIR := doc
+
+PROJECT := festival-freebsoft-utils
 
 .PHONY: all install install-strip uninstall clean distclean mostlyclean \
 	maintainer-clean TAGS info dvi dist check
@@ -40,6 +43,7 @@ mostlyclean:
 
 clean: mostlyclean
 	rm -rf $(DISTDIR) $(TARBALL)*
+	rm -f doc/*.info doc/*.ps doc/*.pdf doc/*.html
 
 distclean: clean
 
@@ -47,13 +51,24 @@ maintainer-clean: distclean
 
 TAGS:
 
-info: festival-freebsoft-utils.info
+info: $(DOCDIR)/$(PROJECT).info
 %.info: %.texi
-	makeinfo $<
+	cd $(DOCDIR) && makeinfo $(PROJECT).texi
 
-pdf: festival-freebsoft-utils.pdf
+pdf: $(DOCDIR)/$(PROJECT).pdf
 %.pdf: %.texi
-	texi2pdf festival-freebsoft-utils.texi
+	cd $(DOCDIR) && texi2pdf $(PROJECT).texi
+
+ps: $(DOCDIR)/$(PROJECT).ps
+%.ps: %.texi
+	cd $(DOCDIR) && texi2dvi $(PROJECT).texi && dvips $(PROJECT).dvi
+
+html: $(DOCDIR)/$(PROJECT).html
+%.html: %.texi
+	cd $(DOCDIR) &&	\
+	makeinfo --html --no-split $(PROJECT).texi
+
+doc-all: info pdf ps html
 
 dist: clean info
 	mkdir $(DISTDIR)
