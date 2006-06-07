@@ -158,8 +158,9 @@ startup by adding the line
 (require 'speech-dispatcher)
 @end lisp
 
-to the @file{/etc/festival.scm} configuration file (before any calls
-to functions or any settings of parameters contained in this package).
+to the Festival initialization file (typically
+@file{/etc/festival.scm} system wide or @file{~/.festivalrc} for a
+particular user).
 
 @c ****************************************************************************
 
