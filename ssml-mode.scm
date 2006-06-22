@@ -238,7 +238,7 @@
 (define-wrapper (Duration utt) ssml-duration
   ((next-func) utt)
   (let ((token (utt.relation utt 'Token)))
-    (if (item.has_feat token 'ssml-break)
+    (if (and token (item.has_feat token 'ssml-break))
         (let ((length (item.feat token 'ssml-break))
               (starting-token token))
           (set! token (item.next token))
