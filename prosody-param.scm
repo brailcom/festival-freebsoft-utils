@@ -1,6 +1,6 @@
 ;;; Changing prosody parameters
 
-;; Copyright (C) 2004 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -24,6 +24,9 @@
 (require 'util)
 
 
+(defvar prosody-testing-word "babebibobub")
+
+
 ;;; Prosody parameter accessors
 
 
@@ -33,8 +36,9 @@
   ;; wrapped
   (let ((int-method (Param.get 'Int_Target_Method)))
     (cond
-     ((eq? int-method Int_Targets_General)
-      (avalue-get 'f0_mean int_general_params))
+     ((prosody-general-method? int-method)
+      (or (avalue-get 'f0_mean int_general_params)
+          (prosody-general-pitch)))
      ((eq? int-method Int_Targets_LR)
       (avalue-get 'target_f0_mean int_lr_params))
      ((eq? int-method Int_Targets_Simple)
@@ -43,9 +47,11 @@
 (define (prosody-set-pitch value)
   (let ((int-method (Param.get 'Int_Target_Method)))
     (cond
-     ((eq? int-method Int_Targets_General)
-      (set! int_general_params
-            (assoc-set int_general_params 'f0_mean (list value))))
+     ((prosody-general-method? int-method)
+      (if (avalue-get 'f0_mean int_general_params)
+          (set! int_general_params
+                (assoc-set int_general_params 'f0_mean (list value)))
+          (prosody-set-general-pitch value)))
      ((eq? int-method Int_Targets_LR)
       (set! int_lr_params
             (assoc-set int_lr_params 'target_f0_mean (list value))))
@@ -56,8 +62,9 @@
 (define (prosody-get-pitch-range)
   (let ((int-method (Param.get 'Int_Target_Method)))
     (cond
-     ((eq? int-method Int_Targets_General)
-      (avalue-get 'f0_std int_general_params))
+     ((prosody-general-method? int-method)
+      (or (avalue-get 'f0_std int_general_params)
+          (prosody-general-pitch-range)))
      ((eq? int-method Int_Targets_LR)
       (avalue-get 'target_f0_std int_lr_params))
      ((eq? int-method Int_Targets_Simple)
@@ -66,9 +73,11 @@
 (define (prosody-set-pitch-range value)
   (let ((int-method (Param.get 'Int_Target_Method)))
     (cond
-     ((eq? int-method Int_Targets_General)
-      (set! int_general_params
-            (assoc-set int_general_params 'f0_std (list value))))
+     ((prosody-general-method? int-method)
+      (if (avalue-get 'f0_std int_general_params)
+          (set! int_general_params
+                (assoc-set int_general_params 'f0_std (list value)))
+          (prosody-set-general-pitch-range value)))
      ((eq? int-method Int_Targets_LR)
       (set! int_lr_params
             (assoc-set int_lr_params 'target_f0_std (list value))))
@@ -112,6 +121,92 @@
 
 (define (prosody-adjust-volume utt)
   (utt.wave.rescale utt prosody-volume))
+
+
+;;; Internal utilities -- general intonation method handling
+
+
+(defvar prosody-voice-f0-alist '()) ; items: (VOICE PITCH RANGE)
+(defvar prosody-voice-pitch-factor '()) ; (CURRENT-VOICE PITCH RANGE)
+
+(define (prosody-general-method? int-method)
+  (or (eq? int-method Int_Targets_General)
+      (equal? (Param.get 'Int_Method) "General")))
+
+(define (prosody-general-base-f0)
+  (or (second (assoc current-voice prosody-voice-f0-alist))
+      (let ((orig-targ-func (avalue-get 'targ_func int_general_params))
+            (pitch-list '()))
+        (avalue-set! 'targ_func int_general_params
+                     (lambda (utt syl)
+                       (let ((result (orig-targ-func utt syl)))
+                         (set! pitch-list (append pitch-list
+                                                  (mapcar cadr result)))
+                         result)))
+        (unwind-protect*
+            (SynthText prosody-testing-word)
+          (avalue-set! 'targ_func int_general_params orig-targ-func))
+        (set! pitch-list (or (butlast (cdr pitch-list)) '(100)))
+        (let* ((n (length pitch-list))
+               (pitch (/ (apply + pitch-list) n))
+               (range (/ (apply + (mapcar (lambda (p) (abs (- p pitch))) pitch-list)) n)))
+          (set! prosody-voice-f0-alist (assoc-set prosody-voice-f0-alist
+                                                  current-voice (list pitch range)))
+          pitch))))
+
+(define (prosody-general-f0-range)
+  (prosody-general-base-f0)
+  (third (assoc current-voice prosody-voice-f0-alist)))
+
+(define (prosody-general-pitch)
+  (* (prosody-general-base-f0) (prosody-current-voice-pitch-factor)))
+
+(define (prosody-general-pitch-range)
+  (* (prosody-general-f0-range) (prosody-current-voice-pitch-range-factor)))
+
+(define (prosody-current-voice-pitch-factor)
+  (when (or (null? prosody-voice-pitch-factor)
+            (not (equal? current-voice (first prosody-voice-pitch-factor))))
+    (set! prosody-voice-pitch-factor (list current-voice 1 1)))
+  (second prosody-voice-pitch-factor))
+
+(define (prosody-current-voice-pitch-range-factor)
+  (prosody-current-voice-pitch-factor) ; ensure the factor is defined
+  (third prosody-voice-pitch-factor))
+
+(define (prosody-ensure-targ-func-wrapped)
+  (unless (assoc 'prosody-wrapper-enabled int_general_params)
+    (prosody-general-base-f0)           ; store original base f0
+    (let ((orig-func (avalue-get 'targ_func int_general_params)))
+      (avalue-set! 'targ_func int_general_params
+                   (lambda (utt syl)
+                     (prosody-change-general-pitch utt syl orig-func)))
+      (set! int_general_params (cons '(prosody-wrapper-enabled t)
+                                     int_general_params)))))
+
+(define (prosody-set-general-pitch freq)
+  (prosody-ensure-targ-func-wrapped)
+  (set! prosody-voice-pitch-factor
+        (list current-voice
+              (/ freq (prosody-general-base-f0))
+              (or (third prosody-voice-pitch-factor) 1))))
+
+(define (prosody-set-general-pitch-range range)
+  (prosody-ensure-targ-func-wrapped)
+  (set! prosody-voice-pitch-factor
+        (list current-voice
+              (or (second prosody-voice-pitch-factor) 1)
+              (/ range (prosody-general-f0-range)))))
+
+(define (prosody-change-general-pitch utt syl next-func)
+  (let ((base-pitch (prosody-general-base-f0))
+        (pitch-factor (prosody-current-voice-pitch-factor))
+        (range-factor (prosody-current-voice-pitch-range-factor)))
+    (mapcar (lambda (spec)
+              (cons (first spec)
+                    (cons (* pitch-factor (+ base-pitch (* range-factor (- (second spec) base-pitch))))
+                          (cddr spec))))
+            (next-func utt syl))))
 
 
 ;;; Exported functions
