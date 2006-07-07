@@ -2,6 +2,8 @@ User-visible changes to festival-freebsoft-utils:
 
 * Changes in festival-freebsoft-utils 0.7
 
+** New utility functions `butlast' and `abs'.
+
 ** Use iconv instead of recode.
 
 

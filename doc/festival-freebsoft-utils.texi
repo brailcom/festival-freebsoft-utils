@@ -501,11 +501,18 @@ accepts multiple @var{cleanup-form}s and evaluates them even when
 @item fourth @var{list}
 Return first, second, third or fourth element of @var{list}, respectively.
 
+@item butlast @var{list}
+Return the @var{list} without its last element.  If @var{list} is
+empty, return an empty list.
+
 @item min @var{x} @var{y}
 Return minimum of the two numeric values @var{x} and @var{y}.
 
 @item max @var{x} @var{y}
 Return maximum of the two numeric values @var{x} and @var{y}.
+
+@item abs @var{x}
+Return absolute value of @var{x}.
 
 @item remove-if @var{test} @var{list}
 Return @var{list} with elements, for which the @var{test} call returns
