@@ -104,7 +104,8 @@ LOGICAL-EVENT is replaced by a string naming the key.")
     ("\027" text "control w")
     ("\030" text "control x")
     ("\031" text "control y")
-    ("\032" text "control z"))
+    ("\032" text "control z")
+    ("\0240" text "hard space"))
   "Alist mapping character events to any events.
 The form of the alist is the same as in `logical-event-mapping', except
 LOGICAL-EVENT is replaced by a string naming the character.")
