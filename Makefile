@@ -77,7 +77,9 @@ doc-all: info pdf ps dvi html
 dist: clean info
 	mkdir $(DISTDIR)
 	chmod 755 $(DISTDIR)
-	install -m 644 [A-Z]* *.scm *.texi *.info* $(DISTDIR)
+	install -m 644 [A-Z]* *.scm $(DISTDIR)
+	mkdir -m 755 $(DISTDIR)/doc
+	install -m 644 doc/*.texi doc/*.info* $(DISTDIR)/doc/
 	tar cvf $(TARBALL) $(DISTDIR)
 	gzip -9 $(TARBALL)
 
