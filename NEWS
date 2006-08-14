@@ -2,14 +2,21 @@ User-visible changes to festival-freebsoft-utils:
 
 * Changes in festival-freebsoft-utils 0.7
 
-** Prosody settings extended.
+** Better support of the general intonation method.
 
-It is possible to change basic prosodic parameters of more voices that use
+It is generally possible to change basic prosodic parameters of voices that use
 general intonation method.
+
+** New languages supported.
+
+Bug fixes and improvements that make Finnish, French and Italian voices work
+with festival-freebsoft-utils.
 
 ** New utility functions `butlast' and `abs'.
 
 ** Use iconv instead of recode.
+
+Iconv is more stable and better maintained recoding utility than recode.
 
 
 * Changes in festival-freebsoft-utils 0.6

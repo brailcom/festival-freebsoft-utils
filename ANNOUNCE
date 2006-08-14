@@ -1,8 +1,8 @@
-festival-freebsoft-utils 0.6 released
+festival-freebsoft-utils 0.7 released
 =====================================
 
 The Free(b)soft project is pleased to announce
-festival-freebsoft-utils 0.6.
+festival-freebsoft-utils 0.7.
 
 * What is festival-freebsoft-utils?
 
@@ -42,30 +42,24 @@ festival-freebsoft-utils 0.6.
   - Everything is written in the extension language, no patching of the
     Festival C++ sources is needed.
 
-* What is new in the 0.5 and 0.6 versions?
+* What is new in the 0.7 version?
 
-  - SSML mode implementation was rewritten to improve operation with
-    Speech Dispatcher and to provide better and cleaner framework for
-    future more complete SSML support.  SSML spelling support was added,
-    on the other hand SSML prosody settings remained unimplemented on
-    the synthesis level in this version.
+  - Better support of the general intonation method.
 
-  - New utility functions `min' and `max'.
+  - Improvements and bug fixes that make Finnish, French and Italian
+    free voices work with festival-freebsoft-utils.
 
-  - Manual licensed under both GFDL and GPL.
+  - New utility functions `butlast' and `abs'.
+
+  - festival-freebsoft-utils now uses the more stable and maintained
+    recoding utility `iconv' instead of `recode'.
 
   - Bug fixes.
-
-NOTE: If you use festival-freebsoft-utils with Speech Dispatcher, you
-must install Speech Dispatcher 0.5 or higher.  There was an incompatible
-change in the Speech Dispatcher Festival interface that prevents the new
-festival-freebsoft-utils versions to fully cooperate with older Speech
-Dispatcher versions.
 
 * Where to get it?
   
   You can get the distribution tarball of the released version from
-  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.5.tar.gz .
+  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.7.tar.gz .
 
   The home page of the project is
   http://www.freebsoft.org/festival-freebsoft-utils .
