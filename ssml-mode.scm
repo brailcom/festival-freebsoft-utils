@@ -496,8 +496,18 @@
           (token.punctuation "")
           (token.prepunctuation "")
           (token.whitespace ""))
-    (ssml-parse-xml ssml-text))
+    (ssml-parse-xml (ssml-fix-text ssml-text)))
   (set! ssml-parsed (reverse ssml-parsed)))
+
+(define (ssml-fix-text text)
+  ;; Work around Festival XML parsing bug
+  (let ((pieces '()))
+    (while (string-matches text ".*\\\\.*")
+      (push (string-before text "\\") pieces)
+      (push "\\\\" pieces)
+      (set! text (string-after text "\\")))
+    (push text pieces)
+    (apply string-append (reverse pieces))))
 
 (define (ssml-say ssml-text)
   (ssml-parse ssml-text)
