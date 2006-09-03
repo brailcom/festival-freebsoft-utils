@@ -27,7 +27,7 @@
 
 (defvar punctuation-mode 'default)
 
-(defvar punctuation-chars "[- !\"#$%&'()*+,./\\^_`:;<=>?@{|}~]")
+(defvar punctuation-chars "[- !\"#$%&'()*+,./\\\\^_`:;<=>?@{|}~]")
 (defvar punctuation-chars-2 "[][]")
 
 (defvar punctuation-punc-languages '(english britishenglish americanenglish))
