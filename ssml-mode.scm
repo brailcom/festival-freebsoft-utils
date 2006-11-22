@@ -152,14 +152,12 @@
 
 (define (ssml-process-prosody utt)
   (let* ((item (ssml-find-feature utt 'ssml-prosody))
-         (prosody (item.feat item 'ssml-prosody)))
+         (prosody (ssml-get-feature item 'ssml-prosody)))
     (while item
       (set! item (item.next item))
       (when item
-        (item.set_feat item 'prosody
-                       (if (item.has_feat item 'prosody)
-                           (cons prosody (item.feat item 'prosody))
-                           (list prosody)))))))
+        (dolist (p prosody)
+          (ssml-set-feature* utt item 'prosody p))))))
 
 (define (ssml-get-url url tmpfile)
   (get_url (cond
@@ -168,40 +166,59 @@
             (t (string-append "file:" url)))
            tmpfile))
 
+(define (ssml-set-feature* utt item feature value)
+  (add-annotation utt item (list feature value)))
+
 (define (ssml-set-feature utt feature value)
-  ;; We insert a dummy token so that:
-  ;; 1. some token was always available for feature insertion
-  ;; 2. multiple features of the same name can be placed at the same place
-  ;; 3. each token contains exactly one SSML feature
-  (token-utterance-append utt "" "" "" "")
-  (item.set_feat (utt.relation.last utt 'Token) feature value))
+  (ssml-set-feature* utt (ssml-last-token utt) feature value))
+
+(define (ssml-feature-1 value)
+  (second (first value)))
+
+(define (ssml-get-feature utt item feature)
+  (remove-if (lambda (a) (not (eq? (car a) feature)))
+             (get-annotations utt item)))
+
+(define (ssml-get-feature-1 utt item feature)
+  (ssml-feature-1 (ssml-get-feature utt item feature)))
+
+(define (ssml-has-feature utt item feature)
+  (ssml-get-feature utt item feature))
 
 (define (ssml-find-feature utt feature)
   (let ((item (utt.relation.last utt 'Token)))
-    (while (and item (not (item.has_feat item feature)))
+    (while (and item (not (ssml-has-feature utt item feature)))
       (set! item (item.prev item)))
     item))
 
 (define (ssml-find-feature-value utt feature)
   (let ((item (ssml-find-feature utt feature)))
-    (and item (item.feat item feature))))
+    (and item (ssml-get-feature utt item feature))))
+
+(define (ssml-find-feature-value-1 utt feature)
+  (ssml-feature-1 (ssml-find-feature-value utt feature)))
 
 (define (ssml-spread-feature utt starting-feature feature value)
   (let ((item (ssml-find-feature utt starting-feature)))
     (while item
       (set! item (item.next item))
       (when item
-        (item.set_feat item feature value)))))
+        (ssml-set-feature* utt item feature value)))))
+
+(define (ssml-delete-feature utt item feature)
+  (set-annotations utt item
+                   (remove-if (lambda (a) (not (eq? (car a) feature)))
+                              (get-annotations utt item))))
 
 (define (ssml-delete-items-from-feature utt feature)
   (let ((item (utt.relation.last utt 'Token))
         (value nil))
     (while (not value)
-      (if (item.has_feat item feature)
-          (set! value (item.feat item feature))
-          (let ((prev-item (item.prev item)))
-            (item.delete item)
-            (set! item prev-item))))
+      (set! value (ssml-get-feature utt item feature))
+      (unless value
+        (let ((prev-item (item.prev item)))
+          (item.delete item)
+          (set! item prev-item))))
     value))
 
 (define (ssml-utt-text utt)
@@ -209,15 +226,19 @@
          (token last-token)
          (token-list nil))
     (when last-token
-      (while (and token (not (eq? (item.feat token 'ssml-tag) 'noticed)))
+      (while (and token (not (eq? (ssml-get-feature-1 utt token 'ssml-tag) 'noticed)))
         (push (item.name token) token-list)
         (set! token (item.prev token)))
-      (item.set_feat last-token 'ssml-tag 'noticed))
+      (ssml-set-feature* utt last-token 'ssml-tag 'noticed))
     (apply string-append token-list)))
 
 (define (ssml-append-text utt text)
   (while (not (string-equal text ""))
     (set! text (get-token utt text))))
+
+(define (ssml-last-token utt)
+  (or (utt.relation.last utt 'Token)
+      (token-utterance-append utt "" "" "" "" 'Token)))
 
 
 ;;; Synthesis handlers
@@ -226,7 +247,7 @@
 ;; Breaks: Ensure they are present wherever needed.
 (define-wrapper (Classic_Pauses utt) ssml-classic-pauses
   (do-relation-top-items (token utt Token)
-    (when (item.has_feat token 'ssml-break)
+    (when (ssml-has-feature utt token 'ssml-break)
       (let ((token* token))
         (while (and token* (not (item.daughtern token*)))
           (set! token* (item.prev token*)))
@@ -238,13 +259,13 @@
 (define-wrapper (Duration utt) ssml-duration
   ((next-func) utt)
   (let ((token (utt.relation utt 'Token)))
-    (if (and token (item.has_feat token 'ssml-break))
-        (let ((length (item.feat token 'ssml-break))
+    (if (and token (ssml-has-feature utt token 'ssml-break))
+        (let ((length (apply + (mapcar second (ssml-get-feature utt token 'ssml-break))))
               (starting-token token))
           (set! token (item.next token))
           (while (and token (not (item.daughtern token)))
-            (when (item.has_feat token 'ssml-break)
-              (set! length (+ length (item.feat token 'ssml-break))))
+            (when (ssml-has-feature utt token 'ssml-break)
+              (set! length (+ length (apply + (mapcar second(ssml-get-feature utt token 'ssml-break))))))
             (set! token (item.next token)))
           (while (and starting-token (and (not item.daughtern starting-token)))
             (set! starting-token (item.prev starting-token)))
@@ -254,7 +275,7 @@
               (when silence
                 ;; The final step remains unimplemented for now.
                 ;; We should adjust features of all the following segments here.
-                (item.set_feat silence 'ssml-duration length)))))
+                (sslm-set-feature utt silence 'ssml-duration length)))))
         (set! token (item.next token))))
   utt)
 
@@ -298,11 +319,10 @@
       (ssml-set-feature utt 'ssml-say-as 'dummy)))
 (define (ssml.say-as.end attlist utt)
   (let* ((item (ssml-find-feature utt 'ssml-say-as))
-         (value (item.feat item 'ssml-say-as)))
-    (item.remove_feature item 'ssml-say-as)
+         (value (ssml-get-feature-1 utt item 'ssml-say-as)))
+    (ssml-delete-feature utt item 'ssml-say-as)
     (when (string-equal value 'spell)
-      (ssml-find-feature-value utt 'ssml-say-as)
-      (unless (string-equal (ssml-find-feature-value utt 'ssml-say-as) 'spell)
+      (unless (string-equal (ssml-find-feature-value-1 utt 'ssml-say-as) 'spell)
         (spell_exit_func))))
   nil)
 
@@ -316,7 +336,7 @@
     (ssml-set-feature utt 'ssml-sub text))
   nil)
 (define (ssml.sub.end attlist utt)
-  (ssml-append-text utt (ssml-delete-items-from-feature utt 'ssml-sub)))
+  (ssml-append-text utt (ssml-feature-1 (ssml-delete-items-from-feature utt 'ssml-sub))))
 
 (define (ssml.voice.start attlist utt)
   (apply ssml-change-voice (mapcar (lambda (att) (ssml-attval attlist att))
@@ -390,24 +410,25 @@
   (ssml-set-feature utt 'ssml-audio-uri (ssml-attval attlist 'src))
   nil)
 (define (ssml.audio.end attlist utt)
-  (let ((uri (ssml-find-feature-value utt 'ssml-audio-uri))
-        (tmpfile (make-temp-filename "ssml-audio-%s.delete-after-play"))
-        (sound-available nil))
-    (unwind-protect
-      (begin
-        (ssml-get-url uri tmpfile)
-        (set! sound-available t))
-      (delete-file tmpfile))
-    (when sound-available
-      (ssml-delete-items-from-feature utt 'ssml-audio-uri)
-      (ssml-set-feature utt 'event (list 'sound tmpfile))))
+  (dolist (uri (mapcar second (ssml-find-feature-value utt 'ssml-audio-uri)))
+    (let ((tmpfile (make-temp-filename "ssml-audio-%s.delete-after-play"))
+          (sound-available nil))
+      (unwind-protect
+        (begin
+          (ssml-get-url uri tmpfile)
+          (set! sound-available t))
+        (delete-file tmpfile))
+      (when sound-available
+        (add-event utt (ssml-last-token utt) (list 'sound tmpfile) nil))))
+  (ssml-delete-items-from-feature utt 'ssml-audio-uri)
   nil)
 (define (ssml.audio attlist utt)
   (ssml.audio.start attlist utt)
   (ssml.audio.end attlist utt))
 
 (define (ssml.mark attlist utt)
-  (ssml-set-feature utt 'event (list 'mark (ssml-attval attlist 'name)))
+  (add-event utt (ssml-last-token utt)
+             (list 'mark (ssml-attval attlist 'name)) nil)
   nil)
 
 (define (ssml.desc.start attlist utt)

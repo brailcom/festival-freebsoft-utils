@@ -37,7 +37,10 @@
     (utt.relation.create utt 'Token)))
 
 (define (token-utterance-append utt name whitespace punc prepunc)
-  (utt.relation.append utt 'Token
+  (token-utterance-append* utt name whitespace punc prepunc 'Token))
+
+(define (token-utterance-append* utt name whitespace punc prepunc relation)
+  (utt.relation.append utt relation
                        `(,name
                          ((name ,name) (whitespace ,whitespace)
                           (punc ,punc) (prepunctuation ,prepunc)))))

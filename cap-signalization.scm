@@ -1,6 +1,6 @@
 ;;; Capital character signalization
 
-;; Copyright (C) 2003, 2004 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -55,7 +55,7 @@
     (apply* (next-value) (list utt))
     (do-relation-items (w utt Word)
       (if (item.has_feat w 'capital-event)
-          (item.set_feat w 'event '(logical capital))))
+          (add-event utt w '(logical capital) nil)))
     utt))
 
 (define (set-cap-signalization-mode mode)

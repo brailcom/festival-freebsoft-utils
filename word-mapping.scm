@@ -1,6 +1,6 @@
 ;;; Mapping words to events
 
-;; Copyright (C) 2004 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2006 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -41,16 +41,15 @@ and EVENT-VALUE are the same as in `logical-event-mapping'.")
     (do-relation-items (w utt Word)
       (let ((event (word-mapping-of w)))
         (if (and event
-                 (not (item.has_feat w 'event)))
+                 (not (item-events utt w)))
             (begin
               (item.set_name w "")
-              (item.set_feat w 'event event)
-              (item.set_feat w 'event-stick-to
-                             (let ((tw (item.relation w 'Token)))
-                               (if (and (not (item.prev tw))
-                                        (item.next tw))
-                                   'next
-                                   'prev)))))))
+              (add-event utt w event
+                         (let ((tw (item.relation w 'Token)))
+                           (if (and (not (item.prev tw))
+                                    (item.next tw))
+                               'next
+                               'prev)))))))
     (apply* (next-value) (list utt))))
 
 

@@ -173,20 +173,23 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
   (utt.relation.create utt 'Event)
   (do-relation-items (w utt Word)
     (let* ((events '())
-           (get-event (lambda (item)
-                        (when (item.has_feat item 'event)
-                          (push (list (item.feat item 'event)
-                                      (if (string-equal (item.feat w 'event-stick-to) 'prev)
-                                          'before
-                                          'after))
-                                events)))))
-      (get-event w)
+           (get-events (lambda (item)
+                         (let ((events* (item-events utt item)))
+                           (when events*
+                             (set! events (append (mapcar (lambda (e)
+                                                            (list (first e)
+                                                                  (if (string-equal (second e) 'prev)
+                                                                      'before
+                                                                      'after)))
+                                                          events*)
+                                                  events)))))))
+      (get-events w)
       (let ((token (item.parent (item.relation w 'Token))))
         (if (and token
                  (or (not (item.next w))
                      (not (equal? token (item.parent (item.relation (item.next w) 'Token))))))
             (while token
-              (get-event token)
+              (get-events token)
               (set! token (item.next token))
               (when (and token (item.daughters token))
                 (set! token nil)))))
@@ -221,7 +224,7 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
                        (item.feat (utt.relation.last utt 'Segment) 'end))))
         (wave-eater w)))
   utt)
-  
+
 (define (event-synth-text text wave-eater)
   (unless (string-equal text "")
     (event-eat-utt (SynthText text) wave-eater)))
@@ -318,6 +321,15 @@ EVENT-TYPE is one of the symbols `logical', `text', `sound', `key',
                    (assoc-set (cadr (assoc type event-mappings))
                               value
                               (list new-type new-value)))))
+
+(define (item-events utt item)
+  (mapcar (lambda (event) (list (nth 1 event) (nth 3 event)))
+          (remove-if (lambda (annotation) (not (eq? (car annotation) 'event)))
+                     (get-annotations utt item))))
+
+(define (add-event utt item event stick-to)
+  (add-annotation utt item (list 'event event 'event-stick-to stick-to)))
+  
 
 ;;; Announce
 

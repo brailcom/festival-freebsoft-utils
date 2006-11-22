@@ -201,5 +201,16 @@
     `(dolist (,var (utt-relation-top-items ,utt (quote ,relation)))
        ,@body)))
 
-                                     
+(define (get-annotations utt item)
+  (let ((annotation-list (item.feat item 'ffu-annotation)))
+    (if (pair? annotation-list) annotation-list '())))
+
+(define (add-annotation utt item annotation)
+  (item.set_feat item 'ffu-annotation
+                 (append (get-annotations utt item) (list annotation))))
+
+(define (set-annotations utt item annotations)
+  (item.set_feat item 'ffu-annotation annotations))
+
+
 (provide 'util)
