@@ -634,11 +634,16 @@
         (ssml-process-parsed-part parsed)
         nil)))
 
+(define (ssml-play object)
+  (if (symbol? object)
+      (print object)
+      (wave.play object)))
+
 (define (ssml-speak-chunks)
   (let ((utt (ssml-next-chunk)))
     (when utt
       (utt.synth utt)
-      (event-eat-utt utt wave.play)
+      (event-eat-utt utt ssml-play)
       (ssml-speak-chunks))))
 
 (provide 'ssml-mode)
