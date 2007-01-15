@@ -33,6 +33,7 @@
         (BR british))
     (cs czech)
     (de german)
+    (es spanish)
     (fi finnish)
     (fr french)
     (it italian))
