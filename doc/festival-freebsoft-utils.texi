@@ -10,7 +10,7 @@
 @copying
 This manual is for festival-freebsoft-utils, version @value{VERSION}.
 
-Copyright @copyright{} 2004, 2005, 2006 Brailcom, o.p.s.
+Copyright @copyright{} 2004, 2005, 2006, 2007 Brailcom, o.p.s.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -160,7 +160,8 @@ startup by adding the line
 
 to the Festival initialization file (typically
 @file{/etc/festival.scm} system wide or @file{~/.festivalrc} for a
-particular user).
+particular user).  Note you needn't do this for Speech Dispatcher
+operation as Speech Dispatcher invokes this call itself.
 
 @c ****************************************************************************
 
