@@ -1,6 +1,6 @@
 ;;; Selecting voices
 
-;; Copyright (C) 2004, 2006 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2006, 2007 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -36,7 +36,10 @@
     (es spanish)
     (fi finnish)
     (fr french)
-    (it italian))
+    (hi hindi)
+    (it italian)
+    (mr marathi)
+    (te telugu))
   "Alist mapping ISO language codes to Festival language names.
 Each element of the alist is of the form (LANGUAGE-CODE LANGUAGE-NAME).
 Optionally, elements can have an extended
