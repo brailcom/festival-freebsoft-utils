@@ -913,6 +913,14 @@ Return the list of names of all available voices.  Unlike the list
 returned by the standard Festival function @code{voice.list}, the list
 includes all registered voices.
 
+@item voice-list-language-codes
+Return the list of names, language codes and dialect codes of all
+available voices.  Each element of the returned list is of the form
+@code{(@var{name} @var{language-code} @var{dialect-code})}, where all
+the elements of the tripple are symbols.  If the language code or the
+dialect code is not known for the voice, the corresponding element is
+@code{nil}.
+
 @item current-language-voices
 Return a list of all the voices available for the current language.
 
