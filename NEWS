@@ -1,5 +1,14 @@
 User-visible changes to festival-freebsoft-utils:
 
+* Changes in festival-freebsoft-utils 0.8
+
+** New features required by Speech Dispatcher 0.6.4.
+
+** Additional language codes for available Festival voices.
+
+** Bug fixes in SSML support.
+
+
 * Changes in festival-freebsoft-utils 0.7
 
 ** Better support of the general intonation method.
