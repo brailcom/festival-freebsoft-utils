@@ -1,6 +1,6 @@
 ;;; Speech Dispatcher interface
 
-;; Copyright (C) 2003, 2004, 2005, 2006 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006, 2007 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -167,6 +167,9 @@ punctuation characters), `none' (don't read any punctuation characters) or
   "(speechd-set-voice VOICE)
 Set voice, which is one of the Speech Dispatcher voice strings."
   (speechd-set-lang-voice nil voice))
+
+(define (speechd-set-festival-voice name)
+  ((symbol-value (intern (string-append "voice_" name)))))
 
 (define (speechd-set-rate rate)
   "(speechd-set-rate RATE)
