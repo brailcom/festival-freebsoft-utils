@@ -45,7 +45,16 @@
          (variant (if (string-matches voice* ".*[0-9]")
                       (substring voice* (- (length voice*) 1) 1)
                       t)))
-    (select-voice* lang gender age variant name)
+    (if (eq? lang t)
+        (begin
+          (voice.select name)
+          (set! voice-select-current-defaults
+                (mapcar (lambda (item)
+                          (if (eq? (car item) 'name)
+                              (list 'name name)
+                              item))
+                        voice-select-defaults)))
+        (select-voice* lang gender age variant name))
     (set! speechd-base-pitch (prosody-get-pitch))
     (restore-prosody)
     (current-voice-coding)))
@@ -169,7 +178,7 @@ Set voice, which is one of the Speech Dispatcher voice strings."
   (speechd-set-lang-voice nil voice))
 
 (define (speechd-set-festival-voice name)
-  ((symbol-value (intern (string-append "voice_" name)))))
+  (speechd-set-lang-voice t name))
 
 (define (speechd-set-rate rate)
   "(speechd-set-rate RATE)
