@@ -1,6 +1,6 @@
 ;;; Changing prosody parameters
 
-;; Copyright (C) 2004, 2006 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2006, 2008 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -34,56 +34,52 @@
   ;; This is now easy thing, there are many intonation methods in Festival,
   ;; more methods can be added and the Int_Target_Method parameter can be
   ;; wrapped
-  (let ((int-method (Param.get 'Int_Target_Method)))
-    (cond
-     ((prosody-general-method? int-method)
-      (or (avalue-get 'f0_mean int_general_params)
-          (prosody-general-pitch)))
-     ((eq? int-method Int_Targets_LR)
-      (avalue-get 'target_f0_mean int_lr_params))
-     ((eq? int-method Int_Targets_Simple)
-      (avalue-get 'f0_mean int_simple_params)))))
+  (cond
+   ((prosody-general-method?)
+    (or (avalue-get 'f0_mean int_general_params)
+        (prosody-general-pitch)))
+   ((prosody-lr-method?)
+    (avalue-get 'target_f0_mean int_lr_params))
+   ((prosody-simple-method?)
+    (avalue-get 'f0_mean int_simple_params))))
 
 (define (prosody-set-pitch value)
-  (let ((int-method (Param.get 'Int_Target_Method)))
-    (cond
-     ((prosody-general-method? int-method)
-      (if (avalue-get 'f0_mean int_general_params)
-          (set! int_general_params
-                (assoc-set int_general_params 'f0_mean (list value)))
-          (prosody-set-general-pitch value)))
-     ((eq? int-method Int_Targets_LR)
-      (set! int_lr_params
-            (assoc-set int_lr_params 'target_f0_mean (list value))))
-     ((eq? int-method Int_Targets_Simple)
-      (set! int_simple_params
-            (assoc-set int_simple_params 'f0_mean (list value)))))))
+  (cond
+   ((prosody-general-method?)
+    (if (avalue-get 'f0_mean int_general_params)
+        (set! int_general_params
+              (assoc-set int_general_params 'f0_mean (list value)))
+        (prosody-set-general-pitch value)))
+   ((prosody-lr-method?)
+    (set! int_lr_params
+          (assoc-set int_lr_params 'target_f0_mean (list value))))
+   ((prosody-simple-method?)
+    (set! int_simple_params
+          (assoc-set int_simple_params 'f0_mean (list value))))))
 
 (define (prosody-get-pitch-range)
-  (let ((int-method (Param.get 'Int_Target_Method)))
-    (cond
-     ((prosody-general-method? int-method)
-      (or (avalue-get 'f0_std int_general_params)
-          (prosody-general-pitch-range)))
-     ((eq? int-method Int_Targets_LR)
-      (avalue-get 'target_f0_std int_lr_params))
-     ((eq? int-method Int_Targets_Simple)
-      (avalue-get 'f0_mean int_simple_params)))))
+  (cond
+   ((prosody-general-method?)
+    (or (avalue-get 'f0_std int_general_params)
+        (prosody-general-pitch-range)))
+   ((prosody-lr-method?)
+    (avalue-get 'target_f0_std int_lr_params))
+   ((prosody-simple-method?)
+    (avalue-get 'f0_mean int_simple_params))))
 
 (define (prosody-set-pitch-range value)
-  (let ((int-method (Param.get 'Int_Target_Method)))
-    (cond
-     ((prosody-general-method? int-method)
-      (if (avalue-get 'f0_std int_general_params)
-          (set! int_general_params
-                (assoc-set int_general_params 'f0_std (list value)))
-          (prosody-set-general-pitch-range value)))
-     ((eq? int-method Int_Targets_LR)
-      (set! int_lr_params
-            (assoc-set int_lr_params 'target_f0_std (list value))))
-     ((eq? int-method Int_Targets_Simple)
-      (set! int_simple_params
-            (assoc-set int_simple_params 'f0_std (list value)))))))
+  (cond
+   ((prosody-general-method?)
+    (if (avalue-get 'f0_std int_general_params)
+        (set! int_general_params
+              (assoc-set int_general_params 'f0_std (list value)))
+        (prosody-set-general-pitch-range value)))
+   ((prosody-lr-method?)
+    (set! int_lr_params
+          (assoc-set int_lr_params 'target_f0_std (list value))))
+   ((prosody-simple-method?)
+    (set! int_simple_params
+          (assoc-set int_simple_params 'f0_std (list value))))))
 
 (defvar prosody-volume 1)
 
@@ -129,9 +125,18 @@
 (defvar prosody-voice-f0-alist '()) ; items: (VOICE PITCH RANGE)
 (defvar prosody-voice-pitch-factor '()) ; (CURRENT-VOICE PITCH RANGE)
 
-(define (prosody-general-method? int-method)
-  (or (eq? int-method Int_Targets_General)
-      (equal? (Param.get 'Int_Method) "General")))
+(defmac (define-prosody-method-test form)
+  (let* ((method-name (nth 1 form))
+         (method-function-name (intern (string-append "Int_Targets_" method-name)))
+         (function-name (intern (string-append "prosody-" (downcase method-name) "-method?"))))
+    `(define (,function-name)
+       (let ((int-method (Param.get 'Int_Target_Method)))
+         (or (eq? int-method ,method-function-name)
+             (equal? int-method (quote ,method-function-name))
+             (equal? (Param.get 'Int_Method) ,method-name))))))
+(define-prosody-method-test "General")
+(define-prosody-method-test "LR")
+(define-prosody-method-test "Simple")
 
 (define (prosody-general-base-f0)
   (or (second (assoc current-voice prosody-voice-f0-alist))
