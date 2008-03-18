@@ -1,6 +1,6 @@
 ;;; Speech Synthesis Markup Language 1.0 support
 
-;; Copyright (C) 2004, 2005, 2006 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2005, 2006, 2008 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -99,7 +99,7 @@
 (define (ssml-attval attlist att)
   (let ((attval (car (xxml_attval att attlist))))
     (if attval
-        (recode-utf8->current attval))))
+        (recode-utf8->current (string-append attval)))))
 
 (define (ssml-attval-time attlist att)
   (let ((time (string-before (ssml-attval attlist 'time) "s")))
