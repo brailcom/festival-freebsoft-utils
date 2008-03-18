@@ -1,6 +1,6 @@
 ;;; Miscellaneous utilities
 
-;; Copyright (C) 2003, 2004, 2005, 2006 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006, 2008 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -163,6 +163,16 @@
     `(let ((,filename (make-temp-filename "ffu%s")))
        (unwind-protect* (begin ,@body)
          (delete-file ,filename)))))
+
+(define (string-replace string from to)
+  (string-replace* string from to ""))
+(define (string-replace* string from to result)
+  (let ((before (string-before string from)))
+    (if (or (equal? before string)
+            (and (equal? before "")
+                 (not (equal? (substring string 0 (length from)) from))))
+        (string-append result string)
+        (string-replace* (string-after string from) from to (string-append result before to)))))
 
 ;;; Festival specific utilities
 

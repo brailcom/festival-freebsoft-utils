@@ -30,7 +30,15 @@
       (system (format nil "iconv -c -f %s -t %s//TRANSLIT -o %s %s" from to out-tmpfile tmpfile))
       (read-file out-tmpfile))))
 
+(defvar recode-special-utf8-translations
+  '(("​" " ")))
+
 (define (recode-utf8->current string)
+  (let ((translations recode-special-utf8-translations))
+    (while translations
+      (let ((translation (car translations)))
+        (set! string (string-replace string (car translation) (cadr translation))))
+      (set! translations (cdr translations))))
   (let ((coding (current-voice-coding)))
     (if (eq? coding 'utf-8)
         string

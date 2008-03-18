@@ -10,7 +10,7 @@
 @copying
 This manual is for festival-freebsoft-utils, version @value{VERSION}.
 
-Copyright @copyright{} 2004, 2005, 2006, 2007 Brailcom, o.p.s.
+Copyright @copyright{} 2004, 2005, 2006, 2007, 2008 Brailcom, o.p.s.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -582,6 +582,10 @@ Macro that binds newly generated temporary file name to a local
 variable @var{filename} and then performs @var{body}.  The macro
 ensures the temporary file is deleted after finishing @var{body} in
 any way.
+
+@item string-replace @var{string} @var{from} @var{to}
+Replace all occurrences of @var{from} by @var{to} in @var{string} and
+return the result.
 @end ftable
 
 Festival specific utilities:
@@ -1155,9 +1159,17 @@ between different character sets:
 Return given @var{string}, originally encoded in @var{from-coding},
 recoded to @var{to-coding}.
 
+@vindex recode-special-utf8-translations
 @item recode-utf8->current @var{string}
 Return given @var{string}, originally encoded in @code{UTF-8}, recoded
 to the coding of the current voice.
+
+Before applying normal recoding this function translates strings as
+specified in @code{recode-special-utf8-translations} variable.  This
+allows you to convert some unicode characters in a special way,
+e.g. to translate empty space to space (thus separating words around
+it).  @code{recode-special-utf8-translations} contains lists of two
+elements, the converted substring and its translation.
 @end ftable
 
 The recoding functions use the @code{iconv} program and temporary
