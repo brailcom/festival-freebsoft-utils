@@ -55,6 +55,13 @@
       (string-matches string punctuation-chars-2)))
 
 (define (punctuation-split-token token name ttw)
+  ;; We must be careful not to discard whole token here.  It may contain
+  ;; annotations such as index marks and they would be discarded together with
+  ;; the token.
+  (let ((words (punctuation-split-token* token name ttw)))
+    (or words
+        (ttw token " "))))
+(define (punctuation-split-token* token name ttw)
   (cond
    ;; No punctuation
    ((and (not (string-matches name
@@ -115,16 +122,18 @@
                 (let ((i (item.insert w `(,p ((name ,p))))))
                   (item.append_daughter token i))))))))
    ;; Delete punctuation when punctuation-mode is none
+   ;; (We actually don't delete the words as this might discard annotations
+   ;; such as index marks.  So we just make the word names empty.)
    ((eq punctuation-mode 'none)
     (do-relation-top-items (token utt Token)
       (if (punctuation-character (item.name token))
           (dolist (w (mapcar (lambda (i) (item.relation i 'Word))
                              (item.daughters token)))
             (if w
-                (item.delete w)))))
+                (item.set_feat w 'name "")))))
     (do-relation-top-items (w utt Word)
       (if (punctuation-character (item.name w))
-          (item.delete w)))))
+          (item.set_feat w 'name "")))))
   utt)
 
 (Param.wrap Token_Method punctuation
