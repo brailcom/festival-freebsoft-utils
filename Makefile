@@ -1,6 +1,6 @@
 # Makefile for festival-freebsoft-utils
 
-# Copyright (C) 2004, 2006, 2007 Brailcom, o.p.s.
+# Copyright (C) 2004, 2006, 2007, 2008 Brailcom, o.p.s.
 #
 # Author: Milan Zamazal <pdm@brailcom.org>
 #
@@ -21,7 +21,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
 PROJECT := festival-freebsoft-utils
-VERSION := 0.8
+VERSION := 0.9
 
 DISTDIR := festival-freebsoft-utils-$(VERSION)
 TARBALL := $(DISTDIR).tar

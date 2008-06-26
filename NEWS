@@ -1,5 +1,19 @@
 User-visible changes to festival-freebsoft-utils:
 
+* Changes in festival-freebsoft-utils 0.9
+
+** Character recoding improvements.
+
+Recoding of characters from UTF-8 to 8-bit codings is more kind to extra
+characters, not present in the target coding.  New variable
+`recode-special-utf8-translations' allows to define custom mapping of extra
+characters.
+
+** New function `string-replace'.
+
+** Bug fixes.
+
+
 * Changes in festival-freebsoft-utils 0.8
 
 ** New features required by Speech Dispatcher 0.6.4.

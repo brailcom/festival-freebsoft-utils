@@ -1,8 +1,8 @@
-festival-freebsoft-utils 0.8 released
+festival-freebsoft-utils 0.9 released
 =====================================
 
 The Free(b)soft project is pleased to announce
-festival-freebsoft-utils 0.8.
+festival-freebsoft-utils 0.9.
 
 * What is festival-freebsoft-utils?
 
@@ -42,18 +42,18 @@ festival-freebsoft-utils 0.8.
   - Everything is written in the extension language, no patching of the
     Festival C++ sources is needed.
 
-* What is new in the 0.8 version?
+* What is new in the 0.9 version?
 
-  - New features required by Speech Dispatcher 0.6.4.
+  - Improvements of recoding from UTF-8 to 8-bit character sets.
 
-  - Additional language codes for available Festival voices.
+  - New function `string-replace'.
 
-  - Bug fixes in SSML support.
+  - Bug fixes.
 
 * Where to get it?
   
   You can get the distribution tarball of the released version from
-  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.8.tar.gz .
+  http://www.freebsoft.org/pub/projects/festival-freebsoft-utils/festival-freebsoft-utils-0.9.tar.gz .
 
   The home page of the project is
   http://www.freebsoft.org/festival-freebsoft-utils .
