@@ -25,7 +25,7 @@
 
 
 (define (recode string from to)
-  (if (string= string "")
+  (if (string-equal string "")
       string
       (with-temp-file-data (tmpfile string)
         (with-temp-file out-tmpfile
