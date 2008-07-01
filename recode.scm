@@ -25,10 +25,12 @@
 
 
 (define (recode string from to)
-  (with-temp-file-data (tmpfile string)
-    (with-temp-file out-tmpfile
-      (system (format nil "iconv -c -f %s -t %s//TRANSLIT -o %s %s" from to out-tmpfile tmpfile))
-      (read-file out-tmpfile))))
+  (if (string= string "")
+      string
+      (with-temp-file-data (tmpfile string)
+        (with-temp-file out-tmpfile
+          (system (format nil "iconv -c -f %s -t %s//TRANSLIT -o %s %s" from to out-tmpfile tmpfile))
+          (read-file out-tmpfile)))))
 
 (defvar recode-special-utf8-translations
   '(("​" " ")))
