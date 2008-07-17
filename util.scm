@@ -141,6 +141,12 @@
   (path-as-directory
    (substring path 0 (- (length path) (length (basename path))))))
 
+;; There is a bug in speech-tools preventing it to honor $TMPDIR.
+;; We can work around the bug by setting some other environment variables.
+(let ((tempdir (getenv "TMPDIR")))
+  (when (and tempdir (not (equal? tempdir "")))
+    (setenv "TEMP" tempdir)
+    (setenv "TMP" tempdir)))
 (define (make-temp-filename template)
   (let ((tmp-name (string-append (make_tmp_filename) "%d")))
     (set! template (format nil "%s%s" (dirname tmp-name)
