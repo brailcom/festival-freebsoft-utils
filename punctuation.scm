@@ -1,6 +1,6 @@
 ;;; Punctuation modes
 
-;; Copyright (C) 2003, 2004, 2005, 2006 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006, 2008 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -60,7 +60,7 @@
   ;; the token.
   (let ((words (punctuation-split-token* token name ttw)))
     (or words
-        (ttw token " "))))
+        (ttw token (if (eq punctuation-mode 'all) "" " ")))))
 (define (punctuation-split-token* token name ttw)
   (cond
    ;; No punctuation
