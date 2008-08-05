@@ -1,6 +1,6 @@
 ;;; Speech Dispatcher interface
 
-;; Copyright (C) 2003, 2004, 2005, 2006, 2007 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -33,6 +33,7 @@
 
 
 (defvar speechd-base-pitch nil)
+(defvar speechd-spelling nil)
 
 
 (define (speechd-set-lang-voice lang voice)
@@ -98,7 +99,14 @@ synthesized wave forms."
 (define (speechd-next*)
   (unless speechd-multi-mode
     (error "Not in multi mode"))
-  (let ((wave (multi-next)))
+  (let ((wave (if speechd-spelling
+                  (begin
+                    (spell_init_func)
+                    (unwind-protect
+                      (prog1 (multi-next)
+                        (spell_exit_func))
+                      (spell_exit_func)))
+                  (multi-next))))
     (cond
      ((symbol? wave) wave)
      (wave (wave-utt wave))
@@ -111,6 +119,7 @@ Return next synthesized wave form."
       (speechd-send-to-client utt))))
 
 (define (speechd-speak* text)
+  (set! speechd-spelling nil)
   (speechd-event-synth 'text (recode-utf8->current text)))
 (define (speechd-speak text)
   "(speechd-speak TEXT)
@@ -118,25 +127,29 @@ Speak TEXT."
   (speechd-maybe-send-to-client (speechd-speak* text)))
 
 (define (speechd-speak-ssml* ssml-text)
+  (set! speechd-spelling nil)
   (oo-ensure-function-wrapped 'ssml-change-voice)
   (speechd-event-synth 'ssml ssml-text))
 (define (speechd-speak-ssml ssml-text)
-  "(speechd-speak-ssml TEXT)
+  "(speechd-speak-ssml SSML-TEXT)
 Speak SSML-TEXT."
   (speechd-maybe-send-to-client (speechd-speak-ssml* ssml-text)))
 
-(define (speechd-spell* text)
+(define (speechd-spell* ssml-text)
+  (oo-ensure-function-wrapped 'ssml-change-voice)
+  (set! speechd-spelling t)
   (spell_init_func)
   (unwind-protect
-      (prog1 (speechd-event-synth 'text text)
+      (prog1 (speechd-event-synth 'ssml ssml-text)
         (spell_exit_func))
     (spell_exit_func)))
 (define (speechd-spell text)
-  "(speechd-spell TEXT)
-Spell TEXT."
+  "(speechd-spell SSML-TEXT)
+Spell SSML-TEXT."
   (speechd-maybe-send-to-client (speechd-spell* text)))
 
 (define (speechd-sound-icon* name)
+  (set! speechd-spelling nil)
   (speechd-event-synth 'logical name))
 (define (speechd-sound-icon name)
   "(speechd-sound-icon NAME)
@@ -144,6 +157,7 @@ Play the sound or text bound to the sound icon named by the symbol NAME."
   (speechd-maybe-send-to-client (speechd-sound-icon* name)))
 
 (define (speechd-character* character)
+  (set! speechd-spelling nil)
   (speechd-event-synth 'character (recode-utf8->current character)))
 (define (speechd-character character)
   "(speechd-character CHARACTER)
@@ -151,6 +165,7 @@ Speak CHARACTER, represented by a string."
   (speechd-maybe-send-to-client (speechd-character* character)))
 
 (define (speechd-key* key)
+  (set! speechd-spelling nil)
   (speechd-event-synth 'key (recode-utf8->current key)))
 (define (speechd-key key)
   "(speechd-key KEY)
