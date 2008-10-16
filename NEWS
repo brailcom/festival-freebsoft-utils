@@ -1,5 +1,21 @@
 User-visible changes to festival-freebsoft-utils:
 
+* Changes in festival-freebsoft-utils 0.10
+
+** Speech Dispatcher support updated for new libc/iconv.
+
+Due to a change in iconv Speech Dispatcher support has stopped to work.  This
+release fixes the problem.
+
+** TMPDIR environment variable honored.
+
+There is a bug in the current released version of Edinburgh Speech Tools
+resulting in ignoring temporary directory setting in TMPDIR environment
+variable.  festival-freebsoft-utils now contains workaround of this bug.
+
+** Bug fixes.
+
+
 * Changes in festival-freebsoft-utils 0.9
 
 ** Character recoding improvements.

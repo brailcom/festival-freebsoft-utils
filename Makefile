@@ -21,7 +21,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
 PROJECT := festival-freebsoft-utils
-VERSION := 0.9
+VERSION := 0.10
 
 DISTDIR := festival-freebsoft-utils-$(VERSION)
 TARBALL := $(DISTDIR).tar

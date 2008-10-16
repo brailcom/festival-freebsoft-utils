@@ -1,7 +1,7 @@
 \input texinfo    @c -*-texinfo-*-
 @comment %**start of header
 @setfilename festival-freebsoft-utils.info
-@set VERSION 0.9
+@set VERSION 0.10
 @settitle festival-freebsoft-utils @value{VERSION}
 @syncodeindex fn cp
 @syncodeindex ky cp
