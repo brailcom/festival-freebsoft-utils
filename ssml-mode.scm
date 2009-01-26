@@ -1,6 +1,6 @@
 ;;; Speech Synthesis Markup Language 1.0 support
 
-;; Copyright (C) 2004, 2005, 2006, 2008 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2005, 2006, 2008, 2009 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -152,7 +152,7 @@
 
 (define (ssml-process-prosody utt)
   (let* ((item (ssml-find-feature utt 'ssml-prosody))
-         (prosody (ssml-get-feature item 'ssml-prosody)))
+         (prosody (ssml-get-feature utt item 'ssml-prosody)))
     (while item
       (set! item (item.next item))
       (when item
