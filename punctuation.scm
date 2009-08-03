@@ -1,6 +1,6 @@
 ;;; Punctuation modes
 
-;; Copyright (C) 2003, 2004, 2005, 2006, 2008 Brailcom, o.p.s.
+;; Copyright (C) 2003, 2004, 2005, 2006, 2008, 2009 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -31,6 +31,7 @@
 (defvar punctuation-chars-2 "[][]")
 
 (defvar punctuation-punc-languages '(english britishenglish americanenglish))
+(defvar punctuation-punc-language-handlers '((french . franfest_token_punctuation_all)))
 
 ;; Default English voice doesn't have defined pronunciation of punctuation
 ;; characters
@@ -93,34 +94,38 @@
 (define (punctuation-process-words utt)
   (cond
    ((eq? punctuation-mode 'all)
-    (if (member (intern (Param.get 'Language)) punctuation-punc-languages)
-        ;; Standard English lexicon has no notion of punctuation pronounciation
-        (do-relation-items (w utt Word)
-          (let ((trans (assoc (item.name w) punctuation-pronunciation)))
-            (if (and trans
-                     (not (word-mapping-of w)))
-                (begin
-                  (item.set_name w (car (cdr trans)))
-                  (set! trans (cdr (cdr trans)))
-                  (while trans
-                    (let ((i (item.insert w (list (car trans)))))
-                      (item.append_daughter (item.parent (item.relation w 'Token))
-                                            i))
-                    (set! trans (cdr trans)))))))
-        ;; We assume other languages don't insert punctuation words themselves
-        (do-relation-items (w utt Word)
-          (let* ((w* (item.relation w 'Token))
-                 (token (item.parent w*)))
-            (when (and (not (item.prev w*))
-                       (item.has_feat token 'prepunctuation))
-              (dolist (p (reverse (symbolexplode (item.feat token 'prepunctuation))))
-                (let ((i (item.insert w `(,p ((name ,p))) 'before)))
-                  (item.prepend_daughter token i))))
-            (when (and (not (item.next w*))
-                       (item.has_feat token 'punc))
-              (dolist (p (reverse (symbolexplode (item.feat token 'punc))))
-                (let ((i (item.insert w `(,p ((name ,p))))))
-                  (item.append_daughter token i))))))))
+    (cond
+     ((assoc (intern (Param.get 'Language)) punctuation-punc-language-handlers)
+      (apply (cdr (assoc (intern (Param.get 'Language)) punctuation-punc-language-handlers)) (list utt)))
+     ((member (intern (Param.get 'Language)) punctuation-punc-languages)
+      ;; Standard English lexicon has no notion of punctuation pronounciation
+      (do-relation-items (w utt Word)
+        (let ((trans (assoc (item.name w) punctuation-pronunciation)))
+          (if (and trans
+                   (not (word-mapping-of w)))
+              (begin
+                (item.set_name w (car (cdr trans)))
+                (set! trans (cdr (cdr trans)))
+                (while trans
+                  (let ((i (item.insert w (list (car trans)))))
+                    (item.append_daughter (item.parent (item.relation w 'Token))
+                                          i))
+                  (set! trans (cdr trans))))))))
+     (t
+      ;; We assume other languages don't insert punctuation words themselves
+      (do-relation-items (w utt Word)
+        (let* ((w* (item.relation w 'Token))
+               (token (item.parent w*)))
+          (when (and (not (item.prev w*))
+                     (item.has_feat token 'prepunctuation))
+            (dolist (p (reverse (symbolexplode (item.feat token 'prepunctuation))))
+                    (let ((i (item.insert w `(,p ((name ,p))) 'before)))
+                      (item.prepend_daughter token i))))
+          (when (and (not (item.next w*))
+                     (item.has_feat token 'punc))
+            (dolist (p (reverse (symbolexplode (item.feat token 'punc))))
+                    (let ((i (item.insert w `(,p ((name ,p))))))
+                      (item.append_daughter token i)))))))))
    ;; Delete punctuation when punctuation-mode is none
    ;; (We actually don't delete the words as this might discard annotations
    ;; such as index marks.  So we just make the word names empty.)
