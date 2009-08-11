@@ -31,7 +31,8 @@
 (defvar punctuation-chars-2 "[][]")
 
 (defvar punctuation-punc-languages '(english britishenglish americanenglish))
-(defvar punctuation-punc-language-handlers '((french . franfest_token_punctuation_all)))
+(defvar punctuation-punc-language-handlers '((french . franfest_token_punctuation)))
+(defvar punctuation-punc-language-splitters '((french . franfest_token_punctuation_split)))
 
 ;; Default English voice doesn't have defined pronunciation of punctuation
 ;; characters
@@ -89,14 +90,17 @@
 (define-wrapper (token_to_words token name) punctuation
   (if (eq? punctuation-mode 'default)
       ((next-func) token name)
-      (punctuation-split-token token name (next-func))))
+      (if (assoc (intern (Param.get 'Language))
+		 punctuation-punc-language-splitters)
+	  (apply (cdr (assoc (intern (Param.get 'Language))
+			     punctuation-punc-language-splitters))
+		 (list token name (next-func)))
+	  (punctuation-split-token token name (next-func)))))
 
 (define (punctuation-process-words utt)
   (cond
    ((eq? punctuation-mode 'all)
     (cond
-     ((assoc (intern (Param.get 'Language)) punctuation-punc-language-handlers)
-      (apply (cdr (assoc (intern (Param.get 'Language)) punctuation-punc-language-handlers)) (list utt)))
      ((member (intern (Param.get 'Language)) punctuation-punc-languages)
       ;; Standard English lexicon has no notion of punctuation pronounciation
       (do-relation-items (w utt Word)
@@ -144,7 +148,12 @@
 (Param.wrap Token_Method punctuation
   (lambda (utt)
     (apply* (next-value) (list utt))
-    (punctuation-process-words utt)))
+    (if (assoc (intern (Param.get 'Language))
+	       punctuation-punc-language-handlers)
+	(apply (cdr (assoc (intern (Param.get 'Language))
+			   punctuation-punc-language-handlers))
+	       (list utt))
+	(punctuation-process-words utt))))
 
 (Param.wrap Word_Method punctuation
   ;; This is here to avoid deletion of punctuation in standard functions
