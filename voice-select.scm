@@ -1,6 +1,6 @@
 ;;; Selecting voices
 
-;; Copyright (C) 2004, 2006, 2007 Brailcom, o.p.s.
+;; Copyright (C) 2004, 2006, 2007, 2013 Brailcom, o.p.s.
 
 ;; Author: Milan Zamazal <pdm@brailcom.org>
 
@@ -37,6 +37,7 @@
     (fi finnish)
     (fr french)
     (hi hindi)
+    (hr croatian)
     (it italian)
     (mr marathi)
     (te telugu))
